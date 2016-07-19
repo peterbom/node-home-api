@@ -5,10 +5,13 @@
   "main": "app.js",
   "scripts": {
     "clean": "rimraf lib/*",
-    "test": "mocha --compilers js:babel-register ./test -u bdd -R spec",
-    "compile": "babel src -d lib --source-maps",
+    "precompile": "npm run clean",
+    "compile": "babel src -d lib",
+    "test-no-compile": "mocha --compilers js:babel-register ./test -u bdd -R spec",
+    "test": "npm run compile && npm run test-no-compile",
+    "test:debug": "npm run compile && concurrently \"mocha --compilers js:babel-register ./test --debug-brk\" \"node-inspector\"",
     "watch:src": "watch \"npm run compile\" ./src",
-    "watch:test": "watch \"npm run test -- -R min\" ./test",
+    "watch:test": "watch \"npm run test-no-compile -- -R min\" ./test",
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
     "start:debug": "nodemon --debug lib/app.js",
     "start": "node lib/app.js",
@@ -44,6 +47,8 @@
   },
   "dependencies": {
     "koa": "^2.0.0",
-    "koa-simple-router": "^0.2.0"
+    "koa-bodyparser": "^3.1.0",
+    "koa-simple-router": "^0.2.0",
+    "monk": "^3.0.7"
   }
 }

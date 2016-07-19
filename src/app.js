@@ -1,7 +1,10 @@
 //require("babel-core/register");
 import "babel-polyfill";
 import Application from "koa";
+import convert from "koa-convert";
 import router from "koa-simple-router";
+import body from "koa-better-body";
+//import bodyParser from "koa-bodyparser";
 //import routes from "koa-route";
 
 //var koa = require("koa");
@@ -20,6 +23,8 @@ app.use(async (ctx, next) => {
     ctx.app.emit('error', err, ctx);
   }
 });
+
+app.use(convert(body()));
 
 let userRoutes = require("./userRoutes");
 let userRouteMiddleware = router(_ => {

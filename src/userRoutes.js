@@ -1,14 +1,47 @@
 
-export function *add() {
+//import monk from "monk";
 
+//let db = monk("localhost/usersApi");
+
+let users = []; //db.get("users");
+let id = 1;
+
+export function findUser(idVal) {
+	let id = Number.parseInt(idVal);
+	if (id === NaN) {
+		return null;
+	}
+
+	return users.find(u => u._id === id);
 }
-/*
-export function *get(id) {
-	this.body = "You passed me: " + id;
+
+export function addUser(userData) {
+	let userObject = Object.assign({_id: id++}, userData);
+	users.push(userObject);
+
+	return userObject;
 }
-*/
+
+export function clearUsers() {
+	users = [];
+}
+
+export async function add(ctx) {
+	// TODO: validation
+	let insertedUser = addUser(ctx.body);
+
+	ctx.set("location", `/user/${insertedUser._id}`);
+	ctx.status = 200;
+}
+
 export async function get(ctx) {
-	ctx.body = `You passed me ${ctx.params.id}`;
+	let user = findUser(ctx.params.id);
+	if (!user) {
+		ctx.status = 404;
+		return;
+	}
+
+	ctx.body = user;
 }
 
 export function *update(id) {
