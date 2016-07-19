@@ -1,4 +1,4 @@
-
+/*
 var parse = require("co-body");
 
 module.exports.listStagingPhotos = function *() {
@@ -17,3 +17,4 @@ module.exports.createPhotoMovement = function *(id) {
 	this.status = 200;
 };
 
+*/
