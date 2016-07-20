@@ -48,7 +48,6 @@
   "dependencies": {
     "koa": "^2.0.0",
     "koa-bodyparser": "^3.1.0",
-    "koa-simple-router": "^0.2.0",
-    "monk": "^3.0.7"
+    "koa-simple-router": "^0.2.0"
   }
 }
