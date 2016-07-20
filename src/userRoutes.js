@@ -28,7 +28,7 @@ export function clearUsers() {
 
 export async function add(ctx) {
 	// TODO: validation
-	let insertedUser = addUser(ctx.body);
+	let insertedUser = addUser(ctx.request.body);
 
 	ctx.set("location", `/user/${insertedUser._id}`);
 	ctx.status = 200;

@@ -1,20 +1,12 @@
-//require("babel-core/register");
 import "babel-polyfill";
 import Application from "koa";
 import convert from "koa-convert";
 import router from "koa-simple-router";
-import body from "koa-better-body";
-//import bodyParser from "koa-bodyparser";
-//import routes from "koa-route";
-
-//var koa = require("koa");
-//var app = module.exports = koa();
-//var routes = require("koa-route");
+import bodyParser from "koa-bodyparser";
 
 export const app = new Application();
 
 // https://github.com/koajs/koa/wiki/Error-Handling
-
 app.use(async (ctx, next) => {
   try {
     await next();
@@ -24,7 +16,12 @@ app.use(async (ctx, next) => {
   }
 });
 
-app.use(convert(body()));
+// https://github.com/koajs/bodyparser
+app.use(bodyParser({
+	enableTypes: ["json"],
+	// http://stackoverflow.com/questions/16133923/400-vs-422-response-to-post-of-data
+	onerror: (err, ctx) => ctx.throw('invalid syntax', 400)
+}));
 
 let userRoutes = require("./userRoutes");
 let userRouteMiddleware = router(_ => {

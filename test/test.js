@@ -32,7 +32,7 @@ describe("Simple user API", function () {
 	it ("retrieves a user", done => {
 		let insertedUser = addUser(test_user);
 		request
-			.get("/user/`${insertedUser._id}`")
+			.get(`/user/${insertedUser._id}`)
 			.set("Accept", "application/json")
 			.expect("Content-Type", /json/)
 			.expect(/Pete/)
