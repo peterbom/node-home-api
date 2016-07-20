@@ -47,4 +47,16 @@ describe("Simple user API", function () {
 			.expect("location", /^\/user\/\d+$/) // /^\/user\/[0-9a-fA-F]{24}$/
 			.expect(201, done);
 	});
+
+	it ("updates an existing user", done => {
+		let userToUpdate = addUser(test_user);
+		let url = `/user/${userToUpdate._id}`;
+		request
+			.put(url)
+			.send({ name: "Pete2", city: "Wellington" })
+			.expect("location", url)
+			.expect(/Pete2/)
+			.expect(/Wellington/)
+			.expect(200, done);
+	});
 });

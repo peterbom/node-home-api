@@ -11,6 +11,9 @@ app.use(async (ctx, next) => {
   try {
     await next();
   } catch (err) {
+  	// https://developer.mozilla.org/en-US/docs/Web/API/Console/trace
+  	console.trace(err);
+
     ctx.status = err.status || 500;
     ctx.app.emit('error', err, ctx);
   }
