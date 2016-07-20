@@ -31,7 +31,7 @@ export async function add(ctx) {
 	let insertedUser = addUser(ctx.request.body);
 
 	ctx.set("location", `/user/${insertedUser._id}`);
-	ctx.status = 200;
+	ctx.status = 201;
 }
 
 export async function get(ctx) {

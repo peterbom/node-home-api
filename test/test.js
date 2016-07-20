@@ -45,7 +45,6 @@ describe("Simple user API", function () {
 			.post("/user")
 			.send(test_user)
 			.expect("location", /^\/user\/\d+$/) // /^\/user\/[0-9a-fA-F]{24}$/
-			.expect(200)
-			.end(done);
+			.expect(201, done);
 	});
 });
