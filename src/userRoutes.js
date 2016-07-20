@@ -34,6 +34,15 @@ export function updateUser(id, newUserData) {
 	return newUser;
 }
 
+export function deleteUser(id) {
+	let index = users.findIndex(u => u._id === id);
+	if (index === -1) {
+		throw new RangeError(`Users collection does not contain an item with id ${id}`);
+	}
+
+	users.splice(index, 1);
+}
+
 export function clearUsers() {
 	users = [];
 }
@@ -74,7 +83,14 @@ export async function update(ctx) {
 }
 
 export async function remove(ctx) {
+	let user = findUser(ctx.params.id);
+	if (!user) {
+		ctx.status = 404;
+		return;
+	}
 
+	deleteUser(user._id);
+	ctx.status = 200;
 }
 
 /*

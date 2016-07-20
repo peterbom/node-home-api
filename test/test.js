@@ -59,4 +59,12 @@ describe("Simple user API", function () {
 			.expect(/Wellington/)
 			.expect(200, done);
 	});
+
+	it ("deletes an existing user", done => {
+		let userToDelete = addUser(test_user);
+		let url = `/user/${userToDelete._id}`;
+		request
+			.delete(url)
+			.expect(200, done);
+	});
 });
