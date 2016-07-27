@@ -1,9 +1,6 @@
 node_modules
 npm-debug.log
 
-lib
-deploy
-
 .env
 
 terminal.glue

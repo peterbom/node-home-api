@@ -13,7 +13,8 @@
     "watch:test": "watch \"npm run test\" ./test",
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
     "start": "zoo node lib/app.js",
-    "debug": "concurrently \"zoo nodemon --debug lib/app.js\" \"node-inspector\""
+    "debug": "concurrently \"zoo nodemon --debug lib/app.js\" \"node-inspector\"",
+    "update-prod": "git pull && npm prune && npm install --production"
   },
   "repository": {
     "type": "git",
