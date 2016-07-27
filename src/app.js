@@ -2,12 +2,13 @@ import "babel-polyfill";
 import Application from "koa";
 
 import {errorHandler} from "./error-handling-middleware";
-import {jsonBodyParser} from "./request-processing-middleware";
+import {corsConfig, jsonBodyParser} from "./request-processing-middleware";
 import * as routers from "./routing-middleware";
 
 export const app = new Application();
 
 app.use(errorHandler);
+app.use(corsConfig);
 app.use(jsonBodyParser);
 
 app.use(routers.userRouter);
