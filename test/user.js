@@ -1,20 +1,9 @@
 import "babel-polyfill";
 import {app} from "../lib/app";
-import {addUser, clearUsers} from "../lib/userRoutes";
+import {addUser, clearUsers} from "../lib/data-access/user";
 import supertest from "supertest";
 
 let request = supertest.agent(app.listen());
-
-/*
-describe("Simple photo API", function () {
-	it ("Gets all photos in a folder", function (done) {
-		request
-			.get("staging-photo")
-			.send("folder_name")
-			.expect(200, done);
-	});
-});
-*/
 
 describe("Simple user API", function () {
 	let test_user = { name: "Pete", city: "Welly" };
