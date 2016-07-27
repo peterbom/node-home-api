@@ -12,5 +12,6 @@ export let jsonBodyParser = bodyParser({
 
 // https://www.npmjs.com/package/koa-cors
 export let corsConfig = convert(cors({
-	origin: true
+	origin: true,
+	credentials: true
 }));
