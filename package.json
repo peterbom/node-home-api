@@ -7,14 +7,13 @@
     "clean": "rimraf lib/*",
     "precompile": "npm run clean",
     "compile": "babel src -d lib",
-    "test": "mocha --compilers js:babel-register ./test -u bdd -R spec",
+    "test": "zoo mocha --compilers js:babel-register ./test -u bdd -R spec",
     "test:debug": "concurrently \"npm run test -- --debug-brk\" \"node-inspector\"",
     "watch:src": "watch \"npm run compile && npm run test\" ./src",
     "watch:test": "watch \"npm run test\" ./test",
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
-    "start:debug": "nodemon --debug lib/app.js",
-    "start": "node lib/app.js",
-    "debug": "concurrently \"npm run start:debug\" \"npm run watch\" \"node-inspector\""
+    "start": "zoo node lib/app.js",
+    "debug": "concurrently \"zoo nodemon --debug lib/app.js\" \"node-inspector\""
   },
   "repository": {
     "type": "git",
@@ -24,7 +23,9 @@
     "sourceMaps": false,
     "comments": true,
     "minified": false,
-    "presets": ["es2015-loose"],
+    "presets": [
+      "es2015-loose"
+    ],
     "plugins": [
       "transform-async-to-generator"
     ]
@@ -44,7 +45,8 @@
     "nodemon": "^1.9.2",
     "rimraf": "^2.5.3",
     "supertest": "^1.2.0",
-    "watch": "^0.19.1"
+    "watch": "^0.19.1",
+    "zoo": "^0.1.8"
   },
   "dependencies": {
     "koa": "^2.0.0",

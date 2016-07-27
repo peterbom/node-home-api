@@ -3,4 +3,6 @@ npm-debug.log
 
 lib
 
+.env
+
 terminal.glue
