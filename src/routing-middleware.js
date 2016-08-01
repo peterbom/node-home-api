@@ -3,6 +3,7 @@ import router from "koa-simple-router";
 import * as userResource from "./resources/user";
 import * as stagingPhotoResource from "./resources/staging-photo";
 import * as photoMovementResource from "./resources/photo-movement";
+import * as authenticationResource from "./resources/authentication";
 
 export let userRouter = router(_ => {
     _.get('/user/:id', userResource.get);
@@ -19,3 +20,7 @@ export let stagingPhotoRouter = router(_ => {
 export let photoMovementRouter = router(_ => {
     _.put("/photo-movement/:id", photoMovementResource.move);
 });
+
+export let authenticationRouter = router(_ => {
+	_.post("/authentication", authenticationResource.authenticate);
+})
