@@ -22,5 +22,6 @@ export let photoMovementRouter = router(_ => {
 });
 
 export let authenticationRouter = router(_ => {
+	_.get("/authentication", authenticationResource.getProviders);
 	_.post("/authentication", authenticationResource.authenticate);
 })

@@ -30,7 +30,7 @@ export async function validateIdToken(idToken) {
 
     // Find the correct metadata service based on the issuer in the payload.
     let issuer = jwt.payload.iss;
-    let metadataService = await authProviderManager.getMetadataServicesByIssuer(issuer);
+    let metadataService = await authProviderManager.getMetadataServiceByIssuer(issuer);
 
     let keys = await metadataService.getSigningKeys();
 
