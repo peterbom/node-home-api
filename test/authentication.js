@@ -66,6 +66,8 @@ describe("Authentication API", function () {
             .expect("Content-Type", /json/)
             .expect(/outlook/)
             .expect(/google/)
+            .expect(/popupWidth/)
+            .expect(/popupHeight/)
             .expect(200, done);
     });
 })
