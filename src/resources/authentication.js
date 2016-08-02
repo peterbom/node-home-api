@@ -11,7 +11,9 @@ export async function getProviders(ctx) {
             clientId: settings.client_id,
             authority: settings.authority,
             issuer: await metadataService.getIssuer(),
-            authorizationEndpoint: await metadataService.getAuthorizationEndpoint()
+            authorizationEndpoint: await metadataService.getAuthorizationEndpoint(),
+            popupWidth: settings.popupWidth,
+            popupHeight: settings.popupHeight
         }
     }));
 

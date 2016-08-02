@@ -21,7 +21,8 @@ export class OidcClientSettings {
         prompt, display, max_age, ui_locales, acr_values,
         // behavior flags
         filterProtocolClaims = true, loadUserInfo = true,
-        staleStateAge = DefaultStaleStateAge, clockSkew = DefaultClockSkewInSeconds
+        staleStateAge = DefaultStaleStateAge, clockSkew = DefaultClockSkewInSeconds,
+        popupWidth = 500, popupHeight = 500
     } = {}) {
 
         this._authority = authority;
@@ -45,6 +46,9 @@ export class OidcClientSettings {
         this._loadUserInfo = !!loadUserInfo;
         this._staleStateAge = staleStateAge;
         this._clockSkew = clockSkew;
+
+        this._popupWidth = popupWidth;
+        this._popupHeight = popupHeight;
     }
 
     // client config
@@ -149,5 +153,13 @@ export class OidcClientSettings {
     }
     get clockSkew() {
         return this._clockSkew;
+    }
+
+    // presentation
+    get popupWidth() {
+        return this._popupWidth;
+    }
+    get popupHeight() {
+        return this._popupHeight;
     }
 }
