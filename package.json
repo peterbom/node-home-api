@@ -8,13 +8,13 @@
     "build": "npm run clean && babel src -d lib",
     "test-only": "zoo mocha --compilers js:babel-register ./test -u bdd -R spec",
     "test": "npm run build && npm run test-only",
-    "test:debug": "concurrently \"npm run test-only -- --debug-brk\" \"node-inspector\"",
+    "test-debug": "concurrently \"npm run test-only -- --debug-brk\" \"node-inspector\"",
     "watch:src": "watch \"npm run build && npm run test-only\" ./src",
     "watch:test": "watch \"npm run test-only\" ./test",
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
     "start": "zoo node lib/app.js",
     "debug": "concurrently \"zoo nodemon --debug lib/app.js\" \"node-inspector\"",
-    "update:release": "git pull && npm prune --production && npm install --production"
+    "update-release": "git pull && npm prune --production && npm install --production"
   },
   "repository": {
     "type": "git",
