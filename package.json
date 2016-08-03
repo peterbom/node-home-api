@@ -14,7 +14,7 @@
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
     "start": "zoo node lib/app.js",
     "debug": "concurrently \"zoo nodemon --debug lib/app.js\" \"node-inspector\"",
-    "update-prod": "git pull && npm prune --production && npm install --production"
+    "update:release": "git pull && npm prune --production && npm install --production"
   },
   "repository": {
     "type": "git",
