@@ -4,16 +4,22 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "init-env": "shx cp -n .env.template .env",
+ 
     "clean": "rimraf lib/*",
+ 
     "build": "npm run clean && babel src -d lib",
-    "test-only": "zoo mocha --compilers js:babel-register ./test -u bdd -R spec",
-    "test": "npm run build && npm run test-only",
-    "test-debug": "concurrently \"npm run test-only -- --debug-brk\" \"node-inspector\"",
-    "watch:src": "watch \"npm run build && npm run test-only\" ./src",
-    "watch:test": "watch \"npm run test-only\" ./test",
+ 
+    "test": "zoo mocha --compilers js:babel-register ./test -u bdd -R spec",
+    "test-debug": "concurrently \"npm run test -- --debug-brk\" \"node-inspector\"",
+ 
+    "watch:src": "watch \"npm run build && npm run test\" ./src",
+    "watch:test": "watch \"npm run test\" ./test",
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
+ 
     "start": "zoo node lib/app.js",
     "debug": "concurrently \"zoo nodemon --debug lib/app.js\" \"node-inspector\"",
+ 
     "update-release": "git pull && npm prune --production && npm install --production"
   },
   "repository": {
@@ -45,6 +51,7 @@
     "nodemon": "^1.10.0",
     "rifraf": "^2.0.2",
     "rimraf": "^2.5.3",
+    "shx": "^0.1.2",
     "supertest": "^1.2.0",
     "timekeeper": "^0.1.1",
     "watch": "^0.19.1",
@@ -52,6 +59,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.9.1",
+    "bearer-token": "^2.0.0",
     "jsonwebtoken": "^7.1.7",
     "jsrsasign": "^5.0.12",
     "koa": "^2.0.0",

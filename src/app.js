@@ -2,9 +2,11 @@ import "babel-polyfill";
 import Application from "koa";
 import {createAuthProviderManager} from "./authentication-config";
 
-import {errorHandler} from "./error-handling-middleware";
-import {corsConfig, jsonBodyParser} from "./request-processing-middleware";
-import * as routers from "./routing-middleware";
+import {errorHandler} from "./middleware/error-handling-middleware";
+import {corsConfig} from "./middleware/cors-middleware";
+import {jsonBodyParser} from "./middleware/body-parsing-middleware";
+import {bearerTokenParser} from "./middleware/token-parsing-middleware";
+import * as routers from "./middleware/routing-middleware";
 
 export const app = new Application();
 export const authProviderManager = createAuthProviderManager();
@@ -13,10 +15,15 @@ app.use(errorHandler);
 app.use(corsConfig);
 app.use(jsonBodyParser);
 
-//app.use(routers.userRouter);
-//app.use(routers.stagingPhotoRouter);
-//app.use(routers.photoMovementRouter);
+// Routes which don't require a bearer token
 app.use(routers.authenticationRouter);
+
+app.use(bearerTokenParser);
+
+// Routes which require a bearer token
+app.use(routers.userRouter);
+app.use(routers.stagingPhotoRouter);
+app.use(routers.photoMovementRouter);
 
 var port = process.env.PORT || (process.argv[2] || 3000);
 
