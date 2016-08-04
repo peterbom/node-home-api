@@ -11,7 +11,7 @@ let outlookSettings = {
 let googleSettings = {
     name: "google",
     authority: "https://accounts.google.com",
-    client_id: "1062215298697-jkb62vvju15fip57ntra61i7jg9it4t8.apps.googleusercontent.com",
+    client_id: "12212475530-pr5ug20eogvcicaggqk2bu0cr6bggspj.apps.googleusercontent.com",
     popupWidth: 452,
     popupHeight: 633
 }
