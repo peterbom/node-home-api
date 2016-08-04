@@ -13,9 +13,9 @@ app.use(errorHandler);
 app.use(corsConfig);
 app.use(jsonBodyParser);
 
-app.use(routers.userRouter);
-app.use(routers.stagingPhotoRouter);
-app.use(routers.photoMovementRouter);
+//app.use(routers.userRouter);
+//app.use(routers.stagingPhotoRouter);
+//app.use(routers.photoMovementRouter);
 app.use(routers.authenticationRouter);
 
 var port = process.env.PORT || (process.argv[2] || 3000);
