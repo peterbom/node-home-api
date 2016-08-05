@@ -2,7 +2,7 @@ import {sign as signJwt} from "jsonwebtoken";
 
 import {parseJwt} from "../oidc/jose-util";
 import {validateIdToken} from "../oidc/id-token-validator";
-import {authProviderManager} from "../app";
+import {authProviderManager} from "../globals";
 import {getPermissions} from "../authorization/permission-manager";
 
 export async function getProviders(ctx) {
@@ -16,8 +16,7 @@ export async function getProviders(ctx) {
             authority: settings.authority,
             issuer: await metadataService.getIssuer(),
             authorizationEndpoint: await metadataService.getAuthorizationEndpoint(),
-            popupWidth: settings.popupWidth,
-            popupHeight: settings.popupHeight
+            signingKeys: await metadataService.getSigningKeys()
         }
     }));
 
@@ -29,10 +28,11 @@ export async function getProviders(ctx) {
 
 export async function authenticate(ctx) {
     let body = ctx.request.body;
+    let providerName = body.provider;
     let idToken = body.id_token;
 
     try {
-        await validateIdToken(idToken);
+        await validateIdToken(providerName, idToken);
     } catch (err) {
         console.trace(err);
         ctx.status = 400;

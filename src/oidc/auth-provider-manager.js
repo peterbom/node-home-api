@@ -1,14 +1,22 @@
 import {OidcClientSettings} from "./oidc-client-settings";
 import {MetadataService} from "./metadata-service";
+import {HttpClientJsonService} from "./http-client-json-service";
 import {Log} from "../shared/log";
 
 export class AuthProviderManager {
-    constructor(...providerSettingsItems) {
-        this._names = providerSettingsItems.map(s => s.name);
+    constructor(authSettings, jsonServiceFactory = () => new HttpClientJsonService()) {
+        this._names = [];
+        this._oidcClientSettingsLookup = {};
 
-        let oidcClientSettingsItems = providerSettingsItems.map(s => s instanceof OidcClientSettings ? s : new OidcClientSettings(s));
-        this.settingsItems = oidcClientSettingsItems;
-        this.metadataServices = oidcClientSettingsItems.map(s => new MetadataService(s));
+        for (let name in authSettings) {
+            this._names.push(name);
+
+            let providerSettings = Object.assign({}, authSettings[name], {
+                jsonServiceFactory: jsonServiceFactory
+            });
+
+            this._oidcClientSettingsLookup[name] = new OidcClientSettings(providerSettings);
+        }
     }
 
     get names() {
@@ -16,38 +24,14 @@ export class AuthProviderManager {
     }
 
     getSettings(name) {
-        return this.settingsItems[this._names.indexOf(name)];
+        return this._oidcClientSettingsLookup[name];
     }
 
     getMetadataService(name) {
-        return this.metadataServices[this._names.indexOf(name)];
+        return this._oidcClientSettingsLookup[name].metadataService;
     }
 
     async retrieveAllMetadata() {
-        await Promise.all(this.metadataServices.map(ms => ms.getMetadata()));
+        await Promise.all(this.names.map(name => this.getMetadataService(name).getMetadata()));
     }
-
-    async getMetadataServiceByIssuer(issuer) {
-        let index = await getMetadataServicesIndex(this.metadataServices, issuer);
-        if (index === -1) {
-            return null;
-        }
-
-        return this.metadataServices[index];
-    }
-
-    async getSettingsByIssuer(issuer) {
-        let index = await getMetadataServicesIndex(this.metadataServices, issuer);
-        if (index === -1) {
-            return null;
-        }
-
-        return this.settingsItems[index];
-    }
-}
-
-async function getMetadataServicesIndex(metadataServices, issuer) {
-    Log.info(`Getting metadata services for issuer ${issuer}`);
-    let issuers = await Promise.all(metadataServices.map(ms => ms.getIssuer()));
-    return issuers.indexOf(issuer);
 }

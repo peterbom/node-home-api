@@ -5,10 +5,10 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 import * as joseUtil from "./jose-util";
-import {authProviderManager} from "../app";
+import {authProviderManager} from "../globals";
 import {Log} from "../shared/log";
 
-export async function validateIdToken(idToken) {
+export async function validateIdToken(providerName, idToken) {
     
     let jwt = joseUtil.parseJwt(idToken);
     if (!jwt || !jwt.header || !jwt.payload) {
@@ -30,7 +30,7 @@ export async function validateIdToken(idToken) {
 
     // Find the correct metadata service based on the issuer in the payload.
     let issuer = jwt.payload.iss;
-    let metadataService = await authProviderManager.getMetadataServiceByIssuer(issuer);
+    let metadataService = await authProviderManager.getMetadataService(providerName);
 
     let keys = await metadataService.getSigningKeys();
 
@@ -42,13 +42,14 @@ export async function validateIdToken(idToken) {
     Log.info("Received signing keys");
 
     let key = keys.find(key => key.kid === kid);
-
     if (!key) {
         Log.error("No key matching kid found in signing keys");
         throw new Error("No key matching kid found in signing keys");
     }
 
-    let settings = await authProviderManager.getSettingsByIssuer(issuer);
+    Log.info("Matched key: kid " + JSON.stringify(key.kid));
+
+    let settings = await authProviderManager.getSettings(providerName);
     let audience = settings.client_id;
     
     let clockSkewInSeconds = settings.clockSkew;

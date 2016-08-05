@@ -1,8 +1,15 @@
 import "babel-polyfill";
-import {app} from "../lib/app";
-import {addUser, clearUsers} from "../lib/data-access/user";
+
 import supertest from "supertest";
 import timekeeper from "timekeeper";
+
+import {getUnitTestSettings} from "../lib/config";
+import {initialize, app} from "../lib/globals";
+import {Log} from "../lib/shared/log";
+import {addUser, clearUsers} from "../lib/data-access/user";
+
+let settings = getUnitTestSettings();
+initialize(settings);
 
 let request = supertest.agent(app.listen());
 

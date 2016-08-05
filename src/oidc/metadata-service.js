@@ -3,21 +3,16 @@
 
 import {OidcClientSettings} from "./oidc-client-settings";
 import {Log} from "../shared/log";
-import rp from "request-promise";
 
 export class MetadataService {
-    constructor(settings) {
+    constructor(settings, jsonServiceFactory) {
         if (!settings) {
             Log.error("No settings passed to MetadataService");
             throw new Error("settings");
         }
 
-        if (settings instanceof OidcClientSettings) {
-            this._settings = settings;
-        }
-        else {
-            this._settings = new OidcClientSettings(settings);
-        }
+        this._settings = settings;
+        this._jsonService = jsonServiceFactory();
     }
 
     async getMetadata() {
@@ -33,15 +28,9 @@ export class MetadataService {
             throw new Error("No metadataUrl configured on settings");
         }
 
-        let requestOptions = {
-            uri: this._settings.metadataUrl,
-            json: true
-        };
-
-        Log.info("getting metadata from", this._settings.metadataUrl);
-        let metadata = await rp(requestOptions);
-
+        let metadata = await this._jsonService.getJson(this._settings.metadataUrl);
         Log.info("json received");
+
         this._settings.metadata = metadata;
         return metadata;
     }
@@ -95,16 +84,9 @@ export class MetadataService {
         }
 
         let jwks_uri = await this._getMetadataProperty("jwks_uri");
-
         Log.info("jwks_uri received", jwks_uri);
 
-        let requestOptions = {
-            uri: jwks_uri,
-            json: true
-        };
-
-        let keySet = await rp(requestOptions);
-
+        let keySet = await this._jsonService.getJson(jwks_uri);
         Log.info("key set received", keySet);
 
         if (!keySet.keys) {

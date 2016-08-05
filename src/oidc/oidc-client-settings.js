@@ -1,6 +1,7 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+import {MetadataService} from "./metadata-service";
 import {Log} from "../shared/log";
 
 const OidcMetadataUrlPath = ".well-known/openid-configuration";
@@ -22,7 +23,9 @@ export class OidcClientSettings {
         // behavior flags
         filterProtocolClaims = true, loadUserInfo = true,
         staleStateAge = DefaultStaleStateAge, clockSkew = DefaultClockSkewInSeconds,
-        popupWidth = 500, popupHeight = 500
+
+        // To support DI of JsonService
+        jsonServiceFactory
     } = {}) {
 
         this._authority = authority;
@@ -47,8 +50,7 @@ export class OidcClientSettings {
         this._staleStateAge = staleStateAge;
         this._clockSkew = clockSkew;
 
-        this._popupWidth = popupWidth;
-        this._popupHeight = popupHeight;
+        this._metadataService = new MetadataService(this, jsonServiceFactory);
     }
 
     // client config
@@ -155,11 +157,7 @@ export class OidcClientSettings {
         return this._clockSkew;
     }
 
-    // presentation
-    get popupWidth() {
-        return this._popupWidth;
-    }
-    get popupHeight() {
-        return this._popupHeight;
+    get metadataService() {
+        return this._metadataService;
     }
 }

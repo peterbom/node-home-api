@@ -22,8 +22,8 @@ export class Log {
     static get INFO() {return INFO};
     
     static reset(){
-        level = INFO;
-        logger = nopLogger;
+        level = process.env.LOG_LEVEL;
+        logger = console;
     }
     
     static get level(){
