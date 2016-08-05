@@ -17,6 +17,6 @@ export class HttpClientJsonService {
 
         Log.info(`getting json from ${url}`);
 
-        let metadata = await rp(options);
+        return await rp(options);
     }
 }
