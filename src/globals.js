@@ -52,6 +52,6 @@ export function initialize(settings) {
 
     if (!settings.isUnitTest) {
         app.listen(settings.port);
-        console.log("Application started. Listening on port: " + port);
+        console.log("Application started. Listening on port: " + settings.port);
     }
 }
