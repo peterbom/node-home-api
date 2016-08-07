@@ -3,6 +3,7 @@
 
 import {OidcClientSettings} from "./oidc-client-settings";
 import {Log} from "../shared/log";
+import moment from "moment";
 
 export class MetadataService {
     constructor(settings, jsonServiceFactory) {
@@ -13,14 +14,15 @@ export class MetadataService {
 
         this._settings = settings;
         this._jsonService = jsonServiceFactory();
+        this._metadata = null;
     }
 
     async getMetadata() {
         Log.info("MetadataService.getMetadata");
 
-        if (this._settings.metadata) {
+        if (this._metadata && this._metadata.expiry > new Date()) {
             Log.info("Returning metadata from settings");
-            return this._settings.metadata;
+            return this._metadata;
         }
 
         if (!this._settings.metadataUrl) {
@@ -28,10 +30,11 @@ export class MetadataService {
             throw new Error("No metadataUrl configured on settings");
         }
 
-        let metadata = await this._jsonService.getJson(this._settings.metadataUrl);
+        this._metadata = await this._jsonService.getJson(this._settings.metadataUrl);
         Log.info("json received");
 
-        this._settings.metadata = metadata;
+        this._metadata.expiry = moment().add(1, "hour").toDate();
+
         return metadata;
     }
     
