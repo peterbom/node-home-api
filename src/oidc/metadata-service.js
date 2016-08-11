@@ -30,10 +30,11 @@ export class MetadataService {
             throw new Error("No metadataUrl configured on settings");
         }
 
-        this._metadata = await this._jsonService.getJson(this._settings.metadataUrl);
+        let metadata = await this._jsonService.getJson(this._settings.metadataUrl);
         Log.info("json received");
 
-        this._metadata.expiry = moment().add(1, "hour").toDate();
+        metadata.expiry = moment().add(1, "hour").toDate();
+        this._metadata = metadata;
 
         return metadata;
     }
