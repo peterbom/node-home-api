@@ -81,15 +81,19 @@ function _validateJwt(jwt, key, issuer, audience, clockSkew, now) {
 
     if (payload.aud !== audience) {
         Log.error("Invalid audience in token", payload.aud);
-        return Promise.reject(new Error("Invalid audience in token: " + payload.aud));
+        return Promise.reject(new Error(`Invalid audience in token.\n Expected: ${audience}\n Actual: ${payload.aud}`));
     }
 
     var lowerNow = now + clockSkew;
     var upperNow = now - clockSkew;
 
     if (lowerNow < payload.iat) {
-        Log.error("iat is in the future", payload.iat);
-        return Promise.reject(new Error("iat is in the future: " + payload.iat));
+        let message = `iat is in the future.
+        Now: ${now} (${new Date(now * 1000)})
+        Lower limit: ${lowerNow} (${new Date(lowerNow * 1000)})
+        iat: ${payload.iat} (${new Date(payload.iat * 1000)})`;
+        Log.error(message);
+        return Promise.reject(new Error(message));
     }
 
     if (lowerNow < payload.nbf) {

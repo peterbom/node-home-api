@@ -16,11 +16,14 @@ export let bearerTokenParser = async function (ctx, next) {
             // verifies secret and checks expiry
             ctx.request.accessToken = await verifyJwt(token, process.env.JWT_SECRET);
         } catch (err) {
+            // TODO: Logging
             console.trace(err);
             ctx.status = 400; // bad request
             return;
         }
     } else {
+        // TODO: Logging
+        console.log("----- No token provided. Forbidden. -----");
         ctx.status = 403; // forbidden (no token)
         return;
     }

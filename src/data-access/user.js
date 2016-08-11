@@ -41,3 +41,7 @@ export function deleteUser(id) {
 export function clearUsers() {
 	users = [];
 }
+
+export function listUsers() {
+	return users;
+}

@@ -1,4 +1,8 @@
-import {addUser, findUser, updateUser, deleteUser} from "../data-access/user";
+import {listUsers, addUser, findUser, updateUser, deleteUser} from "../data-access/user";
+
+export async function list(ctx) {
+    ctx.body = listUsers();
+}
 
 export async function add(ctx) {
     // TODO: validation

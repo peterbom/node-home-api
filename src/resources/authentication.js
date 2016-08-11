@@ -34,6 +34,8 @@ export async function authenticate(ctx) {
     try {
         await validateIdToken(providerName, idToken);
     } catch (err) {
+        // TODO: Logging
+        console.log("----- Invalid id_token received. Returning 400 (bad request) -----");
         console.trace(err);
         ctx.status = 400;
         return;

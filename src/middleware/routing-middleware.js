@@ -5,7 +5,10 @@ import * as stagingPhotoResource from "../resources/staging-photo";
 import * as photoMovementResource from "../resources/photo-movement";
 import * as authenticationResource from "../resources/authentication";
 
+import * as packagingConstructionStyleResource from "../resources/packaging/construction-style";
+
 export let userRouter = router(_ => {
+    _.get("/user", userResource.list);
     _.get('/user/:id', userResource.get);
     _.post('/user', userResource.add);
     _.put('/user/:id', userResource.update);
@@ -22,6 +25,13 @@ export let photoMovementRouter = router(_ => {
 });
 
 export let authenticationRouter = router(_ => {
-	_.get("/authentication", authenticationResource.getProviders);
-	_.post("/authentication", authenticationResource.authenticate);
-})
+    _.get("/authentication", authenticationResource.getProviders);
+    _.post("/authentication", authenticationResource.authenticate);
+});
+
+export let packagingRouters = [
+    router(_ => {
+        _.get("/packaging/construction-style", packagingConstructionStyleResource.list);
+        //_.get("/packaging/construction-style/:id", packagingConstructionStyleResource.get);
+    })
+];

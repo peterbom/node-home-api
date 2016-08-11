@@ -49,6 +49,17 @@ settings.jsonServiceFactory = () => new MockJsonService({
     }
 });
 
+settings.authSettings = {
+    "outlook": {
+        authority: "https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0",
+        client_id: "00000000-0000-0000-0000-00004C16745D"
+    },
+    "google": {
+        authority: "https://accounts.google.com",
+        client_id: "1062215298697-jkb62vvju15fip57ntra61i7jg9it4t8.apps.googleusercontent.com"
+    }
+};
+
 initialize(settings);
 
 let request = supertest.agent(app.listen());
@@ -78,7 +89,7 @@ describe("Authentication API", function () {
             .expect(/access_token/)
             .end((err, result) => {
                 timekeeper.reset();
-                done();
+                done(err);
             });
     });
 
@@ -88,7 +99,7 @@ describe("Authentication API", function () {
             id_token: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImQwZWM1MTRhMzJiNmY4OGMwYWJkMTJhMjg0MDY5OWJkZDNkZWJhOWQifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhdWQiOiIxMDYyMjE1Mjk4Njk3LWprYjYydnZqdTE1ZmlwNTdudHJhNjFpN2pnOWl0NHQ4LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA2MDYxNTYzNTczNDUyMzk1NDMwIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjEwNjIyMTUyOTg2OTctamtiNjJ2dmp1MTVmaXA1N250cmE2MWk3amc5aXQ0dDguYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJub25jZSI6Inh1YTJzMnk3aTBwNDI1NGtqZTN6bmNkaSIsImVtYWlsIjoicGV0ZWJvbWJlckBnbWFpbC5jb20iLCJpYXQiOjE0NzAyMTc3ODEsImV4cCI6MTQ3MDIyMTM4MSwibmFtZSI6IlBldGUgQm9tYmVyIiwiZ2l2ZW5fbmFtZSI6IlBldGUiLCJmYW1pbHlfbmFtZSI6IkJvbWJlciIsImxvY2FsZSI6ImVuIn0.pttuPx5CYuck52UHuOYmUqNqmWwIsDpkBIzreBV7y_xDDVfBCplzLitzJ5nCa4IX0THSqgUStumKxSgPjuujR3qBg0is0X_J6IltTq1MkiKuvbjin90Gv4AGVGTgD8IQTiIUo3nMPSU2inf6m22n70JCE1W9Lx3VXb8O2oRb3xBd6CBiz5vbDRglXs8LGip4UmtAowI9haUKR7kpM2yLQ7LPgmP3pZqfIbOctqhkChrgN5JsNAtJbd5nWNLqjcggNvHozjUWEm-4SsY4mX-JlVqStpDTEutRcSTdf67C31wYfofBdakKXsjwi-kMkcn21dIGgrbqXnWY9hbUcYfP2g"
         }
 
-        let time = new Date(1470020192000);
+        let time = new Date(1470217781000);
         timekeeper.freeze(time);
 
         request
@@ -98,7 +109,26 @@ describe("Authentication API", function () {
             .expect(/access_token/)
             .end((err, result) => {
                 timekeeper.reset();
-                done();
+                done(err);
+            });
+    });
+
+    it ("refuses to issue an access token for an invalid ID token", done => {
+        let exampleTokenBody = {
+            provider: "google",
+            id_token: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImQwZWM1MTRhMzJiNmY4OGMwYWJkMTJhMjg0MDY5OWJkZDNkZWJhOWQifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhdWQiOiIxMDYyMjE1Mjk4Njk3LWprYjYydnZqdTE1ZmlwNTdudHJhNjFpN2pnOWl0NHQ4LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA2MDYxNTYzNTczNDUyMzk1NDMwIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjEwNjIyMTUyOTg2OTctamtiNjJ2dmp1MTVmaXA1N250cmE2MWk3amc5aXQ0dDguYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJub25jZSI6Inh1YTJzMnk3aTBwNDI1NGtqZTN6bmNkaSIsImVtYWlsIjoicGV0ZWJvbWJlckBnbWFpbC5jb20iLCJpYXQiOjE0NzAyMTc3ODEsImV4cCI6MTQ3MDIyMTM4MSwibmFtZSI6IlBldGUgQm9tYmVyIiwiZ2l2ZW5fbmFtZSI6IlBldGUiLCJmYW1pbHlfbmFtZSI6IkJvbWJlciIsImxvY2FsZSI6ImVuIn0.pttuPx5CYuck52UHuOYmUqNqmWwIsDpkBIzreBV7y_xDDVfBCplzLitzJ5nCa4IX0THSqgUStumKxSgPjuujR3qBg0is0X_J6IltTq1MkiKuvbjin90Gv4AGVGTgD8IQTiIUo3nMPSU2inf6m22n70JCE1W9Lx3VXb8O2oRb3xBd6CBiz5vbDRglXs8LGip4UmtAowI9haUKR7kpM2yLQ7LPgmP3pZqfIbOctqhkChrgN5JsNAtJbd5nWNLqjcggNvHozjUWEm-4SsY4mX-JlVqStpDTEutRcSTdf67C31wYfofBdakKXsjwi-kMkcn21dIGgrbqXnWY9hbUcYfP2g"
+        }
+
+        let time = new Date(1470500000000);  // Token is expired
+        timekeeper.freeze(time);
+
+        request
+            .post("/authentication")
+            .send(exampleTokenBody)
+            .expect(400)
+            .end((err, result) => {
+                timekeeper.reset();
+                done(err);
             });
     });
 
@@ -114,4 +144,4 @@ describe("Authentication API", function () {
             .expect(/signingKeys/)
             .expect(200, done);
     });
-})
+});

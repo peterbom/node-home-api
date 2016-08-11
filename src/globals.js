@@ -10,11 +10,13 @@ import {AuthProviderManager} from "./oidc/auth-provider-manager";
 
 export let app;
 export let authProviderManager;
+export let appSettings;
 
 export function initialize(settings) {
 
     // Set up exports first, in case they're used by subsequent initialization code
     app = new Application();
+    appSettings = settings;
 
     if (settings.allowHttpRequests) {
         authProviderManager = new AuthProviderManager(settings.authSettings);
@@ -40,7 +42,7 @@ export function initialize(settings) {
         app.use(routers.authenticationRouter);
     }
 
-    if (settings.middleware.bearerTokenParser) {
+    if (settings.middleware.requireBearerToken) {
         app.use(bearerTokenParser);
     }
 
@@ -48,6 +50,12 @@ export function initialize(settings) {
         app.use(routers.userRouter);
         app.use(routers.stagingPhotoRouter);
         app.use(routers.photoMovementRouter);
+
+        // for (let router of routers.packagingRouters) {
+        //     console.log("ROUTER>>>>>>>>>>>>>>>>>>>>>>>>>>> " + router);
+        //     app.use(router);
+        // }
+        routers.packagingRouters.forEach(r => app.use(r));
     }
 
     if (!settings.isUnitTest) {
