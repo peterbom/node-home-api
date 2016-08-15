@@ -22,11 +22,12 @@ export class OidcClientSettings {
         prompt, display, max_age, ui_locales, acr_values,
         // behavior flags
         filterProtocolClaims = true, loadUserInfo = true,
-        staleStateAge = DefaultStaleStateAge, clockSkew = DefaultClockSkewInSeconds,
+        staleStateAge = DefaultStaleStateAge, clockSkew = DefaultClockSkewInSeconds
+    } = {}, jsonService) {
 
-        // To support DI of JsonService
-        jsonServiceFactory
-    } = {}) {
+        if (jsonService === undefined) {
+            throw new Error("jsonService not defined");
+        }
 
         this._authority = authority;
         this._metadataUrl = metadataUrl;
@@ -50,7 +51,7 @@ export class OidcClientSettings {
         this._staleStateAge = staleStateAge;
         this._clockSkew = clockSkew;
 
-        this._metadataService = new MetadataService(this, jsonServiceFactory);
+        this._metadataService = new MetadataService(this, jsonService);
     }
 
     // client config

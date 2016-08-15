@@ -1,10 +1,3 @@
-export async function list(ctx) {
-    ctx.body = [];
-}
-
-export async function get(ctx) {
-    ctx.body = {};
-}
 /*
 // Old:
 // Get directories (from photoController.getPhotoPage)
@@ -16,3 +9,13 @@ export async function get(ctx) {
 // Get all staging photo file paths (GET /staging-photo)
 // Get photo properties and tags for a given file path (GET /staging-photo/:id)
 */
+
+export class StagingPhotoResource {
+    async list(ctx) {
+        ctx.body = [];
+    }
+
+    async get(ctx) {
+        ctx.body = {};
+    }
+}

@@ -3,33 +3,45 @@ import "babel-polyfill";
 import supertest from "supertest";
 import timekeeper from "timekeeper";
 
-import {getUnitTestSettings} from "../lib/config";
-import {initialize, app} from "../lib/globals";
+import {getTestComponents} from "../lib/config";
+import {UserResource} from "../lib/resources/user-resource";
+import * as routingMiddleware from "../lib/middleware/routing-middleware";
+import {AppLauncher} from "../lib/app-launcher";
 import {Log} from "../lib/shared/log";
-import {addUser, clearUsers} from "../lib/data-access/user";
 
-let settings = getUnitTestSettings();
-settings.middleware.requireBearerToken = false;
 
-initialize(settings);
-let request = supertest.agent(app.listen());
+// TODO: Remove
+import router from "koa-simple-router";
+
+
+let components = getTestComponents();
+
+components.middleware.authorizationChecker = null;
+components.middleware.unsecuredRoutes = [];
+components.middleware.securedRoutes = [
+    routingMiddleware.getUserRouter(components.userResource)
+];
+
+AppLauncher.launch(components);
+
+let request = supertest.agent(components.app.listen());
 
 describe("Simple user API", function () {
     let test_user = { name: "Pete", city: "Welly" };
 
     let beforeEach = done => {
-        clearUsers();
+        components.userDataAccess.clearUsers();
         done();
     }
 
     let afterEach = done => {
-        clearUsers();
+        components.userDataAccess.clearUsers();
         done();
     }
 
     it ("lists all users", done => {
-        addUser(test_user);
-        addUser(test_user);
+        components.userDataAccess.addUser(test_user);
+        components.userDataAccess.addUser(test_user);
 
         request
             .get("/user")
@@ -41,7 +53,7 @@ describe("Simple user API", function () {
     });
 
     it ("retrieves a user", done => {
-        let insertedUser = addUser(test_user);
+        let insertedUser = components.userDataAccess.addUser(test_user);
 
         request
             .get(`/user/${insertedUser._id}`)
@@ -61,7 +73,7 @@ describe("Simple user API", function () {
     });
 
     it ("updates an existing user", done => {
-        let userToUpdate = addUser(test_user);
+        let userToUpdate = components.userDataAccess.addUser(test_user);
         let url = `/user/${userToUpdate._id}`;
         request
             .put(url)
@@ -73,7 +85,7 @@ describe("Simple user API", function () {
     });
 
     it ("deletes an existing user", done => {
-        let userToDelete = addUser(test_user);
+        let userToDelete = components.userDataAccess.addUser(test_user);
         let url = `/user/${userToDelete._id}`;
         request
             .delete(url)

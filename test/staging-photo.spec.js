@@ -3,14 +3,15 @@ import "babel-polyfill";
 import supertest from "supertest";
 import timekeeper from "timekeeper";
 
-import {getUnitTestSettings} from "../lib/config";
-import {initialize, app} from "../lib/globals";
+import {getTestComponents} from "../lib/config";
+import {AppLauncher} from "../lib/app-launcher";
 import {Log} from "../lib/shared/log";
 
-let settings = getUnitTestSettings();
-initialize(settings);
+let components = getTestComponents();
 
-let request = supertest.agent(app.listen());
+AppLauncher.launch(components);
+
+let request = supertest.agent(components.app.listen());
 
 /*
 describe("Simple photo API", function () {

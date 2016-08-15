@@ -5,12 +5,16 @@ import timekeeper from "timekeeper";
 
 import {MockJsonService} from "./mocks/mock-json-service";
 
-import {getUnitTestSettings} from "../lib/config";
-import {initialize, app, authProviderManager} from "../lib/globals";
+import {getTestComponents} from "../lib/config";
+import {AuthProviderManager} from "../lib/oidc/auth-provider-manager";
+import {IdTokenValidator} from "../lib/oidc/id-token-validator";
+import {AuthenticationResource} from "../lib/resources/authentication-resource";
+import * as routingMiddleware from "../lib/middleware/routing-middleware";
+import {AppLauncher} from "../lib/app-launcher";
+
 import {Log} from "../lib/shared/log";
 
-let settings = getUnitTestSettings();
-settings.jsonServiceFactory = () => new MockJsonService({
+let mockJsonService = new MockJsonService({
     "https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0/.well-known/openid-configuration": {
         "authorization_endpoint":"https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize",
         "token_endpoint":"https://login.microsoftonline.com/consumers/oauth2/v2.0/token",
@@ -49,7 +53,7 @@ settings.jsonServiceFactory = () => new MockJsonService({
     }
 });
 
-settings.authSettings = {
+let authSettings = {
     "outlook": {
         authority: "https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0",
         client_id: "00000000-0000-0000-0000-00004C16745D"
@@ -60,15 +64,35 @@ settings.authSettings = {
     }
 };
 
-initialize(settings);
+let components = getTestComponents();
 
-let request = supertest.agent(app.listen());
+components.authProviderManager = new AuthProviderManager(authSettings, mockJsonService);
+
+components.idTokenValidator = new IdTokenValidator(
+    components.authProviderManager,
+    components.jwtParser,
+    components.jwtValidator);
+
+components.authenticationResource = new AuthenticationResource(
+    components.authProviderManager,
+    components.idTokenValidator,
+    components.jwtParser,
+    components.permissionManager,
+    components.jwtSigner);
+
+components.middleware.unsecuredRoutes = [
+    routingMiddleware.getAuthenticationRouter(components.authenticationResource)
+];
+
+AppLauncher.launch(components);
+
+let request = supertest.agent(components.app.listen());
 
 describe("Authentication API", function () {
 
     before(async function (done) {
         this.timeout(10000);
-        await authProviderManager.retrieveAllMetadata();
+        await components.authProviderManager.retrieveAllMetadata();
         done();
     });
 

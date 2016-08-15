@@ -1,6 +1,9 @@
 import "babel-polyfill";
 
-import {getDefaultSettings} from "./config";
-import {initialize} from "./globals";
+import {getDefaultSettings, getDefaultComponents} from "./config";
+import {AppLauncher} from "./app-launcher";
 
-initialize(getDefaultSettings());
+let settings = getDefaultSettings();
+let components = getDefaultComponents(settings);
+
+AppLauncher.launch(components);

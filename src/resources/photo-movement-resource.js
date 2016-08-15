@@ -1,7 +1,4 @@
 
-export async function move(ctx) {
-    ctx.status = 201;
-}
 /*
 // Old:
 // Create a file movement given a directory+filename and takenDateTime+camera (from photoController.moveFiles)
@@ -9,3 +6,9 @@ export async function move(ctx) {
 // New:
 // Create a file movement given a file path and takenDateTime+camera (PUT /photo-movement/:id)
 */
+
+export class PhotoMovementResource {
+    async move(ctx) {
+        ctx.status = 201;
+    }
+}

@@ -1,21 +1,24 @@
 import {OidcClientSettings} from "./oidc-client-settings";
-import {MetadataService} from "./metadata-service";
-import {HttpClientJsonService} from "./http-client-json-service";
+
+// TODO: Logging
 import {Log} from "../shared/log";
 
 export class AuthProviderManager {
-    constructor(authSettings, jsonServiceFactory = () => new HttpClientJsonService()) {
+    constructor(authSettings, jsonService) {
+        if (authSettings === undefined) {
+            throw new Error("authSettings not defined");
+        }
+
+        if (jsonService === undefined) {
+            throw new Error("jsonService not defined");
+        }
+
         this._names = [];
         this._oidcClientSettingsLookup = {};
 
         for (let name in authSettings) {
             this._names.push(name);
-
-            let providerSettings = Object.assign({}, authSettings[name], {
-                jsonServiceFactory: jsonServiceFactory
-            });
-
-            this._oidcClientSettingsLookup[name] = new OidcClientSettings(providerSettings);
+            this._oidcClientSettingsLookup[name] = new OidcClientSettings(authSettings[name], jsonService);
         }
     }
 

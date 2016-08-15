@@ -1,37 +1,58 @@
 import router from "koa-simple-router";
 
-import * as userResource from "../resources/user";
-import * as stagingPhotoResource from "../resources/staging-photo";
-import * as photoMovementResource from "../resources/photo-movement";
-import * as authenticationResource from "../resources/authentication";
+export function getAuthenticationRouter (authenticationResource) {
+    if (authenticationResource === undefined) {
+        throw new Error("authenticationResource not defined");
+    }
 
-import * as packagingConstructionStyleResource from "../resources/packaging/construction-style";
+    return router(_ => {
+        _.get("/authentication", ctx => authenticationResource.getProviders(ctx));
+        _.post("/authentication", ctx => authenticationResource.authenticate(ctx));
+    });
+}
 
-export let userRouter = router(_ => {
-    _.get("/user", userResource.list);
-    _.get('/user/:id', userResource.get);
-    _.post('/user', userResource.add);
-    _.put('/user/:id', userResource.update);
-    _.delete('/user/:id', userResource.remove);
-});
+export function getUserRouter (userResource) {
+    if (userResource === undefined) {
+        throw new Error("userResource not defined");
+    }
 
-export let stagingPhotoRouter = router(_ => {
-    _.get("/staging-photo", stagingPhotoResource.list);
-    _.get("/staging-photo/:id", stagingPhotoResource.get);
-});
+    return router(_ => {
+        _.get("/user", ctx => userResource.list(ctx));
+        _.get('/user/:id', ctx => userResource.get(ctx));
+        _.post('/user', ctx => userResource.add(ctx));
+        _.put('/user/:id', ctx => userResource.update(ctx));
+        _.delete('/user/:id', ctx => userResource.remove(ctx));
+    });
+}
 
-export let photoMovementRouter = router(_ => {
-    _.put("/photo-movement/:id", photoMovementResource.move);
-});
+export function getStagingPhotoRouter (stagingPhotoResource) {
+    if (stagingPhotoResource === undefined) {
+        throw new Error("stagingPhotoResource not defined");
+    }
 
-export let authenticationRouter = router(_ => {
-    _.get("/authentication", authenticationResource.getProviders);
-    _.post("/authentication", authenticationResource.authenticate);
-});
+    return router(_ => {
+        _.get("/staging-photo", ctx => stagingPhotoResource.list(ctx));
+        _.get("/staging-photo/:id", ctx => stagingPhotoResource.get(ctx));
+    });
+}
 
-export let packagingRouters = [
-    router(_ => {
-        _.get("/packaging/construction-style", packagingConstructionStyleResource.list);
-        //_.get("/packaging/construction-style/:id", packagingConstructionStyleResource.get);
-    })
-];
+export function getPhotoMovementRouter (photoMovementResource) {
+    if (photoMovementResource === undefined) {
+        throw new Error("photoMovementResource not defined");
+    }
+
+    return router(_ => {
+        _.put("/photo-movement/:id", ctx => photoMovementResource.move(ctx));
+    });
+}
+
+export function getPackagingConstructionStyleRouter (constructionStyleResource) {
+    if (constructionStyleResource === undefined) {
+        throw new Error("constructionStyleResource not defined");
+    }
+
+    return router(_ => {
+        _.get("/packaging/construction-style", ctx => constructionStyleResource.list(ctx));
+        _.get("/packaging/construction-style/:id", ctx => constructionStyleResource.get(ctx));
+    });
+}

@@ -1,67 +1,58 @@
-// Copied from:
-// https://github.com/IdentityModel/oidc-client-js/blob/master/src/JoseUtil.js
-
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 import { jws, KEYUTIL as KeyUtil, X509, crypto, hextob64u } from 'jsrsasign';
+
+// TODO: Logging
 import {Log} from "../shared/log";
 
 const AllowedSigningAlgs = ['RS256', 'RS384', 'RS512', 'PS256', 'PS384', 'PS512', 'ES256', 'ES384', 'ES512'];
 
-export function parseJwt(jwt) {
-    Log.info("parseJwt");
-    try {
-        var token = jws.JWS.parse(jwt);
-        return {
-            header: token.headerObj,
-            payload: token.payloadObj
+export class JwtValidator {
+    constructor (jwtParser) {
+        if (jwtParser === undefined) {
+            throw new Error("jwtParser not defined");
         }
+
+        this._jwtParser = jwtParser;
     }
-    catch (e) {
-        Log.error(e);
+
+    validateJwt(jwt, key, issuer, audience, clockSkew, now) {
+        
+        try {
+            if (key.kty === "RSA") {
+                if (key.e && key.n) {
+                    key = KeyUtil.getKey(key);
+                }
+                else if (key.x5c && key.x5c.length) {
+                    key = KeyUtil.getKey(X509.getPublicKeyFromCertPEM(key.x5c[0]));
+                }
+                else {
+                    Log.error("RSA key missing key material", key);
+                    return Promise.reject(new Error("RSA key missing key material"));
+                }
+            }
+            else if (key.kty === "EC") {
+                if (key.crv && key.x && key.y) {
+                    key = KeyUtil.getKey(key);
+                }
+                else {
+                    Log.error("EC key missing key material", key);
+                    return Promise.reject(new Error("EC key missing key material"));
+                }
+            }
+            else {
+                Log.error("Unsupported key type", key && key.kty);
+                return Promise.reject(new Error("Unsupported key type: " + key && key.kty));
+            }
+
+            return _validateJwt(jwt, this._jwtParser, key, issuer, audience, clockSkew, now);
+        }
+        catch (e) {
+            Log.error(e && e.message || e);
+            return Promise.reject("JWT validation failed");
+        }
     }
 }
 
-export function validateJwt(jwt, key, issuer, audience, clockSkew, now) {
-    Log.info("validateJwt");
-
-    try {
-        if (key.kty === "RSA") {
-            if (key.e && key.n) {
-                key = KeyUtil.getKey(key);
-            }
-            else if (key.x5c && key.x5c.length) {
-                key = KeyUtil.getKey(X509.getPublicKeyFromCertPEM(key.x5c[0]));
-            }
-            else {
-                Log.error("RSA key missing key material", key);
-                return Promise.reject(new Error("RSA key missing key material"));
-            }
-        }
-        else if (key.kty === "EC") {
-            if (key.crv && key.x && key.y) {
-                key = KeyUtil.getKey(key);
-            }
-            else {
-                Log.error("EC key missing key material", key);
-                return Promise.reject(new Error("EC key missing key material"));
-            }
-        }
-        else {
-            Log.error("Unsupported key type", key && key.kty);
-            return Promise.reject(new Error("Unsupported key type: " + key && key.kty));
-        }
-
-        return _validateJwt(jwt, key, issuer, audience, clockSkew, now);
-    }
-    catch (e) {
-        Log.error(e && e.message || e);
-        return Promise.reject("JWT validation failed");
-    }
-}
-
-function _validateJwt(jwt, key, issuer, audience, clockSkew, now) {
+function _validateJwt(jwt, jwtParser, key, issuer, audience, clockSkew, now) {
     Log.info("_validateJwt");
 
     if (!clockSkew) {
@@ -72,7 +63,7 @@ function _validateJwt(jwt, key, issuer, audience, clockSkew, now) {
         now = parseInt(Date.now() / 1000);
     }
 
-    var payload = parseJwt(jwt).payload;
+    var payload = jwtParser.parseJwt(jwt).payload;
 
     if (payload.iss !== issuer) {
         Log.error("Invalid issuer in token", payload.iss);

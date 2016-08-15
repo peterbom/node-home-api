@@ -3,17 +3,11 @@ import "babel-polyfill";
 import supertest from "supertest";
 import router from "koa-simple-router";
 
-import {getUnitTestSettings} from "../lib/config";
-import {initialize, app} from "../lib/globals";
+import {getTestComponents} from "../lib/config";
+import {AppLauncher} from "../lib/app-launcher";
 import {errorHandler} from "../lib/middleware/error-handling-middleware";
 
-let settings = getUnitTestSettings();
-settings.middleware.errorHandler = false;
-settings.middleware.corsConfig = false;
-settings.middleware.bodyParser = false;
-settings.middleware.requireBearerToken = false;
-settings.middleware.unsecuredRoutes = false;
-settings.middleware.securedRoutes = false;
+
 
 let delay = function () {
     return new Promise(function (fulfill) {
@@ -48,15 +42,21 @@ describe("Router middleware", function () {
 
     it ("propagates synchronous route-handler errors", done => {
 
-        let syncThrowingRouter = router(_ => {
-            _.get("/error-throwing-resource", syncThrowingFunction);
-        });
+        let components = getTestComponents();
+        components.middleware.errorHandler = catchAllMiddleware;
+        components.middleware.corsConfig = null;
+        components.middleware.bodyParser = null;
+        components.middleware.requireBearerToken = null;
+        components.middleware.unsecuredRoutes = [
+            router(_ => {
+                _.get("/error-throwing-resource", syncThrowingFunction);
+            })
+        ];
+        components.middleware.securedRoutes = [];
 
-        initialize(settings);
-        app.use(catchAllMiddleware);
-        app.use(syncThrowingRouter);
+        AppLauncher.launch(components);
 
-        let request = supertest.agent(app.listen());
+        let request = supertest.agent(components.app.listen());
 
         request
             .get("/error-throwing-resource")
@@ -77,15 +77,21 @@ describe("Router middleware", function () {
 
     it ("propagates asynchronous route-handler errors", done => {
 
-        let asyncThrowingRouter = router(_ => {
-            _.get("/error-throwing-resource", asyncThrowingFunction);
-        });
+        let components = getTestComponents();
+        components.middleware.errorHandler = catchAllMiddleware;
+        components.middleware.corsConfig = null;
+        components.middleware.bodyParser = null;
+        components.middleware.requireBearerToken = null;
+        components.middleware.unsecuredRoutes = [
+            router(_ => {
+                _.get("/error-throwing-resource", asyncThrowingFunction);
+            })
+        ];
+        components.middleware.securedRoutes = [];
 
-        initialize(settings);
-        app.use(catchAllMiddleware);
-        app.use(asyncThrowingRouter);
+        AppLauncher.launch(components);
 
-        let request = supertest.agent(app.listen());
+        let request = supertest.agent(components.app.listen());
 
         request
             .get("/error-throwing-resource")
@@ -109,14 +115,23 @@ describe("Error handling middleware", function () {
 
     it ("catches synchronous errors", done => {
 
-        initialize(settings);
-        app.use(catchAllMiddleware);
-        app.use(errorHandler);
-        app.use(function (ctx, next) {
-            syncThrowingFunction();
-        });
+        let components = getTestComponents();
+        components.middleware.errorHandler = null;
+        components.middleware.corsConfig = null;
+        components.middleware.bodyParser = null;
+        components.middleware.requireBearerToken = null;
+        components.middleware.unsecuredRoutes = [
+            catchAllMiddleware,
+            errorHandler,
+            function (ctx, next) {
+                syncThrowingFunction();
+            }
+        ];
+        components.middleware.securedRoutes = [];
 
-        let request = supertest.agent(app.listen());
+        AppLauncher.launch(components);
+
+        let request = supertest.agent(components.app.listen());
 
         request
             .get("/")
@@ -137,14 +152,23 @@ describe("Error handling middleware", function () {
 
     it ("catches asynchronous errors", done => {
 
-        initialize(settings);
-        app.use(catchAllMiddleware);
-        app.use(errorHandler);
-        app.use(async function (ctx, next) {
-            await asyncThrowingFunction();
-        });
+        let components = getTestComponents();
+        components.middleware.errorHandler = null;
+        components.middleware.corsConfig = null;
+        components.middleware.bodyParser = null;
+        components.middleware.requireBearerToken = null;
+        components.middleware.unsecuredRoutes = [
+            catchAllMiddleware,
+            errorHandler,
+            async function (ctx, next) {
+                await asyncThrowingFunction();
+            }
+        ];
+        components.middleware.securedRoutes = [];
 
-        let request = supertest.agent(app.listen());
+        AppLauncher.launch(components);
+
+        let request = supertest.agent(components.app.listen());
 
         request
             .get("/")

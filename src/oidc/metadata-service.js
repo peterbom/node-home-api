@@ -1,19 +1,23 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-import {OidcClientSettings} from "./oidc-client-settings";
+// TODO: Logging
 import {Log} from "../shared/log";
+
 import moment from "moment";
 
 export class MetadataService {
-    constructor(settings, jsonServiceFactory) {
-        if (!settings) {
-            Log.error("No settings passed to MetadataService");
-            throw new Error("settings");
+    constructor(settings, jsonService) {
+        if (settings === undefined) {
+            throw new Error("settings not defined");
+        }
+
+        if (jsonService === undefined) {
+            throw new Error("jsonService not defined");
         }
 
         this._settings = settings;
-        this._jsonService = jsonServiceFactory();
+        this._jsonService = jsonService;
         this._metadata = null;
     }
 

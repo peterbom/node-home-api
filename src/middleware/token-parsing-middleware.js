@@ -21,11 +21,6 @@ export let bearerTokenParser = async function (ctx, next) {
             ctx.status = 400; // bad request
             return;
         }
-    } else {
-        // TODO: Logging
-        console.log("----- No token provided. Forbidden. -----");
-        ctx.status = 403; // forbidden (no token)
-        return;
     }
 
     await next();
