@@ -11,16 +11,22 @@ const detailSql = `
 select      cs.ConstructionStyleId as id
             , cs.FefcoEsboCode as fefcoEsboCode
             , cs.Name as name
-            , f.FormulaText as formulaText
+            , f_pl.FormulaText as pieceLengthFormulaText
+            , f_pw.FormulaText as pieceWidthFormulaText
+            , f_lsa.FormulaText as lengthwiseScoringAllowanceFormulaText
+            , f_wsa.FormulaText as widthwiseScoringAllowanceFormulaText
             , cs.UpdateVersion as updateVersion
 from        ConstructionStyles as cs
-inner join  Formulas as f on f.FormulaId = cs.PieceLengthFormulaId
+left join   Formulas as f_pl on f_pl.FormulaId = cs.PieceLengthFormulaId
+left join   Formulas as f_pw on f_pw.FormulaId = cs.PieceWidthFormulaId
+left join   Formulas as f_lsa on f_lsa.FormulaId = cs.LengthwiseScoringAllowanceFormulaId
+left join   Formulas as f_wsa on f_wsa.FormulaId = cs.WidthwiseScoringAllowanceFormulaId
 where       cs.ConstructionStyleId = ?
 `;
 
 const detailVariablesSql = `
 select      fv.VariableIndex as variableIndex
-            , fv.VariableIdentifier as variableName
+            , fv.VariableIdentifier as variableIdentifier
             , coalesce(fv.PropertyName, ep.PropertyName) as propertyName
             , ep.EntityCode as entityCode
 from        ConstructionStyles as cs
