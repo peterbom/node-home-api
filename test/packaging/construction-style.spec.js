@@ -20,15 +20,15 @@ let mockDataAccess = {
 };
 
 let components = getTestComponents();
+components.appSettings.suppressAuthorization = true;
 
 components.packagingConstructionStyleDataAccess = mockDataAccess;
 components.packagingConstructionStyleResource = new ConstructionStyleResource(
     components.packagingConstructionStyleDataAccess);
 
-components.middleware.authorizationChecker = null;
-components.middleware.unsecuredRoutes = [];
-components.middleware.securedRoutes = [
-    routingMiddleware.getPackagingConstructionStyleRouter(components.packagingConstructionStyleResource)
+components.middleware.unsecuredRouteGenerators = [];
+components.middleware.securedRouteGenerators = [
+    routingMiddleware.getPackagingConstructionStyleRouteGenerator(components.packagingConstructionStyleResource)
 ];
 
 AppLauncher.launch(components);

@@ -26,7 +26,7 @@ import {noop} from "./middleware/null-middleware";
 import {errorHandler} from "./middleware/error-handling-middleware";
 import {corsConfig} from "./middleware/cors-middleware";
 import {jsonBodyParser} from "./middleware/body-parsing-middleware";
-import {bearerTokenParser} from "./middleware/token-parsing-middleware";
+import {getBearerTokenParser} from "./middleware/token-parsing-middleware";
 import {authorizationChecker} from "./middleware/authorization-middleware";
 import * as routingMiddleware from "./middleware/routing-middleware";
 
@@ -73,19 +73,19 @@ export function getDefaultComponents (settings) {
         corsConfig: corsConfig,
 
         bodyParser: jsonBodyParser,
-        tokenParser: bearerTokenParser,
+        tokenParser: getBearerTokenParser(settings.jwtSecret),
 
-        unsecuredRoutes: [
-            routingMiddleware.getAuthenticationRouter(components.authenticationResource)
+        unsecuredRouteGenerators: [
+            routingMiddleware.getAuthenticationRouteGenerator(components.authenticationResource)
         ],
 
         authorizationChecker: authorizationChecker,
 
-        securedRoutes: [
-            routingMiddleware.getUserRouter(components.userResource),
-            routingMiddleware.getStagingPhotoRouter(components.stagingPhotoResource),
-            routingMiddleware.getPhotoMovementRouter(components.photoMovementResource),
-            routingMiddleware.getPackagingConstructionStyleRouter(components.packagingConstructionStyleResource)
+        securedRouteGenerators: [
+            routingMiddleware.getUserRouteGenerator(components.userResource),
+            routingMiddleware.getStagingPhotoRouteGenerator(components.stagingPhotoResource),
+            routingMiddleware.getPhotoMovementRouteGenerator(components.photoMovementResource),
+            routingMiddleware.getPackagingConstructionStyleRouteGenerator(components.packagingConstructionStyleResource)
         ]
     };
 

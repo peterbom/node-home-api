@@ -10,13 +10,25 @@ export class AppLauncher {
         app.use(components.middleware.bodyParser || noop);
         app.use(components.middleware.tokenParser || noop);
 
-        components.middleware.unsecuredRoutes.forEach(r => app.use(r));
+        for (let routeGenerator of components.middleware.unsecuredRouteGenerators) {
+            if (routeGenerator.securityResourceName) {
+                throw new Error("Router with security resource specified under unsecured routers")
+            }
+
+            app.use(routeGenerator.toMiddleware());
+        }
 
         if (!settings.suppressAuthorization) {
             app.use(components.middleware.authorizationChecker || noop);
         }
 
-        components.middleware.securedRoutes.forEach(r => app.use(r));
+        for (let routeGenerator of components.middleware.securedRouteGenerators) {
+            if (!routeGenerator.securityResourceName) {
+                throw new Error("Router without security resource specified under secured routers")
+            }
+
+            app.use(routeGenerator.toMiddleware(settings.suppressAuthorization));
+        }
 
         if (!settings.isUnitTest) {
             app.listen(settings.port);

@@ -15,11 +15,12 @@ import router from "koa-simple-router";
 
 
 let components = getTestComponents();
+components.appSettings.suppressAuthorization = true;
 
 components.middleware.authorizationChecker = null;
-components.middleware.unsecuredRoutes = [];
-components.middleware.securedRoutes = [
-    routingMiddleware.getUserRouter(components.userResource)
+components.middleware.unsecuredRouteGenerators = [];
+components.middleware.securedRouteGenerators = [
+    routingMiddleware.getUserRouteGenerator(components.userResource)
 ];
 
 AppLauncher.launch(components);

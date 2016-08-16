@@ -80,8 +80,8 @@ components.authenticationResource = new AuthenticationResource(
     components.permissionManager,
     components.jwtSigner);
 
-components.middleware.unsecuredRoutes = [
-    routingMiddleware.getAuthenticationRouter(components.authenticationResource)
+components.middleware.unsecuredRouteGenerators = [
+    routingMiddleware.getAuthenticationRouteGenerator(components.authenticationResource)
 ];
 
 AppLauncher.launch(components);

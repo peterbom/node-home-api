@@ -1,58 +1,53 @@
-import router from "koa-simple-router";
+import {RouteGenerator} from "../shared/route-generator";
 
-export function getAuthenticationRouter (authenticationResource) {
+export function getAuthenticationRouteGenerator (authenticationResource) {
     if (authenticationResource === undefined) {
         throw new Error("authenticationResource not defined");
     }
 
-    return router(_ => {
-        _.get("/authentication", ctx => authenticationResource.getProviders(ctx));
-        _.post("/authentication", ctx => authenticationResource.authenticate(ctx));
-    });
+    return RouteGenerator.create()
+        .get("/authentication", ctx => authenticationResource.getProviders(ctx))
+        .post("/authentication", ctx => authenticationResource.authenticate(ctx));
 }
 
-export function getUserRouter (userResource) {
+export function getUserRouteGenerator (userResource) {
     if (userResource === undefined) {
         throw new Error("userResource not defined");
     }
 
-    return router(_ => {
-        _.get("/user", ctx => userResource.list(ctx));
-        _.get('/user/:id', ctx => userResource.get(ctx));
-        _.post('/user', ctx => userResource.add(ctx));
-        _.put('/user/:id', ctx => userResource.update(ctx));
-        _.delete('/user/:id', ctx => userResource.remove(ctx));
-    });
+    return RouteGenerator.create("experiment")
+        .get("/user", ctx => userResource.list(ctx), "perform")
+        .get('/user/:id', ctx => userResource.get(ctx), "perform")
+        .post('/user', ctx => userResource.add(ctx), "perform")
+        .put('/user/:id', ctx => userResource.update(ctx), "perform")
+        .delete('/user/:id', ctx => userResource.remove(ctx), "perform");
 }
 
-export function getStagingPhotoRouter (stagingPhotoResource) {
+export function getStagingPhotoRouteGenerator (stagingPhotoResource) {
     if (stagingPhotoResource === undefined) {
         throw new Error("stagingPhotoResource not defined");
     }
 
-    return router(_ => {
-        _.get("/staging-photo", ctx => stagingPhotoResource.list(ctx));
-        _.get("/staging-photo/:id", ctx => stagingPhotoResource.get(ctx));
-    });
+    return RouteGenerator.create("home")
+        .get("/staging-photo", ctx => stagingPhotoResource.list(ctx), "manage")
+        .get("/staging-photo/:id", ctx => stagingPhotoResource.get(ctx), "manage");
 }
 
-export function getPhotoMovementRouter (photoMovementResource) {
+export function getPhotoMovementRouteGenerator (photoMovementResource) {
     if (photoMovementResource === undefined) {
         throw new Error("photoMovementResource not defined");
     }
 
-    return router(_ => {
-        _.put("/photo-movement/:id", ctx => photoMovementResource.move(ctx));
-    });
+    return RouteGenerator.create("home")
+        .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 
-export function getPackagingConstructionStyleRouter (constructionStyleResource) {
+export function getPackagingConstructionStyleRouteGenerator (constructionStyleResource) {
     if (constructionStyleResource === undefined) {
         throw new Error("constructionStyleResource not defined");
     }
 
-    return router(_ => {
-        _.get("/packaging/construction-style", ctx => constructionStyleResource.list(ctx));
-        _.get("/packaging/construction-style/:id", ctx => constructionStyleResource.get(ctx));
-    });
+    return RouteGenerator.create("packaging")
+        .get("/packaging/construction-style", ctx => constructionStyleResource.list(ctx), "maintain")
+        .get("/packaging/construction-style/:id", ctx => constructionStyleResource.get(ctx), "maintain");
 }
