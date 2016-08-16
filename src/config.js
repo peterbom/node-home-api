@@ -19,6 +19,7 @@ import {AuthenticationResource} from "./resources/authentication-resource";
 import {UserResource} from "./resources/user-resource";
 import {StagingPhotoResource} from "./resources/staging-photo-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
+import {WolResource} from "./resources/wol-resource";
 import {ConstructionStyleResource as PackagingConstructionStyleResource} from "./resources/packaging/construction-style-resource";
 
 // Middleware
@@ -65,6 +66,8 @@ export function getDefaultComponents (settings) {
     components.userResource = new UserResource(components.userDataAccess);
     components.stagingPhotoResource = new StagingPhotoResource();
     components.photoMovementResource = new PhotoMovementResource();
+    components.wolResource = new WolResource(settings.macAddressLookup);
+
     components.packagingConstructionStyleResource = new PackagingConstructionStyleResource(
         components.packagingConstructionStyleDataAccess);
 
@@ -85,6 +88,7 @@ export function getDefaultComponents (settings) {
             routingMiddleware.getUserRouteGenerator(components.userResource),
             routingMiddleware.getStagingPhotoRouteGenerator(components.stagingPhotoResource),
             routingMiddleware.getPhotoMovementRouteGenerator(components.photoMovementResource),
+            routingMiddleware.getWolRouteGenerator(components.wolResource),
             routingMiddleware.getPackagingConstructionStyleRouteGenerator(components.packagingConstructionStyleResource)
         ]
     };
@@ -101,6 +105,7 @@ export function getTestComponents() {
 
 export function getDefaultSettings () {
     return {
+        isUnitTest: false,
         port: process.env.PORT,
         packagingConnectionString: `Driver={SQL Server Native Client 11.0};Server=tcp:bombers.database.windows.net,1433;Database=Packaging;Uid=petebomber@bombers;Pwd=${process.env.PACKAGING_LOGIN_PASSWORD};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;`,
         authSettings: {
@@ -115,6 +120,8 @@ export function getDefaultSettings () {
         },
         jwtSecret: process.env.JWT_SECRET,
         suppressAuthorization: process.env.SUPPRESS_AUTHORIZATION === "1" && process.env.NODE_ENV === "development",
-        isUnitTest: false
+        macAddressLookup: {
+            dev: "bc:5f:f4:36:5c:a0"
+        }
     };
 }

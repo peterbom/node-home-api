@@ -67,6 +67,7 @@
     "odbc": "^1.2.1",
     "promisify-node": "^0.4.0",
     "request": "^2.74.0",
-    "request-promise": "^4.1.0"
+    "request-promise": "^4.1.0",
+    "wake_on_lan": "0.0.4"
   }
 }

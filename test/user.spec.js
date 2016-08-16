@@ -10,10 +10,6 @@ import {AppLauncher} from "../lib/app-launcher";
 import {Log} from "../lib/shared/log";
 
 
-// TODO: Remove
-import router from "koa-simple-router";
-
-
 let components = getTestComponents();
 components.appSettings.suppressAuthorization = true;
 

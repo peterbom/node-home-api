@@ -42,6 +42,15 @@ export function getPhotoMovementRouteGenerator (photoMovementResource) {
         .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 
+export function getWolRouteGenerator (wolResource) {
+    if (wolResource === undefined) {
+        throw new Error("wolResource not defined");
+    }
+
+    return RouteGenerator.create("home")
+        .put("/wol/:id", ctx => wolResource.send(ctx), "manage");
+}
+
 export function getPackagingConstructionStyleRouteGenerator (constructionStyleResource) {
     if (constructionStyleResource === undefined) {
         throw new Error("constructionStyleResource not defined");
