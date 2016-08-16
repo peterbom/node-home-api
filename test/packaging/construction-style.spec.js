@@ -1,6 +1,7 @@
 import "babel-polyfill";
 
 import supertest from "supertest";
+import timekeeper from "timekeeper";
 
 import {getTestComponents} from "../../lib/config";
 import {ConstructionStyleResource} from "../../lib/resources/packaging/construction-style-resource";
@@ -19,26 +20,31 @@ let mockDataAccess = {
     })
 };
 
-let components = getTestComponents();
-components.appSettings.suppressAuthorization = true;
+function getMockedComponents() {
+    let components = getTestComponents();
 
-components.packagingConstructionStyleDataAccess = mockDataAccess;
-components.packagingConstructionStyleResource = new ConstructionStyleResource(
-    components.packagingConstructionStyleDataAccess);
+    components.packagingConstructionStyleDataAccess = mockDataAccess;
+    components.packagingConstructionStyleResource = new ConstructionStyleResource(
+        components.packagingConstructionStyleDataAccess);
 
-components.middleware.unsecuredRouteGenerators = [];
-components.middleware.securedRouteGenerators = [
-    routingMiddleware.getPackagingConstructionStyleRouteGenerator(components.packagingConstructionStyleResource)
-];
+    components.middleware.unsecuredRouteGenerators = [];
+    components.middleware.securedRouteGenerators = [
+        routingMiddleware.getPackagingConstructionStyleRouteGenerator(components.packagingConstructionStyleResource)
+    ];
 
-AppLauncher.launch(components);
-
-let request = supertest.agent(components.app.listen());
+    return components;
+}
 
 
 describe("Construction style API", function () {
 
-    it ("lists all construction styles", done => {
+    it ("lists all construction styles without authorization", done => {
+
+        let components = getMockedComponents();
+        components.appSettings.suppressAuthorization = true;
+
+        AppLauncher.launch(components);
+        let request = supertest.agent(components.app.listen());
 
         request
             .get("/packaging/construction-style")
@@ -54,12 +60,52 @@ describe("Construction style API", function () {
             .expect(200, done);
     });
 
-    it ("retrieves a construction style", done => {
+    it ("retrieves a construction style without authorization", done => {
+
+        let components = getMockedComponents();
+        components.appSettings.suppressAuthorization = true;
+
+        AppLauncher.launch(components);
+        let request = supertest.agent(components.app.listen());
 
         request
             .get("/packaging/construction-style/1")
             .set("Accept", "application/json")
-            //.expect("Content-Type", /json/)
+            .expect("Content-Type", /json/)
+            .expect(200, done);
+    });
+
+    it ("lists all construction styles when user has packaging_maintain permission", done => {
+
+        let components = getMockedComponents();
+        components.appSettings.suppressAuthorization = false;
+
+        AppLauncher.launch(components);
+        let request = supertest.agent(components.app.listen());
+
+        let user = {
+            email: "test@email.com",
+            name: "Test User",
+            permissions: ["packaging_maintain"]
+        };
+
+        let time = new Date(2016, 1, 1);
+        timekeeper.freeze(time);
+
+        let token = components.jwtSigner.signJwt(user, 1);
+    
+        request
+            .get("/packaging/construction-style")
+            .set("Accept", "application/json")
+            .set("Authorization", `Bearer ${token}`)
+            .expect("Content-Type", /json/)
+            .expect(/Style1/)
+            .expect(/Style2/)
+            .expect(res => {
+                if (!res.length) {
+                    return "No results found";
+                }
+            })
             .expect(200, done);
     });
 });

@@ -219,6 +219,45 @@ describe("Authorization middleware", function () {
             })
             .expect(403, done);
     })
+
+    it ("allows access to the route when access token has the required permissions", done => {
+        let reachedSecureMiddleware = false;
+
+        let components = getTestComponents();
+        components.middleware.unsecuredRouteGenerators = [];
+        components.middleware.securedRouteGenerators = [
+            RouteGenerator.create("resource")
+                .get("/secure-resource", ctx => {
+                    reachedSecureMiddleware = true;
+                    ctx.body = {success: true};
+                }, "write")
+        ];
+
+        AppLauncher.launch(components);
+        let request = supertest.agent(components.app.listen());
+
+        let user = {
+            email: "test@email.com",
+            name: "Test User",
+            permissions: ["resource_write"]
+        };
+
+        let time = new Date(2016, 1, 1);
+        timekeeper.freeze(time);
+
+        let token = components.jwtSigner.signJwt(user, 1);
+    
+        request
+            .get("/secure-resource")
+            .set("Accept", "application/json")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(function () {
+                if (!reachedSecureMiddleware) {
+                    return "Failed to reach secure middleware";
+                }
+            })
+            .expect(200, done);
+    })
 });
 
 describe("Error handling middleware", function () {

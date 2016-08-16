@@ -47,6 +47,6 @@ export function getSecureRouteHandler(routeHandler, securityResourceName, securi
         }
 
         // Bearer of token has permission to perform the action on the resource.
-        routeHandler(ctx);
+        await routeHandler(ctx);
     }
 }
