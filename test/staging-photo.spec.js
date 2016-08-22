@@ -3,11 +3,11 @@ import "babel-polyfill";
 import supertest from "supertest";
 import timekeeper from "timekeeper";
 
-import {getTestComponents} from "../lib/config";
+import {getDefaultComponents} from "../lib/config";
 import {AppLauncher} from "../lib/app-launcher";
 import {Log} from "../lib/shared/log";
 
-let components = getTestComponents();
+let components = getDefaultComponents();
 
 AppLauncher.launch(components);
 

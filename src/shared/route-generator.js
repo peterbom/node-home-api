@@ -1,11 +1,51 @@
 import router from "koa-simple-router";
-import {getSecureRouteHandler} from "../middleware/authorization-middleware";
+
+function getSecureRouteHandler(permissionDataAccess, routeHandler, securityResourceName, securityActionName) {
+
+    if (!securityResourceName && !securityActionName) {
+        // No security checking needed.
+        return routeHandler;
+    }
+
+    if (!securityResourceName) {
+        throw new Error(`Resource is not secured but security action ${securityActionName} is specified`);
+    }
+
+    if (!securityActionName) {
+        throw new Error(`Resource is secured with ${securityResourceName} but no security action name is specified`);
+    }
+
+    return async function (ctx) {
+        let idToken = ctx.request.idToken;
+        if (!idToken) {
+            // This is an error because we shouldn't even reach this middleware without an access token.
+            throw new Error(`Resource is secured by ${securityActionName} on ${securityResourceName} but no access token is provided`);
+        }
+
+        if (!idToken.sub) {
+            throw new Error("no \"sub\" claim on access token");
+        }
+
+        let permissions = await permissionDataAccess.getPermissions(idToken.sub);
+
+        let requiredPermission = `${securityResourceName}_${securityActionName}`;
+
+        if (permissions.indexOf(requiredPermission) < 0) {
+            // Forbidden
+            ctx.status = 403;
+            return;
+        }
+
+        // Bearer of token has permission to perform the action on the resource.
+        await routeHandler(ctx);
+    }
+}
 
 export class RouteGenerator {
 
     securityResourceName;
 
-    constructor(securityResourceName) {
+    constructor(permissionDataAccess, securityResourceName) {
         this.securityResourceName = securityResourceName;
 
         this._routeDescriptors = [];
@@ -16,7 +56,7 @@ export class RouteGenerator {
                     method: method,
                     route: route,
                     bareHandler: handler,
-                    secureHandler: getSecureRouteHandler(handler, this.securityResourceName, securityActionName),
+                    secureHandler: getSecureRouteHandler(permissionDataAccess, handler, this.securityResourceName, securityActionName),
                     securityActionName: securityActionName
                 };
 
@@ -26,8 +66,8 @@ export class RouteGenerator {
         });
     }
 
-    static create(securityResourceName) {
-        return new RouteGenerator(securityResourceName);
+    static create(permissionDataAccess, securityResourceName) {
+        return new RouteGenerator(permissionDataAccess, securityResourceName);
     }
 
     toMiddleware(suppressAuthorization) {

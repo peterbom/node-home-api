@@ -1,62 +1,51 @@
 import {RouteGenerator} from "../shared/route-generator";
 
-export function getAuthenticationRouteGenerator (authenticationResource) {
-    if (authenticationResource === undefined) {
-        throw new Error("authenticationResource not defined");
+export function getPermissionRouteGenerator(permissionResource) {
+    if (permissionResource === undefined) {
+        throw new Error("permissionResource not defined");
     }
 
     return RouteGenerator.create()
-        .get("/authentication", ctx => authenticationResource.getProviders(ctx))
-        .post("/authentication", ctx => authenticationResource.authenticate(ctx));
+        .get("/permission", ctx => permissionResource.getPermissions(ctx));
 }
 
-export function getUserRouteGenerator (userResource) {
+export function getUserRouteGenerator (permissionDataAccess, userResource) {
     if (userResource === undefined) {
         throw new Error("userResource not defined");
     }
 
-    return RouteGenerator.create("experiment")
-        .get("/user", ctx => userResource.list(ctx), "perform")
-        .get('/user/:id', ctx => userResource.get(ctx), "perform")
-        .post('/user', ctx => userResource.add(ctx), "perform")
-        .put('/user/:id', ctx => userResource.update(ctx), "perform")
-        .delete('/user/:id', ctx => userResource.remove(ctx), "perform");
+    return RouteGenerator.create(permissionDataAccess, "site")
+        .get("/user", ctx => userResource.list(ctx), "maintain")
+        .get('/user/:id', ctx => userResource.get(ctx), "maintain")
+        .post('/user', ctx => userResource.add(ctx), "maintain")
+        .put('/user/:id', ctx => userResource.update(ctx), "maintain")
+        .delete('/user/:id', ctx => userResource.remove(ctx), "maintain");
 }
 
-export function getStagingPhotoRouteGenerator (stagingPhotoResource) {
+export function getStagingPhotoRouteGenerator (permissionDataAccess, stagingPhotoResource) {
     if (stagingPhotoResource === undefined) {
         throw new Error("stagingPhotoResource not defined");
     }
 
-    return RouteGenerator.create("home")
+    return RouteGenerator.create(permissionDataAccess, "home")
         .get("/staging-photo", ctx => stagingPhotoResource.list(ctx), "manage")
         .get("/staging-photo/:id", ctx => stagingPhotoResource.get(ctx), "manage");
 }
 
-export function getPhotoMovementRouteGenerator (photoMovementResource) {
+export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovementResource) {
     if (photoMovementResource === undefined) {
         throw new Error("photoMovementResource not defined");
     }
 
-    return RouteGenerator.create("home")
+    return RouteGenerator.create(permissionDataAccess, "home")
         .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 
-export function getWolRouteGenerator (wolResource) {
+export function getWolRouteGenerator (permissionDataAccess, wolResource) {
     if (wolResource === undefined) {
         throw new Error("wolResource not defined");
     }
 
-    return RouteGenerator.create("home")
+    return RouteGenerator.create(permissionDataAccess, "home")
         .put("/wol/:id", ctx => wolResource.send(ctx), "manage");
-}
-
-export function getPackagingConstructionStyleRouteGenerator (constructionStyleResource) {
-    if (constructionStyleResource === undefined) {
-        throw new Error("constructionStyleResource not defined");
-    }
-
-    return RouteGenerator.create("packaging")
-        .get("/packaging/construction-style", ctx => constructionStyleResource.list(ctx), "maintain")
-        .get("/packaging/construction-style/:id", ctx => constructionStyleResource.get(ctx), "maintain");
 }

@@ -1,44 +1,32 @@
 import "babel-polyfill";
 
 import supertest from "supertest";
-import timekeeper from "timekeeper";
 
-import {getTestComponents} from "../lib/config";
-import {UserResource} from "../lib/resources/user-resource";
+import {getDefaultComponents} from "../lib/config";
 import * as routingMiddleware from "../lib/middleware/routing-middleware";
 import {AppLauncher} from "../lib/app-launcher";
-import {Log} from "../lib/shared/log";
 
 
-let components = getTestComponents();
+let components = getDefaultComponents();
 components.appSettings.suppressAuthorization = true;
 
 components.middleware.authorizationChecker = null;
 components.middleware.unsecuredRouteGenerators = [];
 components.middleware.securedRouteGenerators = [
-    routingMiddleware.getUserRouteGenerator(components.userResource)
+    routingMiddleware.getUserRouteGenerator(null, components.userResource)
 ];
 
 AppLauncher.launch(components);
 
 let request = supertest.agent(components.app.listen());
 
-describe("Simple user API", function () {
-    let test_user = { name: "Pete", city: "Welly" };
+describe("User API", function () {
 
-    let beforeEach = done => {
-        components.userDataAccess.clearUsers();
-        done();
-    }
+    it ("lists all users", async function (done) {
+        await components.userDataAccess.clearUsers();
 
-    let afterEach = done => {
-        components.userDataAccess.clearUsers();
-        done();
-    }
-
-    it ("lists all users", done => {
-        components.userDataAccess.addUser(test_user);
-        components.userDataAccess.addUser(test_user);
+        await components.userDataAccess.upsertUser({ sub: "a", name: "Pete", city: "Welly" });
+        await components.userDataAccess.upsertUser({ sub: "b", name: "Bill", city: "Welly" });
 
         request
             .get("/user")
@@ -49,11 +37,12 @@ describe("Simple user API", function () {
             .expect(200, done);
     });
 
-    it ("retrieves a user", done => {
-        let insertedUser = components.userDataAccess.addUser(test_user);
+    it ("retrieves a user", async function (done) {
+        await components.userDataAccess.clearUsers();
+        let insertedUser = await components.userDataAccess.upsertUser({ sub: "a", name: "Pete", city: "Welly" });
 
         request
-            .get(`/user/${insertedUser._id}`)
+            .get(`/user/${insertedUser.sub}`)
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
             .expect(/Pete/)
@@ -61,17 +50,19 @@ describe("Simple user API", function () {
             .expect(200, done);
     });
 
-    it ("creates a new user", done => {
+    it ("creates a new user", async function (done) {
+        await components.userDataAccess.clearUsers();
         request
             .post("/user")
-            .send(test_user)
-            .expect("location", /^\/user\/\d+$/) // /^\/user\/[0-9a-fA-F]{24}$/
+            .send({ sub: "a", name: "Pete", city: "Welly" })
+            .expect("location", /^\/user\/a/)
             .expect(201, done);
     });
 
-    it ("updates an existing user", done => {
-        let userToUpdate = components.userDataAccess.addUser(test_user);
-        let url = `/user/${userToUpdate._id}`;
+    it ("updates an existing user", async function (done) {
+        await components.userDataAccess.clearUsers();
+        let userToUpdate = await components.userDataAccess.upsertUser({ sub: "a", name: "Pete", city: "Welly" });
+        let url = `/user/${userToUpdate.sub}`;
         request
             .put(url)
             .send({ name: "Pete2", city: "Wellington" })
@@ -81,9 +72,10 @@ describe("Simple user API", function () {
             .expect(200, done);
     });
 
-    it ("deletes an existing user", done => {
-        let userToDelete = components.userDataAccess.addUser(test_user);
-        let url = `/user/${userToDelete._id}`;
+    it ("deletes an existing user", async function (done) {
+        await components.userDataAccess.clearUsers();
+        let userToDelete = await components.userDataAccess.upsertUser({ sub: "a", name: "Pete", city: "Welly" });
+        let url = `/user/${userToDelete.sub}`;
         request
             .delete(url)
             .expect(200, done);

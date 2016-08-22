@@ -8,20 +8,19 @@ export class UserResource {
         this._userDataAccess = userDataAccess;
     }
 
-    list(ctx) {
-        ctx.body = this._userDataAccess.listUsers();
+    async list(ctx) {
+        ctx.body = await this._userDataAccess.listUsers();
     }
 
     async add(ctx) {
-        // TODO: validation
-        let insertedUser = this._userDataAccess.addUser(ctx.request.body);
+        let insertedUser = await this._userDataAccess.upsertUser(ctx.request.body);
 
-        ctx.set("location", `/user/${insertedUser._id}`);
+        ctx.set("location", `/user/${insertedUser.sub}`);
         ctx.status = 201;
     }
 
     async get(ctx) {
-        let user = this._userDataAccess.findUser(ctx.params.id);
+        let user = await this._userDataAccess.findUser(ctx.params.id);
         if (!user) {
             ctx.status = 404;
             return;
@@ -31,30 +30,29 @@ export class UserResource {
     }
 
     async update(ctx) {
-        let user = this._userDataAccess.findUser(ctx.params.id);
+        let user = await this._userDataAccess.findUser(ctx.params.id);
         if (!user) {
             ctx.status = 404;
             return;
         }
 
-        // TODO: validation
-        let updatedUser = this._userDataAccess.updateUser(user._id, ctx.request.body);
+        let updatedUser = await this._userDataAccess.updateUser(user.sub, ctx.request.body);
 
         ctx.body = updatedUser;
-        ctx.set("location", `/user/${updatedUser._id}`);
+        ctx.set("location", `/user/${updatedUser.sub}`);
 
         // http://blog.ploeh.dk/2013/04/30/rest-lesson-learned-avoid-204-responses/
         ctx.status = 200;
     }
 
     async remove(ctx) {
-        let user = this._userDataAccess.findUser(ctx.params.id);
+        let user = await this._userDataAccess.findUser(ctx.params.id);
         if (!user) {
             ctx.status = 404;
             return;
         }
 
-        this._userDataAccess.deleteUser(user._id);
+        await this._userDataAccess.deleteUser(user._id);
         ctx.status = 200;
     }
 }

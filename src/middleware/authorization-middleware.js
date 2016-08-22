@@ -1,5 +1,5 @@
 export let authorizationChecker = async function (ctx, next) {
-    if (!ctx.request.accessToken) {
+    if (!ctx.request.idToken) {
         // TODO: Logging
         console.log("----- No token provided. Unauthorized. -----");
 
@@ -10,43 +10,4 @@ export let authorizationChecker = async function (ctx, next) {
     }
 
     await next();
-}
-
-export function getSecureRouteHandler(routeHandler, securityResourceName, securityActionName) {
-
-    if (!securityResourceName && !securityActionName) {
-        // No security checking needed.
-        return routeHandler;
-    }
-
-    if (!securityResourceName) {
-        throw new Error(`Resource is not secured but no security action ${securityActionName} is specified`);
-    }
-
-    if (!securityActionName) {
-        throw new Error(`Resource is secured with ${securityResourceName} but no security action name is specified`);
-    }
-
-    return async function (ctx) {
-        let accessToken = ctx.request.accessToken;
-        if (!accessToken) {
-            // This is an error because we shouldn't even reach this middleware without an access token.
-            throw new Error(`Resource is secured by ${securityActionName} on ${securityResourceName} but no access token is provided`);
-        }
-
-        if (!accessToken.permissions) {
-            throw new Error("no permissions collection found on access token");
-        }
-
-        let requiredPermission = `${securityResourceName}_${securityActionName}`;
-
-        if (accessToken.permissions.indexOf(requiredPermission) < 0) {
-            // Forbidden
-            ctx.status = 403;
-            return;
-        }
-
-        // Bearer of token has permission to perform the action on the resource.
-        await routeHandler(ctx);
-    }
 }

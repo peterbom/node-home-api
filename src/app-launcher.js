@@ -9,6 +9,7 @@ export class AppLauncher {
         app.use(components.middleware.corsConfig || noop);
         app.use(components.middleware.bodyParser || noop);
         app.use(components.middleware.tokenParser || noop);
+        app.use(components.middleware.userUpdater || noop);
 
         for (let routeGenerator of components.middleware.unsecuredRouteGenerators) {
             if (routeGenerator.securityResourceName) {

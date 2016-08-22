@@ -1,52 +1,37 @@
 
 export class UserDataAccess {
-    constructor () {
-        this._users = [];
-        this._newUserId = 1;
+    // dbManager: https://automattic.github.io/monk/docs/manager/index.html
+    constructor (dbManager) {
+        this._users = dbManager.get("users");
     }
 
-    findUser(idVal) {
-        let id = Number.parseInt(idVal);
-        if (id === NaN) {
-            return null;
+    async findUser(sub) {
+        return await this._users.findOne({sub: sub});
+    }
+
+    async upsertUser(userData) {
+        if (!userData.sub) {
+            throw new Error("sub is not set");
         }
 
-        return this._users.find(u => u._id === id);
+        return await this._users.findOneAndUpdate({sub: userData.sub}, userData, {upsert: true});
     }
 
-    addUser(userData) {
-        let userObject = Object.assign({_id: this._newUserId++}, userData);
-        this._users.push(userObject);
-
-        return userObject;
+    async updateUser(sub, newUserData) {
+        // Ensure the new user data has a sub property
+        Object.assign(newUserData, {sub: sub});
+        return await this._users.findOneAndUpdate({sub: sub}, newUserData);
     }
 
-    updateUser(id, newUserData) {
-        let index = this._users.findIndex(u => u._id === id);
-        if (index === -1) {
-            throw new RangeError(`this._users collection does not contain an item with id ${id}`);
-        }
-
-        let newUser = Object.assign({_id: id}, newUserData);
-        this._users.splice(index, 1, newUser);
-
-        return newUser;
+    async deleteUser(sub) {
+        await this._users.findOneAndDelete({sub: sub});
     }
 
-    deleteUser(id) {
-        let index = this._users.findIndex(u => u._id === id);
-        if (index === -1) {
-            throw new RangeError(`this._users collection does not contain an item with id ${id}`);
-        }
-
-        this._users.splice(index, 1);
+    async clearUsers() {
+        await this._users.remove();
     }
 
-    clearUsers() {
-        this._users = [];
-    }
-
-    listUsers() {
-        return this._users;
+    async listUsers() {
+        return await this._users.find();
     }
 }

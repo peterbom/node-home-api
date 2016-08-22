@@ -9,4 +9,9 @@ export class MockJsonService {
         Log.info("Looking up JSON from " + url);
         return this.jsonResponseLookup[url];
     }
+
+    postJson(url, obj, token) {
+        Log.info("Posting JSON to " + url);
+        return this.jsonResponseLookup[url];
+    }
 }
