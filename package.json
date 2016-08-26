@@ -65,7 +65,6 @@
     "koa-simple-router": "^0.2.0",
     "moment": "^2.14.1",
     "monk": "^3.1.1",
-    "odbc": "^1.2.1",
     "promisify-node": "^0.4.0",
     "request": "^2.74.0",
     "request-promise": "^4.1.0",
