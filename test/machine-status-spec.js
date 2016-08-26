@@ -12,17 +12,18 @@ components.appSettings.suppressAuthorization = true;
 
 components.middleware.unsecuredRouteGenerators = [];
 components.middleware.securedRouteGenerators = [
-    routingMiddleware.getWolRouteGenerator(null, components.wolResource)
+    routingMiddleware.getMachineStatusRouteGenerator(null, components.machineStatusResource)
 ];
 
 AppLauncher.launch(components);
 
 let request = supertest.agent(components.app.listen());
 
-describe("WOL API", function () {
+describe("Machine status API", function () {
     it ("sends a WOL packet without error", done => {
         request
-            .put("/wol/dev")
+            .put("/machine-status/dev")
+            .send({ status: "online" })
             .expect(200, done);
     });
 })

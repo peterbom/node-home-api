@@ -41,11 +41,12 @@ export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovem
         .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 
-export function getWolRouteGenerator (permissionDataAccess, wolResource) {
-    if (wolResource === undefined) {
-        throw new Error("wolResource not defined");
+export function getMachineStatusRouteGenerator (permissionDataAccess, machineStatusResource) {
+    if (machineStatusResource === undefined) {
+        throw new Error("machineStatusResource not defined");
     }
 
     return RouteGenerator.create(permissionDataAccess, "home")
-        .put("/wol/:id", ctx => wolResource.send(ctx), "manage");
+        .get("/machine-status/:id", ctx => machineStatusResource.query(ctx), "manage")
+        .put("/machine-status/:id", ctx => machineStatusResource.request(ctx), "manage");
 }

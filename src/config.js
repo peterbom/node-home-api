@@ -14,7 +14,7 @@ import {PermissionResource} from "./resources/permission-resource";
 import {UserResource} from "./resources/user-resource";
 import {StagingPhotoResource} from "./resources/staging-photo-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
-import {WolResource} from "./resources/wol-resource";
+import {MachineStatusResource} from "./resources/machine-status-resource";
 
 // Middleware
 import {noop} from "./middleware/null-middleware";
@@ -34,8 +34,11 @@ function getDefaultSettings () {
         authProviderSecret: process.env.AUTH_PROVIDER_SECRET,
         connectionString: process.env.NODE_ENV === "test" ? "localhost:27017/unitTest" : process.env.CONNECTION_STRING,
         suppressAuthorization: process.env.SUPPRESS_AUTHORIZATION === "1" && process.env.NODE_ENV === "development",
-        macAddressLookup: {
-            dev: "bc:5f:f4:36:5c:a0"
+        machineLookup: {
+            dev: {
+                ipAddress: "192.168.1.200",
+                macAddress: "bc:5f:f4:36:5c:a0"
+            }
         }
     };
 }
@@ -61,7 +64,7 @@ export function getDefaultComponents () {
     components.userResource = new UserResource(components.userDataAccess);
     components.stagingPhotoResource = new StagingPhotoResource();
     components.photoMovementResource = new PhotoMovementResource();
-    components.wolResource = new WolResource(settings.macAddressLookup);
+    components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
     components.middleware = {
         errorHandler: errorHandler,
@@ -84,7 +87,7 @@ export function getDefaultComponents () {
             routingMiddleware.getUserRouteGenerator(components.permissionDataAccess, components.userResource),
             routingMiddleware.getStagingPhotoRouteGenerator(components.permissionDataAccess, components.stagingPhotoResource),
             routingMiddleware.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
-            routingMiddleware.getWolRouteGenerator(components.permissionDataAccess, components.wolResource)
+            routingMiddleware.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
         ]
     };
 
