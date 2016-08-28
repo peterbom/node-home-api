@@ -70,6 +70,7 @@
     "promisify-node": "^0.4.0",
     "request": "^2.74.0",
     "request-promise": "^4.1.0",
+    "username": "^2.2.2",
     "wake_on_lan": "0.0.4",
     "walk": "^2.3.9"
   }

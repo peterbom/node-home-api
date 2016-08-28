@@ -2,6 +2,8 @@ import walk from "walk";
 
 export class FileFinder {
     async find(basePath, fileMatchRegex, skipDirectoryRegexes) {
+        let username = await require("username")();
+        console.log(username);
         return await new Promise(function (fulfill, reject) {
             var files = [];
             var options = {
