@@ -11,8 +11,12 @@
 */
 
 export class StagingPhotoResource {
+    constructor (stagingPhotoDataAccess) {
+        this._stagingPhotoDataAccess = stagingPhotoDataAccess;
+    }
+
     async list(ctx) {
-        ctx.body = [];
+        ctx.body = await this._stagingPhotoDataAccess.getAllFiles();
     }
 
     async get(ctx) {

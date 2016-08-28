@@ -13,6 +13,7 @@
     "watch:test": "watch \"npm run test\" ./test",
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
     "start": "zoo node lib/app.js",
+    "build-start": "npm run build && npm start",
     "debug": "concurrently \"zoo nodemon --debug lib/app.js\" \"node-inspector\"",
     "update-release": "git pull && npm prune --production && npm install --production"
   },
@@ -69,6 +70,7 @@
     "promisify-node": "^0.4.0",
     "request": "^2.74.0",
     "request-promise": "^4.1.0",
-    "wake_on_lan": "0.0.4"
+    "wake_on_lan": "0.0.4",
+    "walk": "^2.3.9"
   }
 }

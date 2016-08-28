@@ -6,8 +6,10 @@ import {JsonService} from "./shared/json-service";
 import {JwtUtils} from "./shared/jwt-utils";
 
 // Data access
+import {FileFinder} from "./data-access/file-finder";
 import {UserDataAccess} from "./data-access/user-data-access";
 import {PermissionDataAccess} from "./data-access/permission-data-access";
+import {StagingPhotoDataAccess} from "./data-access/staging-photo-data-access";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
@@ -54,15 +56,17 @@ export function getDefaultComponents () {
 
     components.dbManager = new DbManager(settings.connectionString);
 
+    components.fileFinder = new FileFinder();
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
+    components.stagingPhotoDataAccess = new StagingPhotoDataAccess(components.fileFinder);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
 
     components.permissionResource = new PermissionResource(components.permissionDataAccess);
     components.userResource = new UserResource(components.userDataAccess);
-    components.stagingPhotoResource = new StagingPhotoResource();
+    components.stagingPhotoResource = new StagingPhotoResource(components.stagingPhotoDataAccess);
     components.photoMovementResource = new PhotoMovementResource();
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
