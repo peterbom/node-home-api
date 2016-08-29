@@ -20,6 +20,18 @@ export class StagingPhotoResource {
     }
 
     async get(ctx) {
-        ctx.body = {};
+        let inode = Number.parseInt(ctx.params.id);
+        if (Number.isNaN(inode)) {
+            ctx.status = 400;
+            return;
+        }
+
+        let hasImage = await this._stagingPhotoDataAccess.isKnownImageFile(inode);
+        if (!hasImage) {
+            ctx.status = 404;
+            return;
+        }
+
+        ctx.body = await this._stagingPhotoDataAccess.getImageInfo(inode);
     }
 }

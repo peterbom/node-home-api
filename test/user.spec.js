@@ -3,7 +3,7 @@ import "babel-polyfill";
 import supertest from "supertest";
 
 import {getDefaultComponents} from "../lib/config";
-import * as routingMiddleware from "../lib/middleware/routing-middleware";
+import * as routing from "../lib/app-routing";
 import {AppLauncher} from "../lib/app-launcher";
 
 
@@ -13,7 +13,7 @@ components.appSettings.suppressAuthorization = true;
 components.middleware.authorizationChecker = null;
 components.middleware.unsecuredRouteGenerators = [];
 components.middleware.securedRouteGenerators = [
-    routingMiddleware.getUserRouteGenerator(null, components.userResource)
+    routing.getUserRouteGenerator(null, components.userResource)
 ];
 
 AppLauncher.launch(components);

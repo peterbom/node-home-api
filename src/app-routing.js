@@ -1,4 +1,4 @@
-import {RouteGenerator} from "../shared/route-generator";
+import {RouteGenerator} from "./shared/route-generator";
 
 export function getPermissionRouteGenerator(permissionResource) {
     if (permissionResource === undefined) {
@@ -20,6 +20,15 @@ export function getUserRouteGenerator (permissionDataAccess, userResource) {
         .post('/user', ctx => userResource.add(ctx), "maintain")
         .put('/user/:id', ctx => userResource.update(ctx), "maintain")
         .delete('/user/:id', ctx => userResource.remove(ctx), "maintain");
+}
+
+export function getPhotoDirectoryRouteGenerator (permissionDataAccess, photoDirectoryResource) {
+    if (photoDirectoryResource === undefined) {
+        throw new Error("photoDirectoryResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/photo-directory", ctx => photoDirectoryResource.list(ctx), "manage");
 }
 
 export function getStagingPhotoRouteGenerator (permissionDataAccess, stagingPhotoResource) {

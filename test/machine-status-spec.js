@@ -3,7 +3,7 @@ import "babel-polyfill";
 import supertest from "supertest";
 
 import {getDefaultComponents} from "../lib/config";
-import * as routingMiddleware from "../lib/middleware/routing-middleware";
+import * as routing from "../lib/app-routing";
 import {AppLauncher} from "../lib/app-launcher";
 
 
@@ -12,7 +12,7 @@ components.appSettings.suppressAuthorization = true;
 
 components.middleware.unsecuredRouteGenerators = [];
 components.middleware.securedRouteGenerators = [
-    routingMiddleware.getMachineStatusRouteGenerator(null, components.machineStatusResource)
+    routing.getMachineStatusRouteGenerator(null, components.machineStatusResource)
 ];
 
 AppLauncher.launch(components);
@@ -26,4 +26,4 @@ describe("Machine status API", function () {
             .send({ status: "online" })
             .expect(200, done);
     });
-})
+});
