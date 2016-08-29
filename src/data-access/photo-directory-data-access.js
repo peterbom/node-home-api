@@ -6,7 +6,7 @@ export class PhotoDirectoryDataAccess {
     }
 
     async getAll () {
-        return await this._fileFinder.findDirectories(this._photoBaseDirectories, [/.*\/@.*/, /.*\.db/]);
+        return await this._fileFinder.findDirectories(this._photoBaseDirectories, [/(?!.*\/)?@.*$/, /.*\.db/]);
     }
 
     async getNew (directory) {

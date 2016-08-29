@@ -12,7 +12,7 @@ export class StagingPhotoDataAccess {
         let files = await this._fileFinder.findFiles(
             this._stagingPhotoPath,
             /^(?!.*\.db$)/,
-            [/.*\/@.*/, /.*\.db/]);
+            [/(?!.*\/)?@.*/, /.*\.db/]);
 
         let directories = [];
         let directoryLookup = {};
