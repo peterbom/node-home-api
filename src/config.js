@@ -41,7 +41,8 @@ function getDefaultSettings () {
                 ipAddress: "192.168.1.200",
                 macAddress: "bc:5f:f4:36:5c:a0"
             }
-        }
+        },
+        stagingPhotoPath: process.env.STAGING_PHOTO_PATH
     };
 }
 
@@ -59,7 +60,7 @@ export function getDefaultComponents () {
     components.fileFinder = new FileFinder();
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
-    components.stagingPhotoDataAccess = new StagingPhotoDataAccess(components.fileFinder);
+    components.stagingPhotoDataAccess = new StagingPhotoDataAccess(components.fileFinder, settings.stagingPhotoPath);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);

@@ -1,15 +1,34 @@
 
-const SELECTION_PATH = "/mnt/photo_staging/ready_to_move";
-
 export class StagingPhotoDataAccess {
-	constructor (fileFinder) {
-		this._fileFinder = fileFinder;
-	}
+    constructor (fileFinder, stagingPhotoPath) {
+        this._fileFinder = fileFinder;
+        this._stagingPhotoPath = stagingPhotoPath;
+    }
 
-	async getAllFiles () {
-		return await this._fileFinder.find(
-			SELECTION_PATH,
-			/^(?!.*\.db$)/,
-			[/.*\/@.*/, /.*\.db/]);
-	}
+    async getAllFiles () {
+        let files = await this._fileFinder.find(
+            this._stagingPhotoPath,
+            /^(?!.*\.db$)/,
+            [/.*\/@.*/, /.*\.db/]);
+
+        let directories = [];
+        let directoryLookup = {};
+        files.forEach(file => {
+            let directory = directoryLookup[file.path];
+
+            if (!directory) {
+                directory = {
+                    path: file.path,
+                    files: []
+                };
+
+                directories.push(directory);
+                directoryLookup[file.path] = directory;
+            }
+
+            directory.files.push(file.filename);
+        });
+
+        return directories;
+    }
 }
