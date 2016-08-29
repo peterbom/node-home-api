@@ -26,7 +26,10 @@ export class StagingPhotoDataAccess {
                 directoryLookup[file.path] = directory;
             }
 
-            directory.files.push(file.filename);
+            directory.files.push({
+                filename: file.filename,
+                ino: file.ino
+            });
         });
 
         return directories;

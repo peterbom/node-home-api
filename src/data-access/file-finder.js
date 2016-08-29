@@ -14,7 +14,8 @@ export class FileFinder {
                 if (fileMatchRegex.test(stat.name)) {
                     files.push({
                         path: root,
-                        filename: stat.name
+                        filename: stat.name,
+                        ino: stat.ino
                     });
                 }
 
