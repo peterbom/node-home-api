@@ -52,6 +52,9 @@ async function findDirectories (baseDirectory, skipDirectoryRegexes) {
         
         var walker = walk.walk(baseDirectory, options);
         walker.on("directories", function(root, dirStatsArray, next) {
+            dirStatsArray = dirStatsArray.filter(
+                stat => !skipDirectoryRegexes.some(regex => regex.test(stat.name)));
+
             let localPaths = dirStatsArray.map(stat => path.join(root, stat.name));
             directoryPaths = directoryPaths.concat(localPaths);
 
