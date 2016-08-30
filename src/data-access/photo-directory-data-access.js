@@ -14,29 +14,31 @@ export class PhotoDirectoryDataAccess {
             [/(?!.*\/)?@.*/, /.*\.db/],
             /^(?!.*\.db$)/);
 
-        let directories = [];
-        let directoryLookup = {};
+        let directoryFilesLookup = {};
         files.forEach(file => {
-            let directory = directoryLookup[file.path];
+            let files = directoryFilesLookup[file.path];
 
-            if (!directory) {
-                directory = {
-                    path: file.path,
-                    files: [],
-                    hasUnknownFiles: null
-                };
-
-                directories.push(directory);
-                directoryLookup[file.path] = directory;
+            if (!files) {
+                files = [];
+                directoryFilesLookup[file.path] = files;
             }
 
-            directory.files.push(file.filename);
+            files.push(file.filename);
         });
 
+        let directories = [];
         let unknownCheckPromises = [];
-        for (let directory of directories) {
+        for (let path in directoryFilesLookup) {
+            let directory = {
+                path: path,
+                hasUnknownFiles: null
+            };
+
+            directories.push(directory);
+
+            let files = directoryFilesLookup[path];
             let unknownCheck = async () => {
-                directory.hasUnknownFiles = await this._imageDataAccess.hasUnknownFiles(directory.path, directory.files);
+                directory.hasUnknownFiles = await this._imageDataAccess.hasUnknownFiles(path, files);
             };
 
             unknownCheckPromises.push(unknownCheck());
