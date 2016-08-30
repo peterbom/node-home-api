@@ -1,7 +1,11 @@
+import path from "path";
+import md5 from "md5";
 
 export class ImageDataAccess {
     constructor(dbManager) {
         this._imageInfos = dbManager.get("imageInfos");
+        this._imageInfos.ensureIndex({"path":1,"filename":1});
+        this._imageInfos.ensureIndex({"hash":1});
     }
 
     async hasUnknownFiles(path, filenames) {
@@ -15,6 +19,29 @@ export class ImageDataAccess {
         return filenames.some(f => knownFilenames.indexOf(f) < 0);
     }
 
+    async upsertImage(directory, filename, imageProperties) {
+        let image = {
+            path: directory.toLowerCase(),
+            filename: filename.toLowerCase(),
+            hash: getImageHash(imageProperties),
+            properties: imageProperties
+        };
+
+        image = await this._imageInfos.findOneAndUpdate(
+            {path: image.path, filename: image.filename},
+            {$set: image},
+            {upsert: true});
+
+        if (!image.pathHistory) {
+            image.pathHistory = [{
+                date: new Date(),
+                filePath: path.join(image.path, image.filename)
+            }];
+
+            image = await this._imageInfos.update({_id: image._id}, image);
+        }
+    }
+/*
     async hasImage(inode) {
         let result = await this._imageInfos.findOne({inode: inode}, {_id: 1});
         return !!result;
@@ -45,4 +72,15 @@ export class ImageDataAccess {
 
         return await this._imageInfos.findOneAndUpdate({inode: inode}, {$set: updates}, {upsert: true});
     }
+*/
+}
+
+function getImageHash(imageProperties) {
+    let identifiers = {
+        type: imageProperties.fileType,
+        date: imageProperties.takenDateTime || imageProperties.fileModifyDate,
+        pixels: imageProperties.pixelCount
+    };
+
+    return md5(JSON.stringify(identifiers));
 }

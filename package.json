@@ -65,6 +65,7 @@
     "koa-convert": "^1.2.0",
     "koa-cors": "0.0.16",
     "koa-simple-router": "^0.2.0",
+    "md5": "^2.1.0",
     "moment": "^2.14.1",
     "monk": "^3.1.1",
     "ping": "^0.2.0",

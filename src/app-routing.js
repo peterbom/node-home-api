@@ -28,7 +28,8 @@ export function getPhotoDirectoryRouteGenerator (permissionDataAccess, photoDire
     }
 
     return RouteGenerator.create(permissionDataAccess, "home")
-        .get("/photo-directory", ctx => photoDirectoryResource.list(ctx), "manage");
+        .get("/photo-directory", ctx => photoDirectoryResource.list(ctx), "manage")
+        .put("/photo-directory/:id", ctx => photoDirectoryResource.update(ctx), "manage");
 }
 
 export function getStagingPhotoRouteGenerator (permissionDataAccess, stagingPhotoResource) {

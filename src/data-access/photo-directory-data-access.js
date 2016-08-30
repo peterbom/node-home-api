@@ -1,6 +1,8 @@
+import path from "path";
 
 export class PhotoDirectoryDataAccess {
-    constructor (imageDataAccess, fileFinder, photoBaseDirectories) {
+    constructor (exifTool, imageDataAccess, fileFinder, photoBaseDirectories) {
+        this._exifTool = exifTool;
         this._imageDataAccess = imageDataAccess;
         this._fileFinder = fileFinder;
         this._photoBaseDirectories = photoBaseDirectories;
@@ -45,7 +47,15 @@ export class PhotoDirectoryDataAccess {
         return directories;
     }
 
-    async getNew (directory) {
-        
+    async reindex (directory) {
+        let files = await this._fileFinder.getFiles(directory, /^(?!.*\.db$)/);
+
+        let reindexFile = async filename => {
+            let filePath = path.join(directory, filename);
+            let properties = await this._exifTool.getProperties(filePath);
+            await this._imageDataAccess.upsertImage(directory, filename, properties);
+        };
+
+        await Promise.all(files.map(reindexFile));
     }
 }
