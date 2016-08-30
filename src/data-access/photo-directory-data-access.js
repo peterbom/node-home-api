@@ -50,12 +50,25 @@ export class PhotoDirectoryDataAccess {
     async reindex (directory) {
         let files = await this._fileFinder.getFiles(directory, /^(?!.*\.db$)/);
 
-        let reindexFile = async filename => {
-            let filePath = path.join(directory, filename);
-            let properties = await this._exifTool.getProperties(filePath);
-            await this._imageDataAccess.upsertImage(directory, filename, properties);
+        // split the files into batches
+        const batchSize = 100;
+        let batches = [];
+        while (files.length) {
+            batches.push(files.splice(0, batchSize));
+        }
+
+        let reindexFiles = async filenames => {
+            let filePaths = filenames.map(f => path.join(directory, f));
+            let filePropertyLookup = await this._exifTool.getProperties(...filePaths);
+            let imagePromises = [];
+            for (let filename in filePropertyLookup) {
+                let properties =  filePropertyLookup[filename];
+                imagePromises.push(this._imageDataAccess.upsertImage(directory, filename, properties));
+            }
+
+            await Promise.all(imagePromises);
         };
 
-        await Promise.all(files.map(reindexFile));
+        await Promise.all(batches.map(reindexFiles));
     }
 }

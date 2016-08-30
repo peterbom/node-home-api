@@ -27,7 +27,7 @@ export class ExifTool {
         }
     }
 
-    async getProperties(filePath) {
+    async getProperties(...filePaths) {
         let properties = [
             "-DateTimeOriginal",
             "-CreateDate",
@@ -39,6 +39,7 @@ export class ExifTool {
             "-Model",
             "-Software",
             "-CreatorTool",
+            "-FileName",
             "-FileType",
             "-FileSize",
             "-ImageWidth",
@@ -47,72 +48,78 @@ export class ExifTool {
             "-Keywords",
         ];
 
-        let command = `perl ${this._toolPath} -s -j ${properties.join(" ")} "${filePath}"`;
+        let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
+        let command = `perl ${this._toolPath} -s -j ${properties.join(" ")} ${pathArgs}`;
+
         let output = await exec(command);
 
-        if (output.stderr) {
-            throw output.stderr;
-        }
-
         if (!output.stdout) {
+            if (output.stderr) {
+                throw output.stderr;
+            }
+
             return {};
         }
 
-        let info = JSON.parse(output.stdout)[0];
+        let results = {};
+        let infos = JSON.parse(output.stdout);
+        for (let info of infos) {
+            let takenDateTimeString = info.DateTimeOriginal ||
+                info.CreateDate ||
+                info.MediaCreateDate ||
+                info.DateTime1 ||
+                info.DateTime2;
 
-        let takenDateTimeString = info.DateTimeOriginal ||
-            info.CreateDate ||
-            info.MediaCreateDate ||
-            info.DateTime1 ||
-            info.DateTime2;
-
-        let takenDateTime;
-        if (takenDateTimeString) {
-            takenDateTime = moment(takenDateTimeString, "YYYY:MM:DD HH:mm:ssZ").toDate();
-        }
-
-        let fileModifyDate;
-        if (info.FileModifyDate) {
-            fileModifyDate = moment(info.FileModifyDate, "YYYY:MM:DD HH:mm:ssZ").toDate();
-        }
-
-        let camera = ((info.Make || "") + " " + (info.Model || "")).trim() ||
-            info.Software ||
-            info.CreatorTool;
-
-        let tags = [];
-        if (info.Subject) {
-            if (typeof info.Subject === 'string') {
-                tags = tags.concat(info.Subject.split(","));
-            } else {
-                tags = tags.concat(info.Subject);
+            let takenDateTime;
+            if (takenDateTimeString) {
+                takenDateTime = moment(takenDateTimeString, "YYYY:MM:DD HH:mm:ssZ").toDate();
             }
-        }
-        
-        let keywordTags = [];
-        if (info.Keywords) {
-            if (typeof info.Keywords === 'string') {
-                keywordTags = keywordTags.concat(info.Keywords.split(","));
-            } else {
-                keywordTags = keywordTags.concat(info.Keywords);
+
+            let fileModifyDate;
+            if (info.FileModifyDate) {
+                fileModifyDate = moment(info.FileModifyDate, "YYYY:MM:DD HH:mm:ssZ").toDate();
             }
+
+            let camera = ((info.Make || "") + " " + (info.Model || "")).trim() ||
+                info.Software ||
+                info.CreatorTool;
+
+            let tags = [];
+            if (info.Subject) {
+                if (typeof info.Subject === 'string') {
+                    tags = tags.concat(info.Subject.split(","));
+                } else {
+                    tags = tags.concat(info.Subject);
+                }
+            }
+            
+            let keywordTags = [];
+            if (info.Keywords) {
+                if (typeof info.Keywords === 'string') {
+                    keywordTags = keywordTags.concat(info.Keywords.split(","));
+                } else {
+                    keywordTags = keywordTags.concat(info.Keywords);
+                }
+            }
+
+            for (let i = 0; i < keywordTags.length; i++) {
+                let keyword = keywordTags[i];
+                if (tags.indexOf(keyword) === -1) {
+                    tags.push(keyword);
+                }
+            }
+
+            results[info.FileName] = {
+                takenDateTime: takenDateTime,
+                fileModifyDate: fileModifyDate,
+                fileSize: info.FileSize,
+                camera: camera,
+                tags: tags,
+                pixelCount: info.ImageWidth * info.ImageHeight,
+                fileType: info.FileType
+            };
         }
 
-        for (let i = 0; i < keywordTags.length; i++) {
-            let keyword = keywordTags[i];
-            if (tags.indexOf(keyword) === -1) {
-                tags.push(keyword);
-            }
-        }
-
-        return {
-            takenDateTime: takenDateTime,
-            fileModifyDate: fileModifyDate,
-            fileSize: info.FileSize,
-            camera: camera,
-            tags: tags,
-            pixelCount: info.ImageWidth * info.ImageHeight,
-            fileType: info.FileType
-        };
+        return results;
     }
 }
