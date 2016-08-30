@@ -35,7 +35,31 @@ describe("Monk", function () {
 
             done();
         } catch (err) {
-            console.log(err);
+            done(err);
+        }
+    });
+
+    it ("Can search using 'in'", async function (done) {
+        try {
+            let components = getDefaultComponents();
+            let dbManager = new DbManager(components.appSettings.connectionString);
+
+            let things = dbManager.get("things");
+            await things.remove();
+
+            await things.insert({name: "Pete", type: "a"});
+            await things.insert({name: "pete", type: "a"});
+            await things.insert({name: "pete", type: "b"});
+            await things.insert({name: "John", type: "a"});
+            await things.insert({name: "Jeff", type: "a"});
+            await things.insert({name: "Bob", type: "a"});
+
+            let matches = await things.find({name: {$in: ["pete", "john"]}, type: "a"});
+            assert.equal(1, matches.length);
+
+            done();
+        } catch (err) {
+            done(err);
         }
     });
 });

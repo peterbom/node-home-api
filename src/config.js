@@ -70,6 +70,7 @@ export function getDefaultComponents () {
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
     components.imageDataAccess = new ImageDataAccess(components.dbManager);
     components.photoDirectoryDataAccess = new PhotoDirectoryDataAccess(
+        components.imageDataAccess,
         components.fileFinder,
         [settings.stagingPhotoPath, settings.targetPhotoPath]);
     components.stagingPhotoDataAccess = new StagingPhotoDataAccess(
