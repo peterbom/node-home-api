@@ -10,9 +10,9 @@ export class StagingPhotoDataAccess {
 
     async getAllFiles () {
         let files = await this._fileFinder.findFiles(
-            this._stagingPhotoPath,
-            /^(?!.*\.db$)/,
-            [/(?!.*\/)?@.*/, /.*\.db/]);
+            [this._stagingPhotoPath],
+            [/(?!.*\/)?@.*/, /.*\.db/],
+            /^(?!.*\.db$)/);
 
         let directories = [];
         let directoryLookup = {};
