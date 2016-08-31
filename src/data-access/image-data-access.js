@@ -19,7 +19,7 @@ export class ImageDataAccess {
         return filenames.some(f => knownFilenames.indexOf(f) < 0);
     }
 
-    async upsertImage(directory, filename, imageProperties) {
+    async upsertImage(directory, filename, imageProperties /* Can be null */) {
         let image = {
             path: directory.toLowerCase(),
             filename: filename.toLowerCase(),
@@ -76,6 +76,10 @@ export class ImageDataAccess {
 }
 
 function getImageHash(imageProperties) {
+    if (!imageProperties) {
+        return null;
+    }
+
     let identifiers = {
         type: imageProperties.fileType,
         date: imageProperties.takenDateTime || imageProperties.fileModifyDate,

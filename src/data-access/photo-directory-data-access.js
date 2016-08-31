@@ -60,11 +60,10 @@ export class PhotoDirectoryDataAccess {
         }
 
         let reindexFiles = async filenames => {
-            let filePaths = filenames.map(f => path.join(directory, f));
-            let filePropertyLookup = await this._exifTool.getProperties(...filePaths);
+            let filePropertyLookup = await getFilePropertyLookup(this._exifTool, directory, filenames);
             let imagePromises = [];
             for (let filename in filePropertyLookup) {
-                let properties =  filePropertyLookup[filename];
+                let properties =  filePropertyLookup[filename];  // Can be null for unreadable files
                 imagePromises.push(this._imageDataAccess.upsertImage(directory, filename, properties));
             }
 
@@ -73,4 +72,28 @@ export class PhotoDirectoryDataAccess {
 
         await Promise.all(batches.map(reindexFiles));
     }
+}
+
+async function getFilePropertyLookup(exifTool, directory, filenames) {
+    if (!filenames.length) {
+        return {};
+    }
+
+    let filePaths = filenames.map(f => path.join(directory, f));
+
+    // Attempt to read all files first
+    let filePropertyLookup = await exifTool.getProperties(...filePaths);
+    if (filePropertyLookup) {
+        return filePropertyLookup;
+    }
+
+    // Reading all files failed. Attempt them one-by-one
+    let results = {};
+    for (let filename of filenames) {
+        let filePath = path.join(directory, filename);
+        filePropertyLookup = await exifTool.getProperties(filePath);
+        results[filename] = filePropertyLookup ? filePropertyLookup[filename] : null;
+    }
+
+    return results;
 }

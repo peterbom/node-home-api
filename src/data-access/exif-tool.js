@@ -51,18 +51,24 @@ export class ExifTool {
         let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
         let command = `perl ${this._toolPath} -s -j ${properties.join(" ")} ${pathArgs}`;
 
-        let output = await exec(command);
+        let infos = [];
+        try {
+            let output = await exec(command);
 
-        if (!output.stdout) {
-            if (output.stderr) {
-                throw output.stderr;
+            if (!output.stdout) {
+                if (output.stderr) {
+                    throw output.stderr;
+                }
+
+                return null;
             }
 
-            return {};
+            infos = JSON.parse(output.stdout);
+        } catch (error) {
+            return null;
         }
 
         let results = {};
-        let infos = JSON.parse(output.stdout);
         for (let info of infos) {
             let takenDateTimeString = info.DateTimeOriginal ||
                 info.CreateDate ||
