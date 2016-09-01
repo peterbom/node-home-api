@@ -4,80 +4,106 @@ import md5 from "md5";
 export class ImageDataAccess {
     constructor(dbManager) {
         this._imageInfos = dbManager.get("imageInfos");
-        this._imageInfos.ensureIndex({"path":1,"filename":1});
+        this._imageInfos.ensureIndex({"directoryPath":1,"filename":1});
         this._imageInfos.ensureIndex({"hash":1});
     }
 
-    async hasUnknownFiles(path, filenames) {
-        path = path.toLowerCase();
+    async getDiff(directoryPath, filenames) {
+        directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
-        let matches = await this._imageInfos.find(
-            {path: path, filename: {$in: filenames}},
+
+        let indexedResults = await this._imageInfos.find(
+            {directoryPath: directoryPath, valid: true},
             {filename: 1});
 
-        if (matches.length < filenames.length) {
-            return true;
+        let result = {
+            new: [],
+            deleted: []
         }
 
-        let knownFilenameLookup = {};
-        matches.forEach(m => knownFilenameLookup[m.filename] = true);
-        return filenames.some(f => !knownFilenameLookup[f]);
+        if (indexedResults.length === 0) {
+            result.new = filenames;
+            return result;
+        }
+
+        let filenameLookup = {};
+        filenames.forEach(f => filenameLookup[f] = true);
+
+        let indexedFilenameLookup = {};
+        indexedResults.forEach(m => indexedFilenameLookup[m.filename] = true);
+
+        for (let filename in filenameLookup) {
+            if (!indexedFilenameLookup[filename]) {
+                result.new.push(filename);
+            }
+        }
+
+        for (let filename in indexedFilenameLookup) {
+            if (!filenameLookup[filename]) {
+                result.deleted.push(filename);
+            }
+        }
+
+        return result;
     }
 
-    async upsertImage(directory, filename, imageProperties /* Can be null */) {
+    async getIndexedDirectories() {
+        let groups = await this._imageInfos.aggregate(
+            {$group: {_id: "$directoryPath", count: {$sum: 1}}}
+        );
+
+        return groups.map(g => ({
+            directoryPath: g._id,
+            imageCount: g.count
+        }));
+    }
+
+    async getImageFilenames(directoryPath) {
+        directoryPath = directoryPath.toLowerCase();
+        let images = await this._imageInfos.find(
+            {directoryPath: directoryPath, valid: true},
+            {filename: 1});
+
+        return images.map(i => i.filename);
+    }
+
+    async cleanExcept(directoryPath, filenames) {
+        directoryPath = directoryPath.toLowerCase();
+        filenames = filenames.map(f => f.toLowerCase());
+        await this._imageInfos.remove({directoryPath: directoryPath, filename: {$nin: filenames}});
+    }
+
+    async invalidateImages(directoryPath) {
+        directoryPath = directoryPath.toLowerCase();
+        await this._imageInfos.update(
+            {directoryPath: directoryPath},
+            {$set: {valid: false}},
+            {multi: true});
+    }
+
+    async upsertImage(directoryPath, filename, imageProperties /* Can be null */) {
         let image = {
-            path: directory.toLowerCase(),
+            directoryPath: directoryPath.toLowerCase(),
             filename: filename.toLowerCase(),
             hash: getImageHash(imageProperties),
-            properties: imageProperties
+            properties: imageProperties,
+            valid: true
         };
 
         image = await this._imageInfos.findOneAndUpdate(
-            {path: image.path, filename: image.filename},
+            {directoryPath: image.directoryPath, filename: image.filename},
             {$set: image},
             {upsert: true});
 
         if (!image.pathHistory) {
             image.pathHistory = [{
                 date: new Date(),
-                filePath: path.join(image.path, image.filename)
+                filePath: path.join(image.directoryPath, image.filename)
             }];
 
             image = await this._imageInfos.update({_id: image._id}, image);
         }
     }
-/*
-    async hasImage(inode) {
-        let result = await this._imageInfos.findOne({inode: inode}, {_id: 1});
-        return !!result;
-    }
-
-    async findImage(inode) {
-        return await this._imageInfos.findOne({inode: inode});
-    }
-
-    async upsertLocation(inode, path, filename) {
-        let updates = {
-            inode: inode,
-            path: path.toLowerCase(),
-            filename: filename.toLowerCase()
-        }
-
-        return await this._imageInfos.findOneAndUpdate({inode: inode}, {$set: updates}, {upsert: true});
-    }
-
-    async upsertImage(inode, path, filename, imageData, tags) {
-        let updates = {
-            inode: inode,
-            path: path.toLowerCase(),
-            filename: filename.toLowerCase(),
-            imageData: imageData,
-            tags: tags
-        };
-
-        return await this._imageInfos.findOneAndUpdate({inode: inode}, {$set: updates}, {upsert: true});
-    }
-*/
 }
 
 function getImageHash(imageProperties) {

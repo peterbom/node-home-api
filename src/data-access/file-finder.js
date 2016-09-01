@@ -11,13 +11,13 @@ export class FileFinder {
         return fileArrays.reduce((files1, files2) => files1.concat(files2), []);
     }
 
-    async getFiles (directory, fileMatchRegex) {
-        let items = await fs.readdir(directory);
+    async getFiles (directoryPath, fileMatchRegex) {
+        let items = await fs.readdir(directoryPath);
         items = items.filter(item => fileMatchRegex.test(item));
 
         let filenames = [];
         let isFile = async item => {
-            let itemPath = path.join(directory, item);
+            let itemPath = path.join(directoryPath, item);
             let stats = await fs.stat(itemPath);
             if (stats.isFile()) {
                 filenames.push(item);
@@ -42,7 +42,7 @@ async function findFiles (baseDirectory, skipDirectoryRegexes, fileMatchRegex) {
         walker.on("file", function(root, stat, next) {
             if (fileMatchRegex.test(stat.name)) {
                 files.push({
-                    path: root,
+                    directoryPath: root,
                     filename: stat.name
                 });
             }

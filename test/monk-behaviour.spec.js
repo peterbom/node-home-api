@@ -5,6 +5,57 @@ import {default as DbManager} from "monk";
 import {getDefaultComponents} from "../lib/config";
 
 describe("Monk", function () {
+    it ("Can use distinct", async done => {
+        try {
+            let components = getDefaultComponents();
+            let dbManager = new DbManager(components.appSettings.connectionString);
+
+            let things = dbManager.get("things");
+            await things.remove();
+
+            await things.insert({name: "Pete", type: "a"});
+            await things.insert({name: "pete", type: "a"});
+            await things.insert({name: "pete", type: "b"});
+
+            let names = await things.distinct("name");
+            assert.equal(2, names.length);
+            done();
+
+        } catch (err) {
+            done(err);
+        }
+    });
+
+    it ("Can use group by", async done => {
+        try {
+            let components = getDefaultComponents();
+            let dbManager = new DbManager(components.appSettings.connectionString);
+
+            let things = dbManager.get("things");
+            await things.remove();
+
+            await things.insert({name: "a"});
+            await things.insert({name: "a"});
+            await things.insert({name: "b"});
+
+            let groups = await things.aggregate(
+                {$group: {_id: "$name", count: {$sum: 1}}}
+            );
+
+            assert.equal(2, groups.length);
+            let aGroup = groups.find(g => g._id == "a");
+            let bGroup = groups.find(g => g._id == "b");
+
+            assert.equal(2, aGroup.count);
+            assert.equal(1, bGroup.count);
+
+            done();
+
+        } catch (err) {
+            done(err);
+        }
+    });
+
     it ("Can upsert using findOneAndUpdate", async function (done) {
         try {
             let components = getDefaultComponents();
