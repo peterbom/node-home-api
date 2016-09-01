@@ -15,8 +15,13 @@ export class ImageDataAccess {
             {path: path, filename: {$in: filenames}},
             {filename: 1});
 
-        let knownFilenames = matches.map(m => m.filename);
-        return filenames.some(f => knownFilenames.indexOf(f) < 0);
+        if (matches.length < filenames.length) {
+            return true;
+        }
+
+        let knownFilenameLookup = {};
+        matches.forEach(m => knownFilenameLookup[m.filename] = true);
+        return filenames.some(f => !knownFilenameLookup[f]);
     }
 
     async upsertImage(directory, filename, imageProperties /* Can be null */) {
