@@ -1,6 +1,6 @@
 import path from "path";
 
-export class PhotoDirectoryDataAccess {
+export class PhotoSyncServices {
     constructor (exifTool, imageDataAccess, fileFinder, photoBaseDirectories) {
         this._exifTool = exifTool;
         this._imageDataAccess = imageDataAccess;

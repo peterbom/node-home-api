@@ -1,11 +1,11 @@
 
 export class PhotoDirectoryResource {
-    constructor (photoDirectoryDataAccess) {
-        this._photoDirectoryDataAccess = photoDirectoryDataAccess;
+    constructor (photoSyncServices) {
+        this._photoSyncServices = photoSyncServices;
     }
 
     async list (ctx) {
-        ctx.body = await this._photoDirectoryDataAccess.getAll();
+        ctx.body = await this._photoSyncServices.getAll();
     }
 
     async update (ctx) {
@@ -14,13 +14,13 @@ export class PhotoDirectoryResource {
 
         switch (requestedOperation) {
             case "invalidate":
-                await this._photoDirectoryDataAccess.invalidate(directoryPath);
+                await this._photoSyncServices.invalidate(directoryPath);
                 break;
             case "index":
-                ctx.body = await this._photoDirectoryDataAccess.index(directoryPath, 20);
+                ctx.body = await this._photoSyncServices.index(directoryPath, 20);
                 break;
             case "clean":
-                await this._photoDirectoryDataAccess.clean(directoryPath);
+                await this._photoSyncServices.clean(directoryPath);
                 break;
             default:
                 throw new Error("Unexpected operation: " + requestedOperation);

@@ -6,13 +6,13 @@ import {JsonService} from "./shared/json-service";
 import {JwtUtils} from "./shared/jwt-utils";
 
 // Data access
-import {FileFinder} from "./data-access/file-finder";
-import {ExifTool} from "./data-access/exif-tool";
-import {UserDataAccess} from "./data-access/user-data-access";
-import {PermissionDataAccess} from "./data-access/permission-data-access";
-import {ImageDataAccess} from "./data-access/image-data-access";
-import {PhotoDirectoryDataAccess} from "./data-access/photo-directory-data-access";
-import {StagingPhotoDataAccess} from "./data-access/staging-photo-data-access";
+import {FileFinder} from "./services/file-finder";
+import {ExifTool} from "./services/exif-tool";
+import {UserDataAccess} from "./services/user-data-access";
+import {PermissionDataAccess} from "./services/permission-data-access";
+import {ImageDataAccess} from "./services/image-data-access";
+import {PhotoSyncServices} from "./services/photo-sync-services";
+import {StagingPhotoDataAccess} from "./services/staging-photo-data-access";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
@@ -69,7 +69,7 @@ export function getDefaultComponents () {
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
     components.imageDataAccess = new ImageDataAccess(components.dbManager);
-    components.photoDirectoryDataAccess = new PhotoDirectoryDataAccess(
+    components.photoSyncServices = new PhotoSyncServices(
         components.exifTool,
         components.imageDataAccess,
         components.fileFinder,
@@ -85,7 +85,7 @@ export function getDefaultComponents () {
 
     components.permissionResource = new PermissionResource(components.permissionDataAccess);
     components.userResource = new UserResource(components.userDataAccess);
-    components.photoDirectoryResource = new PhotoDirectoryResource(components.photoDirectoryDataAccess);
+    components.photoDirectoryResource = new PhotoDirectoryResource(components.photoSyncServices);
     components.stagingPhotoResource = new StagingPhotoResource(components.stagingPhotoDataAccess);
     components.photoMovementResource = new PhotoMovementResource();
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
