@@ -9,10 +9,6 @@ export class ExifTool {
         this._toolPath = path.join(__dirname, "../../exiftool/exiftool.pl");
     }
 
-    async getImageData(filePath) {
-        return {};
-    }
-
     async getAllTags(filePath) {
         let command = `perl ${this._toolPath} -s -a -j "${filePath}"`;
 
@@ -35,6 +31,7 @@ export class ExifTool {
             "-DateTime1",
             "-DateTime2",
             "-MediaCreateDate",
+            "-FileCreateDate",
             "-FileModifyDate",
             "-Make",
             "-Model",
@@ -45,6 +42,7 @@ export class ExifTool {
             "-FileSize",
             "-ImageWidth",
             "-ImageHeight",
+            "-ImageNumber",
             "-Subject",
             "-Keywords",
         ];
@@ -71,21 +69,13 @@ export class ExifTool {
 
         let results = {};
         for (let info of infos) {
-            let takenDateTimeString = info.DateTimeOriginal ||
-                info.CreateDate ||
-                info.MediaCreateDate ||
-                info.DateTime1 ||
-                info.DateTime2;
+            let takenDateTime = null;
+            ["DateTimeOriginal", "CreateDate", "MediaCreateDate", "DateTime1", "DateTime2"].forEach(prop => {
+                takenDateTime = takenDateTime || tryGetDate(info[prop]);
+            });
 
-            let takenDateTime;
-            if (takenDateTimeString) {
-                takenDateTime = moment(takenDateTimeString, "YYYY:MM:DD HH:mm:ssZ").toDate();
-            }
-
-            let fileModifyDate;
-            if (info.FileModifyDate) {
-                fileModifyDate = moment(info.FileModifyDate, "YYYY:MM:DD HH:mm:ssZ").toDate();
-            }
+            let fileModifyDate = tryGetDate(info.FileModifyDate);
+            let fileCreateDate = tryGetDate(info.FileCreateDate);
 
             let camera = ((info.Make || "") + " " + (info.Model || "")).trim() ||
                 info.Software ||
@@ -119,14 +109,35 @@ export class ExifTool {
             results[info.FileName] = {
                 takenDateTime: takenDateTime,
                 fileModifyDate: fileModifyDate,
+                fileCreateDate: fileCreateDate,
                 fileSize: info.FileSize,
                 camera: camera,
                 tags: tags,
                 pixelCount: info.ImageWidth * info.ImageHeight,
+                imageNumber: info.imageNumber || 0,
                 fileType: info.FileType
             };
         }
 
         return results;
     }
+
+    async setImageNumber (filePath, imageNumber) {
+        // TODO: Consider whether to add -overwrite_original_in_place flag.
+        // http://www.sno.phy.queensu.ca/~phil/exiftool/exiftool_pod.html
+        let command = `perl ${this._toolPath} -ImageNumber=${imageNumber} "${filePath}"`;
+
+        await exec(command, {timeout: timeout});
+    }
+}
+
+function tryGetDate (stringValue) {
+    if (stringValue) {
+        let time = moment(stringValue, "YYYY:MM:DD HH:mm:ssZ");
+        if (time && time.year > 1970 && time.year <= moment().year) {
+            return time.toDate();
+        }
+    }
+
+    return null;
 }

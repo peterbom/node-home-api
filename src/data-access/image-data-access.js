@@ -8,6 +8,10 @@ export class ImageDataAccess {
         this._imageInfos.ensureIndex({"hash":1});
     }
 
+    async getById(id) {
+        return await this._imageInfos.findOne({_id: id});
+    }
+
     async getDiff(directoryPath, filenames) {
         directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
@@ -73,6 +77,15 @@ export class ImageDataAccess {
         await this._imageInfos.remove({directoryPath: directoryPath, filename: {$nin: filenames}});
     }
 
+    async invalidateImage(directoryPath, filename) {
+        directoryPath = directoryPath.toLowerCase();
+        filename = filename.toLowerCase();
+
+        await this._imageInfos.update(
+            {directoryPath: directoryPath, filename: filename},
+            {$set: {valid: false}});
+    }
+
     async invalidateImages(directoryPath) {
         directoryPath = directoryPath.toLowerCase();
         await this._imageInfos.update(
@@ -82,27 +95,93 @@ export class ImageDataAccess {
     }
 
     async upsertImage(directoryPath, filename, imageProperties /* Can be null */) {
+        directoryPath = directoryPath.toLowerCase();
+        filename = filename.toLowerCase();
+
         let image = {
-            directoryPath: directoryPath.toLowerCase(),
-            filename: filename.toLowerCase(),
+            directoryPath: directoryPath,
+            filename: filename,
             hash: getImageHash(imageProperties),
             properties: imageProperties,
             valid: true
         };
 
         image = await this._imageInfos.findOneAndUpdate(
-            {directoryPath: image.directoryPath, filename: image.filename},
+            {directoryPath: directoryPath, filename: filename},
             {$set: image},
             {upsert: true});
 
         if (!image.pathHistory) {
             image.pathHistory = [{
-                date: new Date(),
-                filePath: path.join(image.directoryPath, image.filename)
+                date: imageProperties.fileCreateDate,
+                filePath: path.join(directoryPath, filename)
             }];
 
             image = await this._imageInfos.update({_id: image._id}, image);
         }
+    }
+
+    async getDuplicates() {
+        let groups = await this._imageInfos.aggregate(
+            {$group: {_id: "$hash", count: {$sum: 1}}},
+            {$sort: {count: -1}},
+            {$match: {count: {$gt: 1}}});
+
+        let result = {};
+        let resultPromises = [];
+        for (let group of groups) {
+            let updateResult = async () => {
+                result[group.hash] = await this._imageInfos.find({hash: hash});
+            };
+
+            resultPromises.push(updateResult());
+        }
+
+        await Promise.all(resultPromises);
+        return result;
+    }
+
+    async combineDuplicateHistories(ids) {
+        let duplicates = await this._imageInfos.find({_id: {$in: ids}});
+
+        if (duplicates.length < 2) {
+            // No duplicates
+            return;
+        }
+
+        let hash = duplicates[0].hash;
+        if (duplicates.some(d => d.hash !== hash)) {
+            throw new Error("Expect all duplicates to have the same hash");
+        }
+
+        // Merge all the pathHistories together and order by date
+        let allPathHistoryEvents = duplicates
+            .reduce((img1, img2) => img1.pathHistory.concat(img2.pathHistory), [])
+            .sort((event1, event2) => event1.date - event2.date);
+
+        // Remove duplicates (including events where the path is unchanged)
+        let uniquePathHistoryEvents = [];
+        let lastEvent = null;
+        for (let pathHistoryEvent of uniquePathHistoryEvents) {
+            if (!lastEvent || lastEvent.path !== pathHistoryEvent.path) {
+                uniquePathHistoryEvents.push(pathHistoryEvent);
+                lastEvent = pathHistoryEvent;
+            }
+        }
+
+        // For each duplicate, the path history includes all events up to and including
+        // the current latest date
+        let updatePromises = [];
+        for (let duplicate of duplicates) {
+            let latestDate = duplicate.pathHistory[duplicates.pathHistory.length - 1].date;
+            duplicate.pathHistory = uniquePathHistoryEvents.filter(event => {
+                return event.date <= latestDate;
+            });
+
+            updatePromises.push(this._imageInfos.update({_id: duplicate._id}, duplicate));
+        }
+
+        await Promise.all(updatePromises);
     }
 }
 
@@ -114,7 +193,9 @@ function getImageHash(imageProperties) {
     let identifiers = {
         type: imageProperties.fileType,
         date: imageProperties.takenDateTime || imageProperties.fileModifyDate,
-        pixels: imageProperties.pixelCount
+        camera: imageProperties.camera,
+        pixels: imageProperties.pixelCount,
+        number: imageProperties.imageNumber
     };
 
     return md5(JSON.stringify(identifiers));

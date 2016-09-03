@@ -9,7 +9,7 @@ export class PhotoDirectoryResource {
     }
 
     async update (ctx) {
-    	let directoryPath = decodeURIComponent(ctx.params.id);
+        let directoryPath = decodeURIComponent(ctx.params.id);
         let requestedOperation = ctx.request.body.operation;
 
         switch (requestedOperation) {
@@ -17,7 +17,7 @@ export class PhotoDirectoryResource {
                 await this._photoDirectoryDataAccess.invalidate(directoryPath);
                 break;
             case "index":
-                ctx.body = await this._photoDirectoryDataAccess.index(directoryPath, 100);
+                ctx.body = await this._photoDirectoryDataAccess.index(directoryPath, 20);
                 break;
             case "clean":
                 await this._photoDirectoryDataAccess.clean(directoryPath);
@@ -26,6 +26,6 @@ export class PhotoDirectoryResource {
                 throw new Error("Unexpected operation: " + requestedOperation);
         }
 
-    	ctx.status = 200;
+        ctx.status = 200;
     }
 }
