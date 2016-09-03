@@ -8,7 +8,7 @@ export class PhotoSyncServices {
         this._photoBaseDirectories = photoBaseDirectories;
     }
 
-    async getAll() {
+    async compare() {
         let files = await this._fileFinder.findFiles(
             this._photoBaseDirectories,
             [/(?!.*\/)?@.*/, /.*\.db/],

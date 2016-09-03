@@ -17,7 +17,7 @@ import {StagingPhotoDataAccess} from "./services/staging-photo-data-access";
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
 import {UserResource} from "./resources/user-resource";
-import {PhotoDirectoryResource} from "./resources/photo-directory-resource";
+import {PhotoSyncResource} from "./resources/photo-sync-resource";
 import {StagingPhotoResource} from "./resources/staging-photo-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
@@ -85,7 +85,7 @@ export function getDefaultComponents () {
 
     components.permissionResource = new PermissionResource(components.permissionDataAccess);
     components.userResource = new UserResource(components.userDataAccess);
-    components.photoDirectoryResource = new PhotoDirectoryResource(components.photoSyncServices);
+    components.photoSyncResource = new PhotoSyncResource(components.photoSyncServices);
     components.stagingPhotoResource = new StagingPhotoResource(components.stagingPhotoDataAccess);
     components.photoMovementResource = new PhotoMovementResource();
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
@@ -109,7 +109,7 @@ export function getDefaultComponents () {
 
         securedRouteGenerators: [
             routing.getUserRouteGenerator(components.permissionDataAccess, components.userResource),
-            routing.getPhotoDirectoryRouteGenerator(components.permissionDataAccess, components.photoDirectoryResource),
+            routing.getPhotoSyncRouteGenerator(components.permissionDataAccess, components.photoSyncResource),
             routing.getStagingPhotoRouteGenerator(components.permissionDataAccess, components.stagingPhotoResource),
             routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)

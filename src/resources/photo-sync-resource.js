@@ -1,11 +1,11 @@
 
-export class PhotoDirectoryResource {
+export class PhotoSyncResource {
     constructor (photoSyncServices) {
         this._photoSyncServices = photoSyncServices;
     }
 
-    async list (ctx) {
-        ctx.body = await this._photoSyncServices.getAll();
+    async compare (ctx) {
+        ctx.body = await this._photoSyncServices.compare();
     }
 
     async update (ctx) {
