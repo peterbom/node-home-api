@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 
 export class UserResource {
     constructor (userDataAccess) {

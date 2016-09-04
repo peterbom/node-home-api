@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 import path from "path";
 
 export class PhotoSyncServices {

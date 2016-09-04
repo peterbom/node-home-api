@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 
 export class UserDataAccess {
     // dbManager: https://automattic.github.io/monk/docs/manager/index.html

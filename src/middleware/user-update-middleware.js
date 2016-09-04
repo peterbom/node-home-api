@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 
 export function getUserUpdater(userDataAccess, jsonService, authServer) {
     if (!userDataAccess) {

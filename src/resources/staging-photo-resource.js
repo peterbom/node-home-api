@@ -1,3 +1,5 @@
+import {Log} from "../shared/log";
+
 /*
 // Old:
 // Get directories (from photoController.getPhotoPage)

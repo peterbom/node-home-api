@@ -1,7 +1,10 @@
 import Application from "koa";
+import winston from "winston";
+import winstonLogglyBulk from "winston-loggly-bulk";
 import {default as DbManager} from "monk";
 
 // Shared components
+import {Log} from "./shared/log";
 import {JsonService} from "./shared/json-service";
 import {JwtUtils} from "./shared/jwt-utils";
 
@@ -38,6 +41,8 @@ function getDefaultSettings () {
     return {
         isUnitTest: process.env.NODE_ENV === "test",
         port: process.env.PORT,
+        logglySubdomain: process.env.LOGGLY_SUBDOMAIN,
+        logglyToken: process.env.LOGGLY_TOKEN,
         authServer: process.env.AUTH_SERVER,
         authProviderSecret: process.env.AUTH_PROVIDER_SECRET,
         connectionString: process.env.NODE_ENV === "test" ? "localhost:27017/unitTest" : process.env.CONNECTION_STRING,
@@ -61,6 +66,15 @@ export function getDefaultComponents () {
     };
 
     components.app = new Application();
+
+    winston.add(winston.transports.Loggly, {
+        token: settings.logglyToken,
+        subdomain: settings.logglySubdomain,
+        tags: ["home-api", process.env.NODE_ENV],
+        json: true
+    });
+
+    components.logger = settings.isUnitTest ? console : winston;
 
     components.dbManager = new DbManager(settings.connectionString);
 

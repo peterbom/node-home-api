@@ -1,3 +1,4 @@
+import {Log} from "../../lib/shared/log";
 
 export class MockPermissionDataAccess {
     constructor (permissionLookup) {

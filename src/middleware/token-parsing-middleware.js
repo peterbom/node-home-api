@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 import promisify from "promisify-node";
 
 let bearerToken = promisify("bearer-token");
@@ -13,12 +14,13 @@ export function getBearerTokenParser(jwtUtils) {
 
             let idToken = await jwtUtils.verifyJwt(jwt);
             if (!idToken) {
+                // No need to log here - it'll already have been logged by the verifyJwt method
                 ctx.status = 400; // bad request
                 return;
             }
 
             if (!idToken.sub) {
-                console.log("invalid id_token (no sub specified)");
+                Log.warn("Invalid id_token (no sub specified)");
                 ctx.status = 400;
                 return;
             }

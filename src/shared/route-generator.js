@@ -1,3 +1,4 @@
+import {Log} from "./log";
 import router from "koa-simple-router";
 
 function getSecureRouteHandler(permissionDataAccess, routeHandler, securityResourceName, securityActionName) {

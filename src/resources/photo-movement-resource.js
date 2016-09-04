@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 
 /*
 // Old:

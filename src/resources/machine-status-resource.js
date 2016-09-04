@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 import ping from "ping";
 import promisify from "promisify-node";
 

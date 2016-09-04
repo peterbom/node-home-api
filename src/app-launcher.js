@@ -1,9 +1,11 @@
+import {Log} from "./shared/log";
 import {noop} from "./middleware/null-middleware";
 
 export class AppLauncher {
     static launch(components) {
         let app = components.app;
         let settings = components.appSettings;
+        Log.logger = components.logger;
 
         app.use(components.middleware.errorHandler || noop);
         app.use(components.middleware.corsConfig || noop);
@@ -33,7 +35,7 @@ export class AppLauncher {
 
         if (!settings.isUnitTest) {
             app.listen(settings.port);
-            console.log("Application started. Listening on port: " + settings.port);
+            Log.info("Application started. Listening on port: " + settings.port);
         }
     }
 }

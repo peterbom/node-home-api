@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 import bodyParser from "koa-bodyparser";
 
 // https://github.com/koajs/bodyparser

@@ -1,7 +1,5 @@
-import rp from "request-promise";
-
-// TODO: Logging
 import {Log} from "./log";
+import rp from "request-promise";
 
 export class JsonService {
     async getJson(url, token) {

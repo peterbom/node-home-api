@@ -1,3 +1,4 @@
+import {Log} from "../shared/log";
 import walk from "walk";
 import path from "path";
 import promisify from "promisify-node";

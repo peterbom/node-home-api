@@ -1,5 +1,6 @@
 import "babel-polyfill";
 
+import {Log} from "../lib/shared/log";
 import assert from "assert";
 import {default as DbManager} from "monk";
 import {getDefaultComponents} from "../lib/config";

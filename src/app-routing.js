@@ -1,3 +1,4 @@
+import {Log} from "./shared/log";
 import {RouteGenerator} from "./shared/route-generator";
 
 export function getPermissionRouteGenerator(permissionResource) {

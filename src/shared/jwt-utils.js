@@ -1,3 +1,4 @@
+import {Log} from "./log";
 import {sign as signJwt, verify as verifyJwtLegacy} from "jsonwebtoken";
 import promisify from "promisify-node";
 
@@ -13,8 +14,7 @@ export class JwtUtils {
             // verifies secret and checks expiry
             return await verifyJwt(token, this._secretBuffer);
         } catch (err) {
-            // TODO: Logging
-            console.trace(err);
+            Log.info("JWT failed verification", err);
             return null;
         }
     }

@@ -1,3 +1,4 @@
+import {Log} from "../../lib/shared/log";
 import timekeeper from "timekeeper";
 
 export function createIdToken(jwtUtils, sub, time, lifetimeInMinutes) {

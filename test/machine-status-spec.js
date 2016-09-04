@@ -1,5 +1,6 @@
 import "babel-polyfill";
 
+import {Log} from "../lib/shared/log";
 import supertest from "supertest";
 
 import {getDefaultComponents} from "../lib/config";

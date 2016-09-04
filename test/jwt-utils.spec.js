@@ -1,5 +1,6 @@
 import "babel-polyfill";
 
+import {Log} from "../lib/shared/log";
 import {JwtUtils} from "../lib/shared/jwt-utils";
 import timekeeper from "timekeeper";
 

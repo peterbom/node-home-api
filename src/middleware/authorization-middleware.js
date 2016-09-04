@@ -1,7 +1,9 @@
+import {Log} from "../shared/log";
+
 export let authorizationChecker = async function (ctx, next) {
     if (!ctx.request.idToken) {
         // TODO: Logging
-        console.log("----- No token provided. Unauthorized. -----");
+        Log.info("Missing ID token. Returning 401 (unauthorized).");
 
         // If a token is missing or expired, the correct status code to
         // return is 401.
