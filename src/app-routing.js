@@ -33,14 +33,13 @@ export function getPhotoSyncRouteGenerator (permissionDataAccess, photoSyncResou
         .put("/photo-sync/:id", ctx => photoSyncResource.update(ctx), "manage");
 }
 
-export function getStagingPhotoRouteGenerator (permissionDataAccess, stagingPhotoResource) {
-    if (stagingPhotoResource === undefined) {
-        throw new Error("stagingPhotoResource not defined");
+export function getPhotoDuplicateRouteGenerator (permissionDataAccess, photoDuplicateResource) {
+    if (photoDuplicateResource === undefined) {
+        throw new Error("photoDuplicateResource not defined");
     }
 
     return RouteGenerator.create(permissionDataAccess, "home")
-        .get("/staging-photo", ctx => stagingPhotoResource.list(ctx), "manage")
-        .get("/staging-photo/:id", ctx => stagingPhotoResource.get(ctx), "manage");
+        .get("/photo-duplicate", ctx => photoDuplicateResource.list(ctx), "manage");
 }
 
 export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovementResource) {

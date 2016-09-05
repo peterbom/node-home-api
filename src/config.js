@@ -8,20 +8,20 @@ import {Log} from "./shared/log";
 import {JsonService} from "./shared/json-service";
 import {JwtUtils} from "./shared/jwt-utils";
 
-// Data access
+// Services
 import {FileFinder} from "./services/file-finder";
 import {ExifTool} from "./services/exif-tool";
 import {UserDataAccess} from "./services/user-data-access";
 import {PermissionDataAccess} from "./services/permission-data-access";
 import {ImageDataAccess} from "./services/image-data-access";
 import {PhotoSyncServices} from "./services/photo-sync-services";
-import {StagingPhotoDataAccess} from "./services/staging-photo-data-access";
+import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
 import {UserResource} from "./resources/user-resource";
 import {PhotoSyncResource} from "./resources/photo-sync-resource";
-import {StagingPhotoResource} from "./resources/staging-photo-resource";
+import {PhotoDuplicateResource} from "./resources/photo-duplicate-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
 
@@ -67,14 +67,16 @@ export function getDefaultComponents () {
 
     components.app = new Application();
 
-    winston.add(winston.transports.Loggly, {
-        token: settings.logglyToken,
-        subdomain: settings.logglySubdomain,
-        tags: ["home-api", process.env.NODE_ENV],
-        json: true
-    });
+    if (!settings.isUnitTest) {
+        winston.add(winston.transports.Loggly, {
+            token: settings.logglyToken,
+            subdomain: settings.logglySubdomain,
+            tags: ["home-api", process.env.NODE_ENV],
+            json: true
+        });
+    }
 
-    components.logger = settings.isUnitTest ? console : winston;
+    components.logger = winston;
 
     components.dbManager = new DbManager(settings.connectionString);
 
@@ -88,11 +90,9 @@ export function getDefaultComponents () {
         components.imageDataAccess,
         components.fileFinder,
         [settings.stagingPhotoPath, settings.targetPhotoPath]);
-    components.stagingPhotoDataAccess = new StagingPhotoDataAccess(
+    components.photoDuplicateServices = new PhotoDuplicateServices(
         components.exifTool,
-        components.imageDataAccess,
-        components.fileFinder,
-        settings.stagingPhotoPath);
+        components.imageDataAccess);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
@@ -100,7 +100,7 @@ export function getDefaultComponents () {
     components.permissionResource = new PermissionResource(components.permissionDataAccess);
     components.userResource = new UserResource(components.userDataAccess);
     components.photoSyncResource = new PhotoSyncResource(components.photoSyncServices);
-    components.stagingPhotoResource = new StagingPhotoResource(components.stagingPhotoDataAccess);
+    components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
     components.photoMovementResource = new PhotoMovementResource();
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
@@ -124,7 +124,7 @@ export function getDefaultComponents () {
         securedRouteGenerators: [
             routing.getUserRouteGenerator(components.permissionDataAccess, components.userResource),
             routing.getPhotoSyncRouteGenerator(components.permissionDataAccess, components.photoSyncResource),
-            routing.getStagingPhotoRouteGenerator(components.permissionDataAccess, components.stagingPhotoResource),
+            routing.getPhotoDuplicateRouteGenerator(components.permissionDataAccess, components.photoDuplicateResource),
             routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
         ]

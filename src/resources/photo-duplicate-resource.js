@@ -1,12 +1,12 @@
 import {Log} from "../shared/log";
 
 export class PhotoDuplicateResource {
-    constructor (photoDirectoryDataAccess) {
-        this._photoDirectoryDataAccess = photoDirectoryDataAccess;
+    constructor (photoDuplicateServices) {
+        this._photoDuplicateServices = photoDuplicateServices;
     }
 
     async list (ctx) {
-        ctx.body = await this._photoDirectoryDataAccess.getDuplicates();
+        ctx.body = await this._photoDuplicateServices.getDuplicates();
     }
 
     async resolve (ctx) {
@@ -18,7 +18,7 @@ export class PhotoDuplicateResource {
         let sameIds = ctx.request.body.sameIds;
         let differentIds = ctx.request.body.differentIds;
 
-        await this._photoDirectoryDataAccess.resolveDuplicates(sameIds, differentIds);
+        await this._photoDuplicateServices.resolveDuplicates(sameIds, differentIds);
 
         ctx.status = 200;
     }

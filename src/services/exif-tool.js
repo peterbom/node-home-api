@@ -135,7 +135,7 @@ export class ExifTool {
 function tryGetDate (stringValue) {
     if (stringValue) {
         let time = moment(stringValue, "YYYY:MM:DD HH:mm:ssZ");
-        if (time && time.year > 1970 && time.year <= moment().year) {
+        if (time && time.year() > 1970 && time.year() <= moment().year()) {
             return time.toDate();
         }
     }

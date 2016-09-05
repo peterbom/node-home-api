@@ -57,6 +57,33 @@ describe("Monk", function () {
         }
     });
 
+    it ("Can use group by, having count > 1", async done => {
+        try {
+            let components = getDefaultComponents();
+            let dbManager = new DbManager(components.appSettings.connectionString);
+
+            let things = dbManager.get("things");
+            await things.remove();
+
+            await things.insert({name: "a"});
+            await things.insert({name: "a"});
+            await things.insert({name: "b"});
+
+            let groups = await things.aggregate([
+                {$group: {_id: "$name", count: {$sum: 1}}},
+                {$match: {count: {$gt: 1}}}
+            ]);
+
+            assert.equal(1, groups.length);
+            assert.equal(2, groups[0].count);
+
+            done();
+
+        } catch (err) {
+            done(err);
+        }
+    });
+
     it ("Can upsert using findOneAndUpdate", async function (done) {
         try {
             let components = getDefaultComponents();

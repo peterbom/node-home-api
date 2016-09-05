@@ -7,6 +7,7 @@ export class ImageDataAccess {
         this._imageInfos = dbManager.get("imageInfos");
         this._imageInfos.ensureIndex({"directoryPath":1,"filename":1});
         this._imageInfos.ensureIndex({"hash":1});
+        this._imageInfos.ensureIndex({"properties.takenDateTime":1});
     }
 
     async getById(id) {
@@ -112,7 +113,7 @@ export class ImageDataAccess {
             {$set: image},
             {upsert: true});
 
-        if (!image.pathHistory) {
+        if (!image.pathHistory && imageProperties) {
             image.pathHistory = [{
                 date: imageProperties.fileCreateDate,
                 filePath: path.join(directoryPath, filename)
@@ -123,16 +124,19 @@ export class ImageDataAccess {
     }
 
     async getDuplicates() {
-        let groups = await this._imageInfos.aggregate(
+        let groups = await this._imageInfos.aggregate([
+            {$match: {hash: {$ne: null}}},
             {$group: {_id: "$hash", count: {$sum: 1}}},
-            {$sort: {count: -1}},
-            {$match: {count: {$gt: 1}}});
+            {$match: {count: {$gt: 1}}},
+            {$sort: {count: -1}}
+        ]);
 
         let result = {};
         let resultPromises = [];
         for (let group of groups) {
+            let hash = group._id;
             let updateResult = async () => {
-                result[group.hash] = await this._imageInfos.find({hash: hash});
+                result[hash] = await this._imageInfos.find({hash: hash});
             };
 
             resultPromises.push(updateResult());
