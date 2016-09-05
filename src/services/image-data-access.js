@@ -14,6 +14,10 @@ export class ImageDataAccess {
         return await this._imageInfos.findOne({_id: id});
     }
 
+    async getByHash(hash) {
+        return await this._imageInfos.find({hash: hash});
+    }
+
     async getDiff(directoryPath, filenames) {
         directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
@@ -123,7 +127,7 @@ export class ImageDataAccess {
         }
     }
 
-    async getDuplicates() {
+    async listDuplicates() {
         let groups = await this._imageInfos.aggregate([
             {$match: {hash: {$ne: null}}},
             {$group: {_id: "$hash", count: {$sum: 1}}},

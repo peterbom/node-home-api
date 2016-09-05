@@ -39,7 +39,8 @@ export function getPhotoDuplicateRouteGenerator (permissionDataAccess, photoDupl
     }
 
     return RouteGenerator.create(permissionDataAccess, "home")
-        .get("/photo-duplicate", ctx => photoDuplicateResource.list(ctx), "manage");
+        .get("/photo-duplicate", ctx => photoDuplicateResource.list(ctx), "manage")
+        .get("/photo-duplicate/:id", ctx => photoDuplicateResource.get(ctx), "manage");
 }
 
 export function getPhotoThumbnailRouteGenerator(permissionDataAccess, photoThumbnailResource) {

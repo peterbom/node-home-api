@@ -6,8 +6,12 @@ export class PhotoDuplicateServices {
         this._imageDataAccess = imageDataAccess;
     }
 
-    async getDuplicates() {
-        return await this._imageDataAccess.getDuplicates();
+    async listDuplicates() {
+        return await this._imageDataAccess.listDuplicates();
+    }
+
+    async getDuplicates(hash) {
+        return await this._imageDataAccess.getByHash();
     }
 
     async resolveDuplicates(sameIds, differentIds) {

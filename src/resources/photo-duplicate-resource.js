@@ -5,8 +5,13 @@ export class PhotoDuplicateResource {
         this._photoDuplicateServices = photoDuplicateServices;
     }
 
+    async get (ctx) {
+        let hash = ctx.params.id;
+        ctx.body = await this._photoDuplicateServices.getDuplicates(hash);
+    }
+
     async list (ctx) {
-        ctx.body = await this._photoDuplicateServices.getDuplicates();
+        ctx.body = await this._photoDuplicateServices.listDuplicates();
     }
 
     async resolve (ctx) {
