@@ -42,6 +42,15 @@ export function getPhotoDuplicateRouteGenerator (permissionDataAccess, photoDupl
         .get("/photo-duplicate", ctx => photoDuplicateResource.list(ctx), "manage");
 }
 
+export function getPhotoThumbnailRouteGenerator(permissionDataAccess, photoThumbnailResource) {
+    if (photoThumbnailResource === undefined) {
+        throw new Error("photoThumbnailResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/photo-thumbnail/:id", ctx => photoThumbnailResource.get(ctx), "manage");
+}
+
 export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovementResource) {
     if (photoMovementResource === undefined) {
         throw new Error("photoMovementResource not defined");

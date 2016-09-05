@@ -10,6 +10,26 @@ export class ExifTool {
         this._toolPath = path.join(__dirname, "../../exiftool/exiftool.pl");
     }
 
+    async getThumbnail(filePath) {
+        let command = `perl ${this._toolPath} -b -ThumbnailImage "${filePath}"`;
+
+        let output = await exec(command, {
+            encoding: "binary",
+            maxBuffer: 100*1024,
+            timeout: timeout
+        });
+
+        if (output.stdout) {
+            return new Buffer(output.stdout, "binary");
+        } else {
+            if (output.stderr) {
+                throw output.stderr;
+            } else {
+                return null;
+            }
+        }
+    }
+
     async getAllTags(filePath) {
         let command = `perl ${this._toolPath} -s -a -j "${filePath}"`;
 
