@@ -7,11 +7,30 @@ export class PhotoDuplicateServices {
     }
 
     async listDuplicates() {
-        return await this._imageDataAccess.listDuplicates();
+        let hashes = await this._imageDataAccess.listDuplicateHashes();
+
+        let result = {};
+        let resultPromises = [];
+        for (let hash of hashes) {
+            let updateResult = async () => {
+                result[hash] = await this.getDuplicates(hash);
+            };
+
+            resultPromises.push(updateResult());
+        }
+
+        await Promise.all(resultPromises);
+        return result;
     }
 
     async getDuplicates(hash) {
-        return await this._imageDataAccess.getByHash();
+        let images = await this._imageDataAccess.getByHash(hash);
+        return images.map(image => ({
+            id: image._id,
+            directoryPath: image.directoryPath,
+            filename: image.filename,
+            properties: image.properties
+        }));
     }
 
     async resolveDuplicates(sameIds, differentIds) {

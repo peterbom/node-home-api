@@ -10,17 +10,14 @@ export class ExifTool {
         this._toolPath = path.join(__dirname, "../../exiftool/exiftool.pl");
     }
 
-    async getThumbnail(filePath) {
-        let command = `perl ${this._toolPath} -b -ThumbnailImage "${filePath}"`;
+    async getThumbnails(...filePaths) {
+        let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
+        let command = `perl ${this._toolPath} -j -b -SourceFile -ThumbnailImage ${pathArgs}`;
 
-        let output = await exec(command, {
-            encoding: "binary",
-            maxBuffer: 100*1024,
-            timeout: timeout
-        });
+        let output = await exec(command, {timeout: timeout});
 
         if (output.stdout) {
-            return new Buffer(output.stdout, "binary");
+            return JSON.parse(output.stdout);
         } else {
             if (output.stderr) {
                 throw output.stderr;
@@ -30,17 +27,18 @@ export class ExifTool {
         }
     }
 
-    async getAllTags(filePath) {
-        let command = `perl ${this._toolPath} -s -a -j "${filePath}"`;
+    async getAllTags(...filePaths) {
+        let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
+        let command = `perl ${this._toolPath} -s -a -j ${pathArgs}`;
 
         let output = await exec(command, {timeout: timeout});
         if (output.stdout) {
-            return JSON.parse(output.stdout)[0];
+            return JSON.parse(output.stdout);
         } else {
             if (output.stderr) {
                 throw output.stderr;
             } else {
-                return {};
+                return null;
             }
         }
     }

@@ -16,13 +16,14 @@ import {PermissionDataAccess} from "./services/permission-data-access";
 import {ImageDataAccess} from "./services/image-data-access";
 import {PhotoSyncServices} from "./services/photo-sync-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
+import {PhotoExifDataServices} from "./services/photo-exif-data-services";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
 import {UserResource} from "./resources/user-resource";
 import {PhotoSyncResource} from "./resources/photo-sync-resource";
 import {PhotoDuplicateResource} from "./resources/photo-duplicate-resource";
-import {PhotoThumbnailResource} from "./resources/photo-thumbnail-resource";
+import {PhotoExifDataResource} from "./resources/photo-exif-data-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
 
@@ -94,6 +95,9 @@ export function getDefaultComponents () {
     components.photoDuplicateServices = new PhotoDuplicateServices(
         components.exifTool,
         components.imageDataAccess);
+    components.photoExifDataServices = new PhotoExifDataServices(
+        components.exifTool,
+        components.imageDataAccess);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
@@ -102,7 +106,7 @@ export function getDefaultComponents () {
     components.userResource = new UserResource(components.userDataAccess);
     components.photoSyncResource = new PhotoSyncResource(components.photoSyncServices);
     components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
-    components.photoThumbnailResource = new PhotoThumbnailResource(components.exifTool);
+    components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
     components.photoMovementResource = new PhotoMovementResource();
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
@@ -127,7 +131,7 @@ export function getDefaultComponents () {
             routing.getUserRouteGenerator(components.permissionDataAccess, components.userResource),
             routing.getPhotoSyncRouteGenerator(components.permissionDataAccess, components.photoSyncResource),
             routing.getPhotoDuplicateRouteGenerator(components.permissionDataAccess, components.photoDuplicateResource),
-            routing.getPhotoThumbnailRouteGenerator(components.permissionDataAccess, components.photoThumbnailResource),
+            routing.getPhotoExifDataRouteGenerator(components.permissionDataAccess, components.photoExifDataResource),
             routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
         ]

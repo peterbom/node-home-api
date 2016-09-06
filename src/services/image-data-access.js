@@ -14,6 +14,10 @@ export class ImageDataAccess {
         return await this._imageInfos.findOne({_id: id});
     }
 
+    async getByIds(ids) {
+        return await this._imageInfos.find({_id: {$in: ids}});
+    }
+
     async getByHash(hash) {
         return await this._imageInfos.find({hash: hash});
     }
@@ -127,7 +131,7 @@ export class ImageDataAccess {
         }
     }
 
-    async listDuplicates() {
+    async listDuplicateHashes() {
         let groups = await this._imageInfos.aggregate([
             {$match: {hash: {$ne: null}}},
             {$group: {_id: "$hash", count: {$sum: 1}}},
@@ -135,19 +139,7 @@ export class ImageDataAccess {
             {$sort: {count: -1}}
         ]);
 
-        let result = {};
-        let resultPromises = [];
-        for (let group of groups) {
-            let hash = group._id;
-            let updateResult = async () => {
-                result[hash] = await this._imageInfos.find({hash: hash});
-            };
-
-            resultPromises.push(updateResult());
-        }
-
-        await Promise.all(resultPromises);
-        return result;
+        return groups.map(group => group._id);
     }
 
     async combineDuplicateHistories(ids) {
