@@ -40,7 +40,8 @@ export function getPhotoDuplicateRouteGenerator (permissionDataAccess, photoDupl
 
     return RouteGenerator.create(permissionDataAccess, "home")
         .get("/photo-duplicate", ctx => photoDuplicateResource.list(ctx), "manage")
-        .get("/photo-duplicate/:id", ctx => photoDuplicateResource.get(ctx), "manage");
+        .get("/photo-duplicate/:id", ctx => photoDuplicateResource.get(ctx), "manage")
+        .post("/photo-duplicate", ctx => photoDuplicateResource.resolve(ctx), "manage");
 }
 
 export function getPhotoExifDataRouteGenerator(permissionDataAccess, photoExifDataResource) {
@@ -51,6 +52,15 @@ export function getPhotoExifDataRouteGenerator(permissionDataAccess, photoExifDa
     return RouteGenerator.create(permissionDataAccess, "home")
         .get("/photo-exif-data", ctx => photoExifDataResource.query(ctx), "manage")
         .get("/photo-exif-data/:id", ctx => photoExifDataResource.get(ctx), "manage");
+}
+
+export function getPhotoImageRouteGenerator(permissionDataAccess, photoImageResource) {
+    if (photoImageResource === undefined) {
+        throw new Error("photoImageResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/photo-image", ctx => photoImageResource.query(ctx), "manage");
 }
 
 export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovementResource) {

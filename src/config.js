@@ -17,6 +17,7 @@ import {ImageDataAccess} from "./services/image-data-access";
 import {PhotoSyncServices} from "./services/photo-sync-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
 import {PhotoExifDataServices} from "./services/photo-exif-data-services";
+import {PhotoImageServices} from "./services/photo-image-services";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
@@ -24,6 +25,7 @@ import {UserResource} from "./resources/user-resource";
 import {PhotoSyncResource} from "./resources/photo-sync-resource";
 import {PhotoDuplicateResource} from "./resources/photo-duplicate-resource";
 import {PhotoExifDataResource} from "./resources/photo-exif-data-resource";
+import {PhotoImageResource} from "./resources/photo-image-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
 
@@ -98,6 +100,7 @@ export function getDefaultComponents () {
     components.photoExifDataServices = new PhotoExifDataServices(
         components.exifTool,
         components.imageDataAccess);
+    components.photoImageServices = new PhotoImageServices(components.imageDataAccess);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
@@ -107,6 +110,7 @@ export function getDefaultComponents () {
     components.photoSyncResource = new PhotoSyncResource(components.photoSyncServices);
     components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
+    components.photoImageResource = new PhotoImageResource(components.photoImageServices);
     components.photoMovementResource = new PhotoMovementResource();
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
@@ -132,6 +136,7 @@ export function getDefaultComponents () {
             routing.getPhotoSyncRouteGenerator(components.permissionDataAccess, components.photoSyncResource),
             routing.getPhotoDuplicateRouteGenerator(components.permissionDataAccess, components.photoDuplicateResource),
             routing.getPhotoExifDataRouteGenerator(components.permissionDataAccess, components.photoExifDataResource),
+            routing.getPhotoImageRouteGenerator(components.permissionDataAccess, components.photoImageResource),
             routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
         ]

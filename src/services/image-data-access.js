@@ -22,6 +22,14 @@ export class ImageDataAccess {
         return await this._imageInfos.find({hash: hash});
     }
 
+    async findUnreadable() {
+        return await this._imageInfos.find({properties: null});
+    }
+
+    async findMissingTakenDate() {
+        return await this._imageInfos.find({"properties.takenDateTime": null});
+    }
+
     async getDiff(directoryPath, filenames) {
         directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
@@ -85,6 +93,13 @@ export class ImageDataAccess {
         directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
         await this._imageInfos.remove({directoryPath: directoryPath, filename: {$nin: filenames}});
+    }
+
+    async invalidateImageIds(ids) {
+        await this._imageInfos.update(
+            {_id: {$in: ids}},
+            {$set: {valid: false}},
+            {multi: true});
     }
 
     async invalidateImage(directoryPath, filename) {
@@ -157,7 +172,8 @@ export class ImageDataAccess {
 
         // Merge all the pathHistories together and order by date
         let allPathHistoryEvents = duplicates
-            .reduce((img1, img2) => img1.pathHistory.concat(img2.pathHistory), [])
+            .map(img => img.pathHistory)
+            .reduce((history1, history2) => history1.concat(history2), [])
             .sort((event1, event2) => event1.date - event2.date);
 
         // Remove duplicates (including events where the path is unchanged)

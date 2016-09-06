@@ -1,4 +1,5 @@
 import {Log} from "../shared/log";
+import path from "path";
 
 export class PhotoDuplicateServices {
     constructor (exifTool, imageDataAccess) {
@@ -38,18 +39,15 @@ export class PhotoDuplicateServices {
             await this._imageDataAccess.combineDuplicateHistories(sameIds);
         }
 
-        let differentImages = await Promise.all(differentIds.map(id => this._imageDataAccess.getById(id)));
+        let differentImages = await this._imageDataAccess.getByIds(differentIds);
         let imageNumber = 1;
         let directoryPathLookup = {};
         for (let image of differentImages) {
             directoryPathLookup[image.directoryPath] = true;
             let filePath = path.join(image.directoryPath, image.filename);
             await this._exifTool.setImageNumber(filePath, imageNumber++);
-            await this._imageDataAccess.invalidateImage(image.directoryPath, image.filename);
         }
 
-        for (directoryPath in directoryPathLookup) {
-            await this.index(directoryPath, 100);
-        }
+        await this._imageDataAccess.invalidateImageIds(differentIds);
     }
 }
