@@ -13,7 +13,7 @@ import {FileFinder} from "./services/file-finder";
 import {ExifTool} from "./services/exif-tool";
 import {UserDataAccess} from "./services/user-data-access";
 import {PermissionDataAccess} from "./services/permission-data-access";
-import {ImageDataAccess} from "./services/image-data-access";
+import {PhotoImageDataAccess} from "./services/photo-image-data-access";
 import {PhotoIndexServices} from "./services/photo-index-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
 import {PhotoExifDataServices} from "./services/photo-exif-data-services";
@@ -88,19 +88,19 @@ export function getDefaultComponents () {
     components.exifTool = new ExifTool();
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
-    components.imageDataAccess = new ImageDataAccess(components.dbManager);
+    components.photoImageDataAccess = new PhotoImageDataAccess(components.dbManager);
     components.photoIndexServices = new PhotoIndexServices(
         components.exifTool,
-        components.imageDataAccess,
+        components.photoImageDataAccess,
         components.fileFinder,
         [settings.stagingPhotoPath, settings.targetPhotoPath]);
     components.photoDuplicateServices = new PhotoDuplicateServices(
         components.exifTool,
-        components.imageDataAccess);
+        components.photoImageDataAccess);
     components.photoExifDataServices = new PhotoExifDataServices(
         components.exifTool,
-        components.imageDataAccess);
-    components.photoImageServices = new PhotoImageServices(components.imageDataAccess);
+        components.photoImageDataAccess);
+    components.photoImageServices = new PhotoImageServices(components.photoImageDataAccess);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);

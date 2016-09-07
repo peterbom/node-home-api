@@ -1,17 +1,17 @@
 import {Log} from "../shared/log";
 
 export class PhotoImageServices {
-    constructor (imageDataAccess) {
-        this._imageDataAccess = imageDataAccess;
+    constructor (photoImageDataAccess) {
+        this._photoImageDataAccess = photoImageDataAccess;
     }
 
     async findUnreadable () {
-        let images = await this._imageDataAccess.findUnreadable();
+        let images = await this._photoImageDataAccess.findUnreadable();
         return toReturn(images);
     }
 
     async findMissingTakenDate () {
-        let images = await this._imageDataAccess.findMissingTakenDate();
+        let images = await this._photoImageDataAccess.findMissingTakenDate();
         return toReturn(images);
     }
 }

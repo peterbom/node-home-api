@@ -2,16 +2,16 @@ import {Log} from "../shared/log";
 import path from "path";
 import md5 from "md5";
 
-export class ImageDataAccess {
+export class PhotoImageDataAccess {
     constructor(dbManager) {
-        this._imageInfos = dbManager.get("imageInfos");
-        this._imageInfos.ensureIndex({"directoryPath":1,"filename":1});
-        this._imageInfos.ensureIndex({"hash":1});
-        this._imageInfos.ensureIndex({"properties.takenDateTime":1});
+        this._photoImages = dbManager.get("photoImages");
+        this._photoImages.ensureIndex({"directoryPath":1,"filename":1});
+        this._photoImages.ensureIndex({"hash":1});
+        this._photoImages.ensureIndex({"properties.takenDateTime":1});
     }
 
     async getById(id) {
-        return await this._imageInfos.findOne({_id: id});
+        return await this._photoImages.findOne({_id: id});
     }
 
     async getByIds(ids, includeInvalid = false) {
@@ -20,7 +20,7 @@ export class ImageDataAccess {
             criteria.valid = true;
         }
 
-        return await this._imageInfos.find(criteria);
+        return await this._photoImages.find(criteria);
     }
 
     async getByHash(hash, includeInvalid = false) {
@@ -29,7 +29,7 @@ export class ImageDataAccess {
             criteria.valid = true;
         }
 
-        return await this._imageInfos.find(criteria);
+        return await this._photoImages.find(criteria);
     }
 
     async getByPath(directoryPath, includeInvalid = false) {
@@ -40,22 +40,22 @@ export class ImageDataAccess {
             criteria.valid = true;
         }
 
-        return await this._imageInfos.find(criteria);
+        return await this._photoImages.find(criteria);
     }
 
     async findUnreadable() {
-        return await this._imageInfos.find({properties: null, valid: true});
+        return await this._photoImages.find({properties: null, valid: true});
     }
 
     async findMissingTakenDate() {
-        return await this._imageInfos.find({"properties.takenDateTime": null, valid: true});
+        return await this._photoImages.find({"properties.takenDateTime": null, valid: true});
     }
 
     async getDiff(directoryPath, filenames) {
         directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
 
-        let indexedResults = await this._imageInfos.find(
+        let indexedResults = await this._photoImages.find(
             {directoryPath: directoryPath, valid: true},
             {filename: 1});
 
@@ -91,7 +91,7 @@ export class ImageDataAccess {
     }
 
     async getIndexedDirectories() {
-        let groups = await this._imageInfos.aggregate(
+        let groups = await this._photoImages.aggregate(
             {$group: {_id: "$directoryPath", count: {$sum: 1}}}
         );
 
@@ -104,15 +104,15 @@ export class ImageDataAccess {
     async cleanExcept(directoryPath, filenames) {
         directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
-        await this._imageInfos.remove({directoryPath: directoryPath, filename: {$nin: filenames}});
+        await this._photoImages.remove({directoryPath: directoryPath, filename: {$nin: filenames}});
     }
 
     async cleanIds(ids) {
-        await this._imageInfos.remove({_id: {$in: ids}});
+        await this._photoImages.remove({_id: {$in: ids}});
     }
 
     async invalidateImageIds(ids) {
-        await this._imageInfos.update(
+        await this._photoImages.update(
             {_id: {$in: ids}},
             {$set: {valid: false}},
             {multi: true});
@@ -122,14 +122,14 @@ export class ImageDataAccess {
         directoryPath = directoryPath.toLowerCase();
         filename = filename.toLowerCase();
 
-        await this._imageInfos.update(
+        await this._photoImages.update(
             {directoryPath: directoryPath, filename: filename},
             {$set: {valid: false}});
     }
 
     async invalidateImages(directoryPath) {
         directoryPath = directoryPath.toLowerCase();
-        await this._imageInfos.update(
+        await this._photoImages.update(
             {directoryPath: directoryPath},
             {$set: {valid: false}},
             {multi: true});
@@ -147,7 +147,7 @@ export class ImageDataAccess {
             valid: true
         };
 
-        image = await this._imageInfos.findOneAndUpdate(
+        image = await this._photoImages.findOneAndUpdate(
             {directoryPath: directoryPath, filename: filename},
             {$set: image},
             {upsert: true});
@@ -158,12 +158,12 @@ export class ImageDataAccess {
                 filePath: path.join(directoryPath, filename)
             }];
 
-            image = await this._imageInfos.update({_id: image._id}, image);
+            image = await this._photoImages.update({_id: image._id}, image);
         }
     }
 
     async listDuplicateHashes() {
-        let groups = await this._imageInfos.aggregate([
+        let groups = await this._photoImages.aggregate([
             {$match: {hash: {$ne: null}}},
             {$group: {_id: "$hash", count: {$sum: 1}}},
             {$match: {count: {$gt: 1}}},
@@ -174,7 +174,7 @@ export class ImageDataAccess {
     }
 
     async combineDuplicateHistories(ids) {
-        let duplicates = await this._imageInfos.find({_id: {$in: ids}});
+        let duplicates = await this._photoImages.find({_id: {$in: ids}});
 
         if (duplicates.length < 2) {
             // No duplicates
@@ -211,7 +211,7 @@ export class ImageDataAccess {
                 return event.date <= latestDate;
             });
 
-            updatePromises.push(this._imageInfos.update({_id: duplicate._id}, duplicate));
+            updatePromises.push(this._photoImages.update({_id: duplicate._id}, duplicate));
         }
 
         await Promise.all(updatePromises);

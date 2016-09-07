@@ -2,13 +2,13 @@ import {Log} from "../shared/log";
 import path from "path";
 
 export class PhotoDuplicateServices {
-    constructor (exifTool, imageDataAccess) {
+    constructor (exifTool, photoImageDataAccess) {
         this._exifTool = exifTool;
-        this._imageDataAccess = imageDataAccess;
+        this._photoImageDataAccess = photoImageDataAccess;
     }
 
     async listDuplicates() {
-        let hashes = await this._imageDataAccess.listDuplicateHashes();
+        let hashes = await this._photoImageDataAccess.listDuplicateHashes();
 
         let result = {};
         let resultPromises = [];
@@ -25,7 +25,7 @@ export class PhotoDuplicateServices {
     }
 
     async getDuplicates(hash) {
-        let images = await this._imageDataAccess.getByHash(hash);
+        let images = await this._photoImageDataAccess.getByHash(hash);
         return images.map(image => ({
             id: image._id,
             directoryPath: image.directoryPath,
@@ -36,10 +36,10 @@ export class PhotoDuplicateServices {
 
     async resolveDuplicates(sameIds, differentIds) {
         if (sameIds.length > 1) {
-            await this._imageDataAccess.combineDuplicateHistories(sameIds);
+            await this._photoImageDataAccess.combineDuplicateHistories(sameIds);
         }
 
-        let differentImages = await this._imageDataAccess.getByIds(differentIds);
+        let differentImages = await this._photoImageDataAccess.getByIds(differentIds);
         let imageNumber = 1;
         let directoryPathLookup = {};
         for (let image of differentImages) {
@@ -48,6 +48,6 @@ export class PhotoDuplicateServices {
             await this._exifTool.setImageNumber(filePath, imageNumber++);
         }
 
-        await this._imageDataAccess.invalidateImageIds(differentIds);
+        await this._photoImageDataAccess.invalidateImageIds(differentIds);
     }
 }

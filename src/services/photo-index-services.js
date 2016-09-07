@@ -2,9 +2,9 @@ import {Log} from "../shared/log";
 import path from "path";
 
 export class PhotoIndexServices {
-    constructor (exifTool, imageDataAccess, fileFinder, photoBaseDirectories) {
+    constructor (exifTool, photoImageDataAccess, fileFinder, photoBaseDirectories) {
         this._exifTool = exifTool;
-        this._imageDataAccess = imageDataAccess;
+        this._photoImageDataAccess = photoImageDataAccess;
         this._fileFinder = fileFinder;
         this._photoBaseDirectories = photoBaseDirectories;
     }
@@ -43,7 +43,7 @@ export class PhotoIndexServices {
             directories.push(directory);
 
             let directoryDiff = async () => {
-                let diff = await this._imageDataAccess.getDiff(directoryPath, files);
+                let diff = await this._photoImageDataAccess.getDiff(directoryPath, files);
                 directory.newFileCount = diff.new.length;
                 directory.deletedFileCount = diff.deleted.length;
             };
@@ -51,7 +51,7 @@ export class PhotoIndexServices {
             diffPromises.push(directoryDiff());
         }
 
-        let indexedDirectories = await this._imageDataAccess.getIndexedDirectories();
+        let indexedDirectories = await this._photoImageDataAccess.getIndexedDirectories();
         for (let indexedDirectory of indexedDirectories) {
             if (!directories.some(d => d.directoryPath.toLowerCase() === indexedDirectory.directoryPath)) {
                 directories.push({
@@ -69,15 +69,15 @@ export class PhotoIndexServices {
     }
 
     async invalidatePath (directoryPath) {
-        await this._imageDataAccess.invalidateImages(directoryPath);
+        await this._photoImageDataAccess.invalidateImages(directoryPath);
     }
 
     async invalidateImageIds(ids) {
-        await this._imageDataAccess.invalidateImageIds(ids);
+        await this._photoImageDataAccess.invalidateImageIds(ids);
     }
 
     async indexPath (directoryPath, maxIndexCount) {
-        let indexedImages = await this._imageDataAccess.getByPath(directoryPath);
+        let indexedImages = await this._photoImageDataAccess.getByPath(directoryPath);
 
         let indexedFilenameLookup = {};
         indexedImages.forEach(img => indexedFilenameLookup[img.filename] = true);
@@ -100,7 +100,7 @@ export class PhotoIndexServices {
         await setPropertiesForImageInfos(this._exifTool, imageInfos);
 
         let imagePromises = imageInfos.map(i =>
-            this._imageDataAccess.upsertImage(i.directoryPath, i.filename, i.properties));
+            this._photoImageDataAccess.upsertImage(i.directoryPath, i.filename, i.properties));
 
         await Promise.all(imagePromises);
 
@@ -111,7 +111,7 @@ export class PhotoIndexServices {
     }
 
     async indexImageIds (ids) {
-        let images = await this._imageDataAccess.getByIds(ids);
+        let images = await this._photoImageDataAccess.getByIds(ids);
 
         let imageInfos = images.map(i => ({
             directoryPath: i.directoryPath,
@@ -121,7 +121,7 @@ export class PhotoIndexServices {
         await setPropertiesForImageInfos(this._exifTool, imageInfos);
 
         let imagePromises = imageInfos.map(i =>
-            this._imageDataAccess.upsertImage(i.directoryPath, i.filename, i.properties));
+            this._photoImageDataAccess.upsertImage(i.directoryPath, i.filename, i.properties));
 
         await Promise.all(imagePromises);
     }
@@ -129,24 +129,21 @@ export class PhotoIndexServices {
     async cleanPath (directoryPath) {
         // Get all the files on disk
         let filenames = await this._fileFinder.getFiles(directoryPath, /^(?!.*\.db$)/);
-        await this._imageDataAccess.cleanExcept(directoryPath, filenames);
+        await this._photoImageDataAccess.cleanExcept(directoryPath, filenames);
     }
 
     async cleanImageIds (ids) {
-        await this._imageDataAccess.cleanIds(ids);
+        await this._photoImageDataAccess.cleanIds(ids);
     }
 }
 
 async function setPropertiesForImageInfos(exifTool, imageInfos) {
     let filePaths = [];
     let imageInfoLookup = {};
-    imageInfos.forEach(i => {
-        let filePath = path.join(i.directoryPath, i.filename);
+    imageInfos.forEach(imageInfo => {
+        let filePath = path.join(imageInfo.directoryPath, imageInfo.filename);
         filePaths.push(filePath);
-        imageInfoLookup[filePath] = {
-            directoryPath: i.directoryPath,
-            filename: i.filename
-        }
+        imageInfoLookup[filePath] = imageInfo;
     });
 
     // Attempt to read all files first
@@ -162,6 +159,7 @@ async function setPropertiesForImageInfos(exifTool, imageInfos) {
 
     for (let filePath in allFilesPropertyLookup) {
         let imageInfo = imageInfoLookup[filePath];
-        imageInfo.properties = allFilesPropertyLookup[filePath];  // Can be null for unreadable files
+        let properties = allFilesPropertyLookup[filePath];  // Can be null for unreadable files
+        imageInfo.properties = properties;
     }
 }
