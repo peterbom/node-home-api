@@ -72,6 +72,16 @@ export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovem
         .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 
+export function getFileRouteGenerator (permissionDataAccess, fileResource) {
+    if (fileResource === undefined) {
+        throw new Error("fileResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .delete("/file", ctx => fileResource.deleteCriteria(ctx), "manage")
+        .delete("/file/:filePath", ctx => fileResource.deleteFilePath(ctx), "manage");
+}
+
 export function getMachineStatusRouteGenerator (permissionDataAccess, machineStatusResource) {
     if (machineStatusResource === undefined) {
         throw new Error("machineStatusResource not defined");

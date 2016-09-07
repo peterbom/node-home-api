@@ -206,7 +206,7 @@ export class PhotoImageDataAccess {
         // the current latest date
         let updatePromises = [];
         for (let duplicate of duplicates) {
-            let latestDate = duplicate.pathHistory[duplicates.pathHistory.length - 1].date;
+            let latestDate = duplicate.pathHistory[duplicate.pathHistory.length - 1].date;
             duplicate.pathHistory = uniquePathHistoryEvents.filter(event => {
                 return event.date <= latestDate;
             });

@@ -25,6 +25,10 @@ export class PhotoExifDataServices {
 }
 
 async function imagesToExifData(exifTool, images, includeAll, includeThumbnails) {
+    if (!images.length) {
+        return {};
+    }
+
     let filePaths = images.map(i => path.join(i.directoryPath, i.filename));
 
     let results = {};

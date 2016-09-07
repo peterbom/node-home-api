@@ -18,6 +18,7 @@ import {PhotoIndexServices} from "./services/photo-index-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
 import {PhotoExifDataServices} from "./services/photo-exif-data-services";
 import {PhotoImageServices} from "./services/photo-image-services";
+import {FileServices} from "./services/file-services";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
@@ -27,6 +28,7 @@ import {PhotoDuplicateResource} from "./resources/photo-duplicate-resource";
 import {PhotoExifDataResource} from "./resources/photo-exif-data-resource";
 import {PhotoImageResource} from "./resources/photo-image-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
+import {FileResource} from "./resources/file-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
 
 // Middleware
@@ -101,6 +103,7 @@ export function getDefaultComponents () {
         components.exifTool,
         components.photoImageDataAccess);
     components.photoImageServices = new PhotoImageServices(components.photoImageDataAccess);
+    components.fileServices = new FileServices();
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
@@ -112,6 +115,7 @@ export function getDefaultComponents () {
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
     components.photoImageResource = new PhotoImageResource(components.photoImageServices);
     components.photoMovementResource = new PhotoMovementResource();
+    components.fileResource = new FileResource(components.fileServices);
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
     components.middleware = {
@@ -138,6 +142,7 @@ export function getDefaultComponents () {
             routing.getPhotoExifDataRouteGenerator(components.permissionDataAccess, components.photoExifDataResource),
             routing.getPhotoImageRouteGenerator(components.permissionDataAccess, components.photoImageResource),
             routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
+            routing.getFileRouteGenerator(components.permissionDataAccess, components.fileResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
         ]
     };

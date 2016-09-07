@@ -136,7 +136,7 @@ export class ExifTool {
                 camera: camera,
                 tags: tags,
                 pixelCount: info.ImageWidth * info.ImageHeight,
-                imageNumber: info.imageNumber || 0,
+                imageNumber: info.ImageNumber || 0,
                 fileType: info.FileType
             };
         }
