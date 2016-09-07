@@ -1,7 +1,7 @@
 import {Log} from "../shared/log";
 import path from "path";
 
-export class PhotoSyncServices {
+export class PhotoIndexServices {
     constructor (exifTool, imageDataAccess, fileFinder, photoBaseDirectories) {
         this._exifTool = exifTool;
         this._imageDataAccess = imageDataAccess;
@@ -68,15 +68,19 @@ export class PhotoSyncServices {
         return directories;
     }
 
-    async invalidate (directoryPath) {
+    async invalidatePath (directoryPath) {
         await this._imageDataAccess.invalidateImages(directoryPath);
     }
 
-    async index (directoryPath, maxIndexCount) {
-        let indexedFilenames = await this._imageDataAccess.getImageFilenames(directoryPath);
+    async invalidateImageIds(ids) {
+        await this._imageDataAccess.invalidateImageIds(ids);
+    }
+
+    async indexPath (directoryPath, maxIndexCount) {
+        let indexedImages = await this._imageDataAccess.getByPath(directoryPath);
 
         let indexedFilenameLookup = {};
-        indexedFilenames.forEach(f => indexedFilenameLookup[f] = true);
+        indexedImages.forEach(img => indexedFilenameLookup[img.filename] = true);
 
         // Get all the files on disk
         let filenames = await this._fileFinder.getFiles(directoryPath, /^(?!.*\.db$)/);
@@ -88,12 +92,15 @@ export class PhotoSyncServices {
         // Only attempt the first maxIndexCount to keep time down
         let batch = filenames.splice(0, maxIndexCount);
 
-        let filePropertyLookup = await getFilePropertyLookup(this._exifTool, directoryPath, batch);
-        let imagePromises = [];
-        for (let filename in filePropertyLookup) {
-            let properties =  filePropertyLookup[filename];  // Can be null for unreadable files
-            imagePromises.push(this._imageDataAccess.upsertImage(directoryPath, filename, properties));
-        }
+        let imageInfos = batch.map(f => ({
+            directoryPath: directoryPath,
+            filename: f
+        }));
+
+        await setPropertiesForImageInfos(this._exifTool, imageInfos);
+
+        let imagePromises = imageInfos.map(i =>
+            this._imageDataAccess.upsertImage(i.directoryPath, i.filename, i.properties));
 
         await Promise.all(imagePromises);
 
@@ -103,33 +110,58 @@ export class PhotoSyncServices {
         };
     }
 
-    async clean (directoryPath) {
+    async indexImageIds (ids) {
+        let images = await this._imageDataAccess.getByIds(ids);
+
+        let imageInfos = images.map(i => ({
+            directoryPath: i.directoryPath,
+            filename: i.filename
+        }));
+
+        await setPropertiesForImageInfos(this._exifTool, imageInfos);
+
+        let imagePromises = imageInfos.map(i =>
+            this._imageDataAccess.upsertImage(i.directoryPath, i.filename, i.properties));
+
+        await Promise.all(imagePromises);
+    }
+
+    async cleanPath (directoryPath) {
         // Get all the files on disk
         let filenames = await this._fileFinder.getFiles(directoryPath, /^(?!.*\.db$)/);
         await this._imageDataAccess.cleanExcept(directoryPath, filenames);
     }
+
+    async cleanImageIds (ids) {
+        await this._imageDataAccess.cleanIds(ids);
+    }
 }
 
-async function getFilePropertyLookup(exifTool, directoryPath, filenames) {
-    if (!filenames.length) {
-        return {};
-    }
-
-    let filePaths = filenames.map(f => path.join(directoryPath, f));
+async function setPropertiesForImageInfos(exifTool, imageInfos) {
+    let filePaths = [];
+    let imageInfoLookup = {};
+    imageInfos.forEach(i => {
+        let filePath = path.join(i.directoryPath, i.filename);
+        filePaths.push(filePath);
+        imageInfoLookup[filePath] = {
+            directoryPath: i.directoryPath,
+            filename: i.filename
+        }
+    });
 
     // Attempt to read all files first
-    let filePropertyLookup = await exifTool.getProperties(...filePaths);
-    if (filePropertyLookup) {
-        return filePropertyLookup;
+    let allFilesPropertyLookup = await exifTool.getProperties(...filePaths);
+    if (!allFilesPropertyLookup) {
+        // Reading all files failed. Attempt them one-by-one
+        allFilesPropertyLookup = {};
+        for (let filePath of filePaths) {
+            let filePropertyLookup = await exifTool.getProperties(filePath);
+            allFilesPropertyLookup[filePath] = filePropertyLookup ? filePropertyLookup[filePath] : null;
+        }
     }
 
-    // Reading all files failed. Attempt them one-by-one
-    let results = {};
-    for (let filename of filenames) {
-        let filePath = path.join(directoryPath, filename);
-        filePropertyLookup = await exifTool.getProperties(filePath);
-        results[filename] = filePropertyLookup ? filePropertyLookup[filename] : null;
+    for (let filePath in allFilesPropertyLookup) {
+        let imageInfo = imageInfoLookup[filePath];
+        imageInfo.properties = allFilesPropertyLookup[filePath];  // Can be null for unreadable files
     }
-
-    return results;
 }

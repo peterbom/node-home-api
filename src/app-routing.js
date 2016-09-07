@@ -23,14 +23,14 @@ export function getUserRouteGenerator (permissionDataAccess, userResource) {
         .delete('/user/:id', ctx => userResource.remove(ctx), "maintain");
 }
 
-export function getPhotoSyncRouteGenerator (permissionDataAccess, photoSyncResource) {
-    if (photoSyncResource === undefined) {
-        throw new Error("photoSyncResource not defined");
+export function getPhotoIndexRouteGenerator (permissionDataAccess, photoIndexResource) {
+    if (photoIndexResource === undefined) {
+        throw new Error("photoIndexResource not defined");
     }
 
     return RouteGenerator.create(permissionDataAccess, "home")
-        .get("/photo-sync", ctx => photoSyncResource.compare(ctx), "manage")
-        .put("/photo-sync/:id", ctx => photoSyncResource.update(ctx), "manage");
+        .get("/photo-index", ctx => photoIndexResource.compare(ctx), "manage")
+        .post("/photo-index", ctx => photoIndexResource.apply(ctx), "manage");
 }
 
 export function getPhotoDuplicateRouteGenerator (permissionDataAccess, photoDuplicateResource) {

@@ -14,20 +14,41 @@ export class ImageDataAccess {
         return await this._imageInfos.findOne({_id: id});
     }
 
-    async getByIds(ids) {
-        return await this._imageInfos.find({_id: {$in: ids}});
+    async getByIds(ids, includeInvalid = false) {
+        let criteria = {_id: {$in: ids}};
+        if (!includeInvalid) {
+            criteria.valid = true;
+        }
+
+        return await this._imageInfos.find(criteria);
     }
 
-    async getByHash(hash) {
-        return await this._imageInfos.find({hash: hash});
+    async getByHash(hash, includeInvalid = false) {
+        let criteria = {hash: hash};
+        if (!includeInvalid) {
+            criteria.valid = true;
+        }
+
+        return await this._imageInfos.find(criteria);
+    }
+
+    async getByPath(directoryPath, includeInvalid = false) {
+        directoryPath = directoryPath.toLowerCase();
+
+        let criteria = {directoryPath: directoryPath};
+        if (!includeInvalid) {
+            criteria.valid = true;
+        }
+
+        return await this._imageInfos.find(criteria);
     }
 
     async findUnreadable() {
-        return await this._imageInfos.find({properties: null});
+        return await this._imageInfos.find({properties: null, valid: true});
     }
 
     async findMissingTakenDate() {
-        return await this._imageInfos.find({"properties.takenDateTime": null});
+        return await this._imageInfos.find({"properties.takenDateTime": null, valid: true});
     }
 
     async getDiff(directoryPath, filenames) {
@@ -80,19 +101,14 @@ export class ImageDataAccess {
         }));
     }
 
-    async getImageFilenames(directoryPath) {
-        directoryPath = directoryPath.toLowerCase();
-        let images = await this._imageInfos.find(
-            {directoryPath: directoryPath, valid: true},
-            {filename: 1});
-
-        return images.map(i => i.filename);
-    }
-
     async cleanExcept(directoryPath, filenames) {
         directoryPath = directoryPath.toLowerCase();
         filenames = filenames.map(f => f.toLowerCase());
         await this._imageInfos.remove({directoryPath: directoryPath, filename: {$nin: filenames}});
+    }
+
+    async cleanIds(ids) {
+        await this._imageInfos.remove({_id: {$in: ids}});
     }
 
     async invalidateImageIds(ids) {

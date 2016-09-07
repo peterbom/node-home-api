@@ -14,7 +14,7 @@ import {ExifTool} from "./services/exif-tool";
 import {UserDataAccess} from "./services/user-data-access";
 import {PermissionDataAccess} from "./services/permission-data-access";
 import {ImageDataAccess} from "./services/image-data-access";
-import {PhotoSyncServices} from "./services/photo-sync-services";
+import {PhotoIndexServices} from "./services/photo-index-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
 import {PhotoExifDataServices} from "./services/photo-exif-data-services";
 import {PhotoImageServices} from "./services/photo-image-services";
@@ -22,7 +22,7 @@ import {PhotoImageServices} from "./services/photo-image-services";
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
 import {UserResource} from "./resources/user-resource";
-import {PhotoSyncResource} from "./resources/photo-sync-resource";
+import {PhotoIndexResource} from "./resources/photo-index-resource";
 import {PhotoDuplicateResource} from "./resources/photo-duplicate-resource";
 import {PhotoExifDataResource} from "./resources/photo-exif-data-resource";
 import {PhotoImageResource} from "./resources/photo-image-resource";
@@ -89,7 +89,7 @@ export function getDefaultComponents () {
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
     components.imageDataAccess = new ImageDataAccess(components.dbManager);
-    components.photoSyncServices = new PhotoSyncServices(
+    components.photoIndexServices = new PhotoIndexServices(
         components.exifTool,
         components.imageDataAccess,
         components.fileFinder,
@@ -107,7 +107,7 @@ export function getDefaultComponents () {
 
     components.permissionResource = new PermissionResource(components.permissionDataAccess);
     components.userResource = new UserResource(components.userDataAccess);
-    components.photoSyncResource = new PhotoSyncResource(components.photoSyncServices);
+    components.photoIndexResource = new PhotoIndexResource(components.photoIndexServices);
     components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
     components.photoImageResource = new PhotoImageResource(components.photoImageServices);
@@ -133,7 +133,7 @@ export function getDefaultComponents () {
 
         securedRouteGenerators: [
             routing.getUserRouteGenerator(components.permissionDataAccess, components.userResource),
-            routing.getPhotoSyncRouteGenerator(components.permissionDataAccess, components.photoSyncResource),
+            routing.getPhotoIndexRouteGenerator(components.permissionDataAccess, components.photoIndexResource),
             routing.getPhotoDuplicateRouteGenerator(components.permissionDataAccess, components.photoDuplicateResource),
             routing.getPhotoExifDataRouteGenerator(components.permissionDataAccess, components.photoExifDataResource),
             routing.getPhotoImageRouteGenerator(components.permissionDataAccess, components.photoImageResource),

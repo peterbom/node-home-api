@@ -87,7 +87,10 @@ export class ExifTool {
         }
 
         let results = {};
-        for (let info of infos) {
+        for (let i = 0; i < filePaths.length; i++) {
+            let info = infos[i];
+            let filePath = filePaths[i];
+
             let takenDateTime = null;
             ["DateTimeOriginal", "CreateDate", "MediaCreateDate", "DateTime1", "DateTime2"].forEach(prop => {
                 takenDateTime = takenDateTime || tryGetDate(info[prop]);
@@ -125,7 +128,7 @@ export class ExifTool {
                 }
             }
 
-            results[info.FileName] = {
+            results[filePath] = {
                 takenDateTime: takenDateTime,
                 fileModifyDate: fileModifyDate,
                 fileCreateDate: fileCreateDate,
