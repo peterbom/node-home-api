@@ -111,7 +111,9 @@ export class PhotoIndexServices {
     }
 
     async indexImageIds (ids) {
-        let images = await this._photoImageDataAccess.getByIds(ids);
+        // Pass 'true' to include invalidated images (the whole point of invalidating
+        // them is to cause them to be re-indexed, so we really do want invalid ones too).
+        let images = await this._photoImageDataAccess.getByIds(ids, true);
 
         let imageInfos = images.map(i => ({
             directoryPath: i.directoryPath,

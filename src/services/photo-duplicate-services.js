@@ -45,7 +45,7 @@ export class PhotoDuplicateServices {
         for (let image of differentImages) {
             directoryPathLookup[image.directoryPath] = true;
             let filePath = path.join(image.directoryPath, image.filename);
-            await this._exifTool.setImageNumber(filePath, imageNumber++);
+            await this._exifTool.setIntegerProperty(filePath, "ImageNumber", imageNumber++);
         }
 
         await this._photoImageDataAccess.invalidateImageIds(differentIds);

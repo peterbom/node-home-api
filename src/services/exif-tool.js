@@ -14,16 +14,16 @@ export class ExifTool {
         let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
         let command = `perl ${this._toolPath} -j -b -SourceFile -ThumbnailImage ${pathArgs}`;
 
-        let output = await exec(command, {timeout: timeout});
+        try {
+            let output = await exec(command, {timeout: timeout});
 
-        if (output.stdout) {
-            return JSON.parse(output.stdout);
-        } else {
-            if (output.stderr) {
-                throw output.stderr;
+            if (output.stdout) {
+                return JSON.parse(output.stdout);
             } else {
                 return null;
             }
+        } catch (err) {
+            return null;
         }
     }
 
@@ -31,15 +31,15 @@ export class ExifTool {
         let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
         let command = `perl ${this._toolPath} -s -a -j ${pathArgs}`;
 
-        let output = await exec(command, {timeout: timeout});
-        if (output.stdout) {
-            return JSON.parse(output.stdout);
-        } else {
-            if (output.stderr) {
-                throw output.stderr;
+        try {
+            let output = await exec(command, {timeout: timeout});
+            if (output.stdout) {
+                return JSON.parse(output.stdout);
             } else {
                 return null;
             }
+        } catch (err) {
+            return null;
         }
     }
 
@@ -144,10 +144,23 @@ export class ExifTool {
         return results;
     }
 
-    async setImageNumber (filePath, imageNumber) {
-        // TODO: Consider whether to add -overwrite_original_in_place flag.
+    async setIntegerProperty(filePath, propertyName, value) {
         // http://www.sno.phy.queensu.ca/~phil/exiftool/exiftool_pod.html
-        let command = `perl ${this._toolPath} -ImageNumber=${imageNumber} "${filePath}"`;
+        let command = `perl ${this._toolPath} -${propertyName}=${value} -overwrite_original_in_place "${filePath}"`;
+
+        await exec(command, {timeout: timeout});
+    }
+
+    async setStringProperty(filePath, propertyName, value) {
+        let command = `perl ${this._toolPath} -${propertyName}="${value}" -overwrite_original_in_place "${filePath}"`;
+
+        await exec(command, {timeout: timeout});
+    }
+
+    async setDateProperty(filePath, propertyName, value) {
+        let stringValue = moment(value).format("YYYY:MM:DD HH:mm:ssZ");
+        
+        let command = `perl ${this._toolPath} -${propertyName}="${stringValue}" -overwrite_original_in_place "${filePath}"`;
 
         await exec(command, {timeout: timeout});
     }

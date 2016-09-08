@@ -37,4 +37,14 @@ export class PhotoExifDataResource {
                 includeThumbnails);
         }
     }
+
+    async updateMany (ctx) {
+        let updates = ctx.request.body.updates;
+        let propertyName = ctx.request.body.propertyName;
+        let type = ctx.request.body.type;
+
+        await this._photoExifDataServices.updateMany(updates, propertyName, type);
+
+        ctx.status = 200;
+    }
 }

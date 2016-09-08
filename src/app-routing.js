@@ -51,7 +51,8 @@ export function getPhotoExifDataRouteGenerator(permissionDataAccess, photoExifDa
 
     return RouteGenerator.create(permissionDataAccess, "home")
         .get("/photo-exif-data", ctx => photoExifDataResource.query(ctx), "manage")
-        .get("/photo-exif-data/:id", ctx => photoExifDataResource.get(ctx), "manage");
+        .get("/photo-exif-data/:id", ctx => photoExifDataResource.get(ctx), "manage")
+        .post("/photo-exif-data", ctx => photoExifDataResource.updateMany(ctx), "manage");
 }
 
 export function getPhotoImageRouteGenerator(permissionDataAccess, photoImageResource) {

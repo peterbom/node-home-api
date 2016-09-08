@@ -48,7 +48,11 @@ export class PhotoImageDataAccess {
     }
 
     async findMissingTakenDate() {
-        return await this._photoImages.find({"properties.takenDateTime": null, valid: true});
+        return await this._photoImages.find({
+            properties: {$ne: null},
+            "properties.takenDateTime": null,
+            valid: true
+        });
     }
 
     async getDiff(directoryPath, filenames) {
