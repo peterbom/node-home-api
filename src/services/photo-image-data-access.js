@@ -10,6 +10,27 @@ export class PhotoImageDataAccess {
         this._photoImages.ensureIndex({"properties.takenDateTime":1});
     }
 
+    async getIds(includeInvalid = false, includeUnreadable = false, includeUndated = false) {
+        let criteria = {};
+        if (!includeInvalid) {
+            criteria.valid = true;
+        }
+
+        if (!includeUnreadable) {
+            criteria.properties = {$ne: null};
+        }
+
+        if (!includeUndated) {
+            criteria["properties.takenDateTime"] = {$ne: null};
+        }
+
+        let results = await this._photoImages.find(
+            criteria,
+            {fields: {_id: 1}});
+
+        return results.map(r => r._id);
+    }
+
     async getById(id) {
         return await this._photoImages.findOne({_id: id});
     }
@@ -33,8 +54,6 @@ export class PhotoImageDataAccess {
     }
 
     async getByPath(directoryPath, includeInvalid = false) {
-        directoryPath = directoryPath.toLowerCase();
-
         let criteria = {directoryPath: directoryPath};
         if (!includeInvalid) {
             criteria.valid = true;
@@ -56,9 +75,6 @@ export class PhotoImageDataAccess {
     }
 
     async getDiff(directoryPath, filenames) {
-        directoryPath = directoryPath.toLowerCase();
-        filenames = filenames.map(f => f.toLowerCase());
-
         let indexedResults = await this._photoImages.find(
             {directoryPath: directoryPath, valid: true},
             {filename: 1});
@@ -106,8 +122,6 @@ export class PhotoImageDataAccess {
     }
 
     async cleanExcept(directoryPath, filenames) {
-        directoryPath = directoryPath.toLowerCase();
-        filenames = filenames.map(f => f.toLowerCase());
         await this._photoImages.remove({directoryPath: directoryPath, filename: {$nin: filenames}});
     }
 
@@ -123,16 +137,12 @@ export class PhotoImageDataAccess {
     }
 
     async invalidateImage(directoryPath, filename) {
-        directoryPath = directoryPath.toLowerCase();
-        filename = filename.toLowerCase();
-
         await this._photoImages.update(
             {directoryPath: directoryPath, filename: filename},
             {$set: {valid: false}});
     }
 
     async invalidateImages(directoryPath) {
-        directoryPath = directoryPath.toLowerCase();
         await this._photoImages.update(
             {directoryPath: directoryPath},
             {$set: {valid: false}},
@@ -140,9 +150,6 @@ export class PhotoImageDataAccess {
     }
 
     async upsertImage(directoryPath, filename, imageProperties /* Can be null */) {
-        directoryPath = directoryPath.toLowerCase();
-        filename = filename.toLowerCase();
-
         let image = {
             directoryPath: directoryPath,
             filename: filename,
@@ -164,6 +171,12 @@ export class PhotoImageDataAccess {
 
             image = await this._photoImages.update({_id: image._id}, image);
         }
+    }
+
+    async updateLocation(id, directoryPath, filename) {
+        await this._photoImages.update(
+            {_id: id},
+            {$set: {directoryPath: directoryPath, filename: filename}});
     }
 
     async listDuplicateHashes() {

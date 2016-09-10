@@ -9,7 +9,17 @@ import {Log} from "../shared/log";
 */
 
 export class PhotoMovementResource {
+    constructor(photoMovementServices) {
+        this._photoMovementServices = photoMovementServices;
+    }
+
+    async getAll(ctx) {
+        ctx.body = await this._photoMovementServices.getAllImagesForMovement();
+    }
+
     async move(ctx) {
-        ctx.status = 201;
+        let id = ctx.params.id;
+        await this._photoMovementServices.moveImageFile(id);
+        ctx.status = 200;
     }
 }

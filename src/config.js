@@ -10,6 +10,7 @@ import {JwtUtils} from "./shared/jwt-utils";
 
 // Services
 import {FileFinder} from "./services/file-finder";
+import {FileServices} from "./services/file-services";
 import {ExifTool} from "./services/exif-tool";
 import {UserDataAccess} from "./services/user-data-access";
 import {PermissionDataAccess} from "./services/permission-data-access";
@@ -18,7 +19,7 @@ import {PhotoIndexServices} from "./services/photo-index-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
 import {PhotoExifDataServices} from "./services/photo-exif-data-services";
 import {PhotoImageServices} from "./services/photo-image-services";
-import {FileServices} from "./services/file-services";
+import {PhotoMovementServices} from "./services/photo-movement-services";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
@@ -87,6 +88,7 @@ export function getDefaultComponents () {
     components.dbManager = new DbManager(settings.connectionString);
 
     components.fileFinder = new FileFinder();
+    components.fileServices = new FileServices();
     components.exifTool = new ExifTool();
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
@@ -103,7 +105,11 @@ export function getDefaultComponents () {
         components.exifTool,
         components.photoImageDataAccess);
     components.photoImageServices = new PhotoImageServices(components.photoImageDataAccess);
-    components.fileServices = new FileServices();
+    components.photoMovementServices = new PhotoMovementServices(
+        components.photoImageDataAccess,
+        components.fileServices,
+        settings.stagingPhotoPath,
+        settings.targetPhotoPath);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
@@ -114,7 +120,7 @@ export function getDefaultComponents () {
     components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
     components.photoImageResource = new PhotoImageResource(components.photoImageServices);
-    components.photoMovementResource = new PhotoMovementResource();
+    components.photoMovementResource = new PhotoMovementResource(components.photoMovementServices);
     components.fileResource = new FileResource(components.fileServices);
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 

@@ -53,7 +53,7 @@ export class PhotoIndexServices {
 
         let indexedDirectories = await this._photoImageDataAccess.getIndexedDirectories();
         for (let indexedDirectory of indexedDirectories) {
-            if (!directories.some(d => d.directoryPath.toLowerCase() === indexedDirectory.directoryPath)) {
+            if (!directories.some(d => d.directoryPath === indexedDirectory.directoryPath)) {
                 directories.push({
                     directoryPath: indexedDirectory.directoryPath,
                     newFileCount: 0,
@@ -86,7 +86,7 @@ export class PhotoIndexServices {
         let filenames = await this._fileFinder.getFiles(directoryPath, /^(?!.*\.db$)/);
         filenames = filenames.filter(f => {
             // Exclude those which are already indexed
-            return !indexedFilenameLookup[f.toLowerCase()];
+            return !indexedFilenameLookup[f];
         });
 
         // Only attempt the first maxIndexCount to keep time down
