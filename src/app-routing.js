@@ -74,6 +74,16 @@ export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovem
         .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 
+export function getPhotoUploadRouteGenerator (permissionDataAccess, photoUploadResource) {
+    if (photoUploadResource === undefined) {
+        throw new Error("photoUploadResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .post("/photo-upload", ctx => photoUploadResource.create(ctx), "manage")
+        .put("/photo-upload/:uploadId/:filename", ctx => photoUploadResource.addFile(ctx), "manage");
+}
+
 export function getFileRouteGenerator (permissionDataAccess, fileResource) {
     if (fileResource === undefined) {
         throw new Error("fileResource not defined");

@@ -6,7 +6,27 @@ import {default as DbManager} from "monk";
 import {getDefaultComponents} from "../lib/config";
 
 describe("Monk", function () {
-    it ("Can use distinct", async done => {
+    it ("can read inserted document", async done => {
+        try {
+            let components = getDefaultComponents();
+            let dbManager = new DbManager(components.appSettings.connectionString);
+
+            let things = dbManager.get("things");
+            await things.remove();
+
+            let thing = await things.insert({name: "Pete", type: "a"});
+
+            assert(thing);
+            assert(thing._id);
+
+            done();
+
+        } catch (err) {
+            done(err);
+        }
+    });
+
+    it ("can use distinct", async done => {
         try {
             let components = getDefaultComponents();
             let dbManager = new DbManager(components.appSettings.connectionString);
@@ -27,7 +47,7 @@ describe("Monk", function () {
         }
     });
 
-    it ("Can use group by", async done => {
+    it ("can use group by", async done => {
         try {
             let components = getDefaultComponents();
             let dbManager = new DbManager(components.appSettings.connectionString);
@@ -57,7 +77,7 @@ describe("Monk", function () {
         }
     });
 
-    it ("Can use group by, having count > 1", async done => {
+    it ("can use group by, having count > 1", async done => {
         try {
             let components = getDefaultComponents();
             let dbManager = new DbManager(components.appSettings.connectionString);
@@ -84,7 +104,7 @@ describe("Monk", function () {
         }
     });
 
-    it ("Can upsert using findOneAndUpdate", async function (done) {
+    it ("can upsert using findOneAndUpdate", async function (done) {
         try {
             let components = getDefaultComponents();
             let dbManager = new DbManager(components.appSettings.connectionString);
@@ -118,7 +138,7 @@ describe("Monk", function () {
         }
     });
 
-    it ("Can search using 'in'", async function (done) {
+    it ("can search using 'in'", async function (done) {
         try {
             let components = getDefaultComponents();
             let dbManager = new DbManager(components.appSettings.connectionString);

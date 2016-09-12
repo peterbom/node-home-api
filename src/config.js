@@ -12,14 +12,18 @@ import {JwtUtils} from "./shared/jwt-utils";
 import {FileFinder} from "./services/file-finder";
 import {FileServices} from "./services/file-services";
 import {ExifTool} from "./services/exif-tool";
+
 import {UserDataAccess} from "./services/user-data-access";
 import {PermissionDataAccess} from "./services/permission-data-access";
 import {PhotoImageDataAccess} from "./services/photo-image-data-access";
+import {PhotoUploadDataAccess} from "./services/photo-upload-data-access";
+
 import {PhotoIndexServices} from "./services/photo-index-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
 import {PhotoExifDataServices} from "./services/photo-exif-data-services";
 import {PhotoImageServices} from "./services/photo-image-services";
 import {PhotoMovementServices} from "./services/photo-movement-services";
+import {PhotoUploadServices} from "./services/photo-upload-services";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
@@ -29,6 +33,7 @@ import {PhotoDuplicateResource} from "./resources/photo-duplicate-resource";
 import {PhotoExifDataResource} from "./resources/photo-exif-data-resource";
 import {PhotoImageResource} from "./resources/photo-image-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
+import {PhotoUploadResource} from "./resources/photo-upload-resource";
 import {FileResource} from "./resources/file-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
 
@@ -90,9 +95,12 @@ export function getDefaultComponents () {
     components.fileFinder = new FileFinder();
     components.fileServices = new FileServices();
     components.exifTool = new ExifTool();
+
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
     components.photoImageDataAccess = new PhotoImageDataAccess(components.dbManager);
+    components.photoUploadDataAccess = new PhotoUploadDataAccess(components.dbManager);
+
     components.photoIndexServices = new PhotoIndexServices(
         components.exifTool,
         components.photoImageDataAccess,
@@ -110,6 +118,9 @@ export function getDefaultComponents () {
         components.fileServices,
         settings.stagingPhotoPath,
         settings.targetPhotoPath);
+    components.photoUploadServices = new PhotoUploadServices(
+        components.photoUploadDataAccess,
+        settings.stagingPhotoPath);
 
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
@@ -121,6 +132,7 @@ export function getDefaultComponents () {
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
     components.photoImageResource = new PhotoImageResource(components.photoImageServices);
     components.photoMovementResource = new PhotoMovementResource(components.photoMovementServices);
+    components.photoUploadResource = new PhotoUploadResource(components.photoUploadServices);
     components.fileResource = new FileResource(components.fileServices);
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
@@ -148,6 +160,7 @@ export function getDefaultComponents () {
             routing.getPhotoExifDataRouteGenerator(components.permissionDataAccess, components.photoExifDataResource),
             routing.getPhotoImageRouteGenerator(components.permissionDataAccess, components.photoImageResource),
             routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
+            routing.getPhotoUploadRouteGenerator(components.permissionDataAccess, components.photoUploadResource),
             routing.getFileRouteGenerator(components.permissionDataAccess, components.fileResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
         ]
