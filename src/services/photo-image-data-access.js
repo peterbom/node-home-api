@@ -240,9 +240,13 @@ function getImageHash(imageProperties) {
         return null;
     }
 
+    if (!imageProperties.takenDateTime) {
+        return null;
+    }
+
     let identifiers = {
         type: imageProperties.fileType,
-        date: imageProperties.takenDateTime || imageProperties.fileModifyDate,
+        date: imageProperties.takenDateTime,
         camera: imageProperties.camera,
         pixels: imageProperties.pixelCount,
         number: imageProperties.imageNumber

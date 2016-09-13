@@ -13,6 +13,16 @@ export class FileFinder {
     }
 
     async getFiles (directoryPath, fileMatchRegex) {
+        try {
+            let directoryStats = await fs.stat(directoryPath);
+            if (!directoryStats.isDirectory()) {
+                return [];
+            }
+        } catch (err) {
+            // This happens if the directory doesn't exist
+            return [];
+        }
+
         let items = await fs.readdir(directoryPath);
         items = items.filter(item => fileMatchRegex.test(item));
 
