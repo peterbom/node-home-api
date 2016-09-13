@@ -7,8 +7,11 @@ export class PhotoExifDataResource {
 
     async get (ctx) {
         let id = ctx.params.id;
-        let includeAll = !ctx.query.thumbnailsOnly;
-        let includeThumbnails = ctx.query.thumbnailsOnly || ctx.query.includeThumbnails;
+        let thumbnailsOnly = ctx.query.thumbnailsOnly === "true";
+        let includeThumbnails = ctx.query.includeThumbnails === "true";
+
+        let includeAll = !thumbnailsOnly;
+        includeThumbnails = thumbnailsOnly || includeThumbnails;
 
         ctx.body = await this._photoExifDataServices.getByImageId(
             id,

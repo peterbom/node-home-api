@@ -5,6 +5,18 @@ export class PhotoImageResource {
         this._photoImageServices = photoImageServices;
     }
 
+    async getById (ctx) {
+        let id = ctx.params.id;
+        let image = await this._photoImageServices.getById(id);
+        if (!image) {
+            ctx.status = 404;
+            return;
+        }
+
+        ctx.body = image;
+        ctx.status = 200;
+    }
+
     async query (ctx) {
         if (!ctx.query || !ctx.query.json) {
             ctx.status = 400;

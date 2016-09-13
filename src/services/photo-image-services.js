@@ -5,6 +5,15 @@ export class PhotoImageServices {
         this._photoImageDataAccess = photoImageDataAccess;
     }
 
+    async getById (id) {
+        let image = await this._photoImageDataAccess.getById(id);
+        if (!image) {
+            return null;
+        }
+
+        return toReturn([image])[0];
+    }
+
     async findUnreadable () {
         let images = await this._photoImageDataAccess.findUnreadable();
         return toReturn(images);

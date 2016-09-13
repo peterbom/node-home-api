@@ -61,6 +61,7 @@ export function getPhotoImageRouteGenerator(permissionDataAccess, photoImageReso
     }
 
     return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/photo-image/:id", ctx => photoImageResource.getById(ctx), "manage")
         .get("/photo-image", ctx => photoImageResource.query(ctx), "manage");
 }
 
