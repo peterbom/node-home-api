@@ -29,7 +29,7 @@ export class ExifTool {
 
         // Get thumbnail for each path in turn, and flatten results
         let results = filePaths.map(p => this.getThumbnails([p]));
-        return results.reduce((r1,r2) => r1.concat(r2, []));
+        return results.reduce((r1,r2) => r1.concat(r2), []);
     }
 
     async getAllTags(filePaths) {
@@ -50,7 +50,7 @@ export class ExifTool {
 
         // Get tags for each path in turn, and flatten results
         let results = filePaths.map(p => this.getAllTags([p]));
-        return results.reduce((r1,r2) => r1.concat(r2, []));
+        return results.reduce((r1,r2) => r1.concat(r2), []);
     }
 
     async getProperties(...filePaths) {
