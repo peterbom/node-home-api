@@ -62,7 +62,7 @@ async function imagesToExifData(exifTool, images, includeAll, includeThumbnails)
     let results = {};
     images.forEach(i => results[i._id] = {});
     if (includeAll) {
-        let allTags = await exifTool.getAllTags(...filePaths);
+        let allTags = await exifTool.getAllTags(filePaths);
         for (let i = 0; i < images.length; i++) {
             let imageId = images[i]._id;
             Object.assign(results[imageId], allTags[i]);
@@ -70,7 +70,7 @@ async function imagesToExifData(exifTool, images, includeAll, includeThumbnails)
     }
 
     if (includeThumbnails) {
-        let thumbnails = await exifTool.getThumbnails(...filePaths);
+        let thumbnails = await exifTool.getThumbnails(filePaths);
         for (let i = 0; i < images.length; i++) {
             let imageId = images[i]._id;
             Object.assign(results[imageId], thumbnails[i]);

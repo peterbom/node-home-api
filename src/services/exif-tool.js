@@ -10,7 +10,7 @@ export class ExifTool {
         this._toolPath = path.join(__dirname, "../../exiftool/exiftool.pl");
     }
 
-    async getThumbnails(...filePaths) {
+    async getThumbnails(filePaths) {
         let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
         let command = `perl ${this._toolPath} -j -b -SourceFile -ThumbnailImage ${pathArgs}`;
 
@@ -19,15 +19,20 @@ export class ExifTool {
 
             if (output.stdout) {
                 return JSON.parse(output.stdout);
-            } else {
-                return null;
             }
-        } catch (err) {
-            return null;
+        } catch (err) {}
+
+        // If we reached here, we could not generate the thumbnail
+        if (filePaths.length <= 1) {
+            return filePaths.map(p => null);
         }
+
+        // Get thumbnail for each path in turn, and flatten results
+        let results = filePaths.map(p => this.getThumbnails([p]));
+        return results.reduce((r1,r2) => r1.concat(r2, []));
     }
 
-    async getAllTags(...filePaths) {
+    async getAllTags(filePaths) {
         let pathArgs = filePaths.map(p => `"${p}"`).join(" ");
         let command = `perl ${this._toolPath} -s -a -j ${pathArgs}`;
 
@@ -35,12 +40,17 @@ export class ExifTool {
             let output = await exec(command, {timeout: timeout});
             if (output.stdout) {
                 return JSON.parse(output.stdout);
-            } else {
-                return null;
             }
-        } catch (err) {
-            return null;
+        } catch (err) {}
+
+        // If we reached here, we could not get the tags
+        if (filePaths.length <= 1) {
+            return filePaths.map(p => null);
         }
+
+        // Get tags for each path in turn, and flatten results
+        let results = filePaths.map(p => this.getAllTags([p]));
+        return results.reduce((r1,r2) => r1.concat(r2, []));
     }
 
     async getProperties(...filePaths) {
