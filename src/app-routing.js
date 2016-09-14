@@ -72,6 +72,7 @@ export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovem
 
     return RouteGenerator.create(permissionDataAccess, "home")
         .get("/photo-movement", ctx => photoMovementResource.getAll(ctx), "manage")
+        .get("/photo-movement/:path", ctx => photoMovementResource.getByDirectoryPath(ctx), "manage")
         .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 

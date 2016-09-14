@@ -1,9 +1,10 @@
 import {Log} from "../shared/log";
 import path from "path";
-import md5 from "md5";
 
 export class PhotoImageDataAccess {
-    constructor(dbManager) {
+    constructor(dbManager, imageUtils) {
+        this._imageUtils = imageUtils;
+
         this._photoImages = dbManager.get("photoImages");
         this._photoImages.ensureIndex({"directoryPath":1,"filename":1});
         this._photoImages.ensureIndex({"hash":1});
@@ -70,6 +71,29 @@ export class PhotoImageDataAccess {
         return await this._photoImages.find({
             properties: {$ne: null},
             "properties.takenDateTime": null,
+            valid: true
+        });
+    }
+
+    async findPathsRequiringMovement() {
+        let results = await this._photoImages.find(
+            {requiresMovement: true, valid: true},
+            {_id: 1, directoryPath: 1}
+        );
+
+        let paths = {};
+        for (let result of results) {
+            let ids = paths[result.directoryPath] = paths[result.directoryPath] || [];
+            ids.push(result._id);
+        }
+
+        return paths;
+    }
+
+    async findImagesRequiringMovement(directoryPath) {
+        return await this._photoImages.find({
+            directoryPath: directoryPath,
+            requiresMovement: true,
             valid: true
         });
     }
@@ -153,8 +177,9 @@ export class PhotoImageDataAccess {
         let image = {
             directoryPath: directoryPath,
             filename: filename,
-            hash: getImageHash(imageProperties),
+            hash: this._imageUtils.getImageHash(imageProperties),
             properties: imageProperties,
+            requiresMovement: this._imageUtils.requiresMovement(directoryPath, filename, imageProperties),
             valid: true
         };
 
@@ -174,9 +199,20 @@ export class PhotoImageDataAccess {
     }
 
     async updateLocation(id, directoryPath, filename) {
-        await this._photoImages.update(
-            {_id: id},
-            {$set: {directoryPath: directoryPath, filename: filename}});
+        let image = await this._photoImages.findOne({_id: id});
+        if (!image) {
+            return;
+        }
+
+        image.directoryPath = directoryPath;
+        image.filename = filename;
+        image.pathHistory.push({
+            date: new Date(),
+            path: newPath
+        });
+        image.requiresMovement = this._imageUtils.requiresMovement(directoryPath, filename, image.properties);
+
+        await this._photoImages.update({_id: id}, image);
     }
 
     async listDuplicateHashes() {
@@ -233,24 +269,4 @@ export class PhotoImageDataAccess {
 
         await Promise.all(updatePromises);
     }
-}
-
-function getImageHash(imageProperties) {
-    if (!imageProperties) {
-        return null;
-    }
-
-    if (!imageProperties.takenDateTime) {
-        return null;
-    }
-
-    let identifiers = {
-        type: imageProperties.fileType,
-        date: imageProperties.takenDateTime,
-        camera: imageProperties.camera,
-        pixels: imageProperties.pixelCount,
-        number: imageProperties.imageNumber
-    };
-
-    return md5(JSON.stringify(identifiers));
 }

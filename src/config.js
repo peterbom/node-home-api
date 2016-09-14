@@ -5,6 +5,7 @@ import {default as DbManager} from "monk";
 
 // Shared components
 import {Log} from "./shared/log";
+import {ImageUtils} from "./shared/image-utils";
 import {JsonService} from "./shared/json-service";
 import {JwtUtils} from "./shared/jwt-utils";
 
@@ -92,13 +93,17 @@ export function getDefaultComponents () {
 
     components.dbManager = new DbManager(settings.connectionString);
 
+    components.imageUtils = new ImageUtils(settings.targetPhotoPath)
+    components.jsonService = new JsonService();
+    components.jwtUtils = new JwtUtils(settings.authProviderSecret);
+
     components.fileFinder = new FileFinder();
     components.fileServices = new FileServices();
     components.exifTool = new ExifTool();
 
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
-    components.photoImageDataAccess = new PhotoImageDataAccess(components.dbManager);
+    components.photoImageDataAccess = new PhotoImageDataAccess(components.dbManager, components.imageUtils);
     components.photoUploadDataAccess = new PhotoUploadDataAccess(components.dbManager);
 
     components.photoIndexServices = new PhotoIndexServices(
@@ -116,14 +121,10 @@ export function getDefaultComponents () {
     components.photoMovementServices = new PhotoMovementServices(
         components.photoImageDataAccess,
         components.fileServices,
-        settings.stagingPhotoPath,
-        settings.targetPhotoPath);
+        components.imageUtils);
     components.photoUploadServices = new PhotoUploadServices(
         components.photoUploadDataAccess,
         settings.stagingPhotoPath);
-
-    components.jsonService = new JsonService();
-    components.jwtUtils = new JwtUtils(settings.authProviderSecret);
 
     components.permissionResource = new PermissionResource(components.permissionDataAccess);
     components.userResource = new UserResource(components.userDataAccess);

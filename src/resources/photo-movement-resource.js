@@ -14,7 +14,12 @@ export class PhotoMovementResource {
     }
 
     async getAll(ctx) {
-        ctx.body = await this._photoMovementServices.getAllImagesForMovement();
+        ctx.body = await this._photoMovementServices.getDirectoryPathsForMovement();
+    }
+
+    async getByDirectoryPath(ctx) {
+        let directoryPath = ctx.params.path;
+        ctx.body = await this._photoMovementServices.getImagesToMove(directoryPath);
     }
 
     async move(ctx) {
