@@ -40,6 +40,10 @@ export class PhotoImageResource {
             addImages(await this._photoImageServices.findMissingTakenDate());
         }
 
+        if (query.path || query.fromDateTime || query.toDateTime) {
+            addImages(await this._photoImageServices.findByCriteria(query));
+        }
+
         let images = [];
         for (let id in imageLookup) {
             images.push(imageLookup[id]);

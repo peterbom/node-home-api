@@ -30,6 +30,7 @@ export class PhotoMovementServices {
                 destinationFilename !== image.filename) {
                 let result = {
                     id: image._id,
+                    hash: image.hash,
                     current: {
                         directoryPath: image.directoryPath,
                         filename: image.filename

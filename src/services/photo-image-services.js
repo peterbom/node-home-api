@@ -23,6 +23,11 @@ export class PhotoImageServices {
         let images = await this._photoImageDataAccess.findMissingTakenDate();
         return toReturn(images);
     }
+
+    async findByCriteria (criteria) {
+        let images = await this._photoImageDataAccess.findByCriteria(criteria);
+        return toReturn(images);
+    }
 }
 
 function toReturn(images) {

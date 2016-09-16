@@ -1,5 +1,6 @@
 import {Log} from "../shared/log";
 import path from "path";
+import moment from "moment";
 
 export class PhotoImageDataAccess {
     constructor(dbManager, imageUtils) {
@@ -73,6 +74,29 @@ export class PhotoImageDataAccess {
             "properties.takenDateTime": null,
             valid: true
         });
+    }
+
+    async findByCriteria(criteria) {
+        let queryCriteria = {properties: {$ne: null}, valid: true};
+
+        if (criteria.path) {
+            queryCriteria.directoryPath = criteria.path;
+        }
+
+        if (criteria.fromDateTime || criteria.toDateTime) {
+            let takenCriteria = {};
+            if (criteria.fromDateTime) {
+                takenCriteria.$gte = moment(criteria.fromDateTime).toDate();
+            }
+
+            if (criteria.toDateTime) {
+                takenCriteria.$lt = moment(criteria.toDateTime).toDate();
+            }
+
+            queryCriteria["properties.takenDateTime"] = takenCriteria;
+        }
+
+        return await this._photoImages.find(queryCriteria);
     }
 
     async findPathsRequiringMovement() {
