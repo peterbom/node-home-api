@@ -232,7 +232,7 @@ export class PhotoImageDataAccess {
         image.filename = filename;
         image.pathHistory.push({
             date: new Date(),
-            path: newPath
+            filePath: path.join(directoryPath, filename)
         });
         image.requiresMovement = this._imageUtils.requiresMovement(directoryPath, filename, image.properties);
 
@@ -272,7 +272,7 @@ export class PhotoImageDataAccess {
         // Remove duplicates (including events where the path is unchanged)
         let uniquePathHistoryEvents = [];
         let lastEvent = null;
-        for (let pathHistoryEvent of uniquePathHistoryEvents) {
+        for (let pathHistoryEvent of allPathHistoryEvents) {
             if (!lastEvent || lastEvent.path !== pathHistoryEvent.path) {
                 uniquePathHistoryEvents.push(pathHistoryEvent);
                 lastEvent = pathHistoryEvent;
@@ -283,12 +283,14 @@ export class PhotoImageDataAccess {
         // the current latest date
         let updatePromises = [];
         for (let duplicate of duplicates) {
-            let latestDate = duplicate.pathHistory[duplicate.pathHistory.length - 1].date;
-            duplicate.pathHistory = uniquePathHistoryEvents.filter(event => {
-                return event.date <= latestDate;
-            });
+            if (duplicate.pathHistory && duplicate.pathHistory.length > 0) {
+                let latestDate = duplicate.pathHistory[duplicate.pathHistory.length - 1].date;
+                duplicate.pathHistory = uniquePathHistoryEvents.filter(event => {
+                    return event.date <= latestDate;
+                });
 
-            updatePromises.push(this._photoImages.update({_id: duplicate._id}, duplicate));
+                updatePromises.push(this._photoImages.update({_id: duplicate._id}, duplicate));
+            }
         }
 
         await Promise.all(updatePromises);
