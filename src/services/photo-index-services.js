@@ -51,7 +51,7 @@ export class PhotoIndexServices {
         indexedImages.forEach(img => indexedFilenameLookup[img.filename] = true);
 
         // Get all the files on disk
-        let filenames = await this._fileFinder.getFiles(directoryPath, /^(?!.*\.db$)/);
+        let filenames = await this._fileServices.getFiles(directoryPath, /^(?!.*\.db$)/);
         filenames = filenames.filter(f => {
             // Exclude those which are already indexed
             return !indexedFilenameLookup[f];
@@ -98,7 +98,7 @@ export class PhotoIndexServices {
 
     async cleanPath (directoryPath) {
         // Get all the files on disk
-        let filenames = await this._fileFinder.getFiles(directoryPath, /^(?!.*\.db$)/);
+        let filenames = await this._fileServices.getFiles(directoryPath, /^(?!.*\.db$)/);
         await this._photoImageDataAccess.cleanExcept(directoryPath, filenames);
     }
 
