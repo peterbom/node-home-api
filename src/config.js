@@ -10,7 +10,6 @@ import {JsonService} from "./shared/json-service";
 import {JwtUtils} from "./shared/jwt-utils";
 
 // Services
-import {FileFinder} from "./services/file-finder";
 import {FileServices} from "./services/file-services";
 import {ExifTool} from "./services/exif-tool";
 
@@ -97,7 +96,6 @@ export function getDefaultComponents () {
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
 
-    components.fileFinder = new FileFinder();
     components.fileServices = new FileServices();
     components.exifTool = new ExifTool();
 
@@ -109,7 +107,7 @@ export function getDefaultComponents () {
     components.photoIndexServices = new PhotoIndexServices(
         components.exifTool,
         components.photoImageDataAccess,
-        components.fileFinder,
+        components.fileServices,
         [settings.stagingPhotoPath, settings.targetPhotoPath]);
     components.photoDuplicateServices = new PhotoDuplicateServices(
         components.exifTool,

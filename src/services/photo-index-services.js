@@ -2,70 +2,38 @@ import {Log} from "../shared/log";
 import path from "path";
 
 export class PhotoIndexServices {
-    constructor (exifTool, photoImageDataAccess, fileFinder, photoBaseDirectories) {
+    constructor (exifTool, photoImageDataAccess, fileServices, photoBaseDirectories) {
         this._exifTool = exifTool;
         this._photoImageDataAccess = photoImageDataAccess;
-        this._fileFinder = fileFinder;
+        this._fileServices = fileServices;
         this._photoBaseDirectories = photoBaseDirectories;
     }
 
-    async compare() {
-        let files = await this._fileFinder.findFiles(
+    async listDirectories () {
+        let indexedDirectories = await this._photoImageDataAccess.getIndexedDirectories();
+        let fileDirectories = await this._fileServices.findDirectories(
             this._photoBaseDirectories,
-            [/(?!.*\/)?@.*/, /.*\.db/],
+            /(?!.*\/)?@.*/,
+            /.*\.db/);
+
+        // concat and remove duplicates
+        let set = new Set(indexedDirectories.concat(fileDirectories));
+        return Array.from(set).sort();
+    }
+
+    async compare(directoryPath) {
+        let files = await this._fileServices.getFiles(
+            directoryPath,
             /^(?!.*\.db$)/);
 
-        let directoryFilesLookup = {};
-        files.forEach(file => {
-            let files = directoryFilesLookup[file.directoryPath];
+        let diff = await this._photoImageDataAccess.getDiff(directoryPath, files);
 
-            if (!files) {
-                files = [];
-                directoryFilesLookup[file.directoryPath] = files;
-            }
-
-            files.push(file.filename);
-        });
-
-        let directories = [];
-
-        let diffPromises = [];
-        for (let directoryPath in directoryFilesLookup) {
-            let files = directoryFilesLookup[directoryPath];
-
-            let directory = {
-                directoryPath: directoryPath,
-                fileCount: files.length,
-                newFileCount: 0,
-                deletedFileCount: 0
-            };
-
-            directories.push(directory);
-
-            let directoryDiff = async () => {
-                let diff = await this._photoImageDataAccess.getDiff(directoryPath, files);
-                directory.newFileCount = diff.new.length;
-                directory.deletedFileCount = diff.deleted.length;
-            };
-
-            diffPromises.push(directoryDiff());
-        }
-
-        let indexedDirectories = await this._photoImageDataAccess.getIndexedDirectories();
-        for (let indexedDirectory of indexedDirectories) {
-            if (!directories.some(d => d.directoryPath === indexedDirectory.directoryPath)) {
-                directories.push({
-                    directoryPath: indexedDirectory.directoryPath,
-                    newFileCount: 0,
-                    deletedFileCount: indexedDirectory.imageCount
-                });
-            }
-        }
-
-        // Wait for any remaining diff promises to complete
-        await Promise.all(diffPromises);
-
-        return directories;
+        return {
+            directoryPath: directoryPath,
+            fileCount: files.length,
+            newFileCount: diff.new.length,
+            deletedFileCount: diff.deleted.length
+        };
     }
 
     async invalidatePath (directoryPath) {

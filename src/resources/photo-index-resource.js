@@ -5,8 +5,13 @@ export class PhotoIndexResource {
         this._photoIndexServices = photoIndexServices;
     }
 
+    async listDirectories (ctx) {
+        ctx.body = await this._photoIndexServices.listDirectories();
+    }
+
     async compare (ctx) {
-        ctx.body = await this._photoIndexServices.compare();
+        let directoryPath = ctx.params.path;
+        ctx.body = await this._photoIndexServices.compare(directoryPath);
     }
 
     async apply (ctx) {

@@ -29,7 +29,8 @@ export function getPhotoIndexRouteGenerator (permissionDataAccess, photoIndexRes
     }
 
     return RouteGenerator.create(permissionDataAccess, "home")
-        .get("/photo-index", ctx => photoIndexResource.compare(ctx), "manage")
+        .get("/photo-index", ctx => photoIndexResource.listDirectories(ctx), "manage")
+        .get("/photo-index/:path", ctx => photoIndexResource.compare(ctx), "manage")
         .post("/photo-index", ctx => photoIndexResource.apply(ctx), "manage");
 }
 

@@ -159,14 +159,7 @@ export class PhotoImageDataAccess {
     }
 
     async getIndexedDirectories() {
-        let groups = await this._photoImages.aggregate(
-            {$group: {_id: "$directoryPath", count: {$sum: 1}}}
-        );
-
-        return groups.map(g => ({
-            directoryPath: g._id,
-            imageCount: g.count
-        }));
+        return await this._photoImages.distinct("directoryPath");
     }
 
     async cleanExcept(directoryPath, filenames) {
