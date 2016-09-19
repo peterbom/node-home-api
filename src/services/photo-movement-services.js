@@ -14,9 +14,7 @@ export class PhotoMovementServices {
 
     async getImagesToMove(directoryPath) {
         // Pre-load all duplicate hashes
-        let duplicateHashes = await this._photoImageDataAccess.listDuplicateHashes();
-        let duplicateHashLookup = {};
-        duplicateHashes.forEach(h => duplicateHashLookup[h] = true);
+        let duplicateHashes = new Set(await this._photoImageDataAccess.listDuplicateHashes());
 
         let images = await this._photoImageDataAccess.findImagesRequiringMovement(directoryPath);
 
@@ -39,7 +37,7 @@ export class PhotoMovementServices {
                         directoryPath: destinationDirectoryPath,
                         filename: destinationFilename
                     },
-                    hasDuplicate: !!duplicateHashLookup[image.hash]
+                    hasDuplicate: duplicateHashes.has(image.hash)
                 };
 
                 results.push(result);

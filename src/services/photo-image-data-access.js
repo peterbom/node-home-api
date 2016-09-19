@@ -9,6 +9,7 @@ export class PhotoImageDataAccess {
         this._photoImages = dbManager.get("photoImages");
         this._photoImages.ensureIndex({"directoryPath":1,"filename":1});
         this._photoImages.ensureIndex({"hash":1});
+        this._photoImages.ensureIndex({"requiresMovement":1});
         this._photoImages.ensureIndex({"properties.takenDateTime":1});
     }
 
@@ -100,18 +101,22 @@ export class PhotoImageDataAccess {
     }
 
     async findPathsRequiringMovement() {
-        let results = await this._photoImages.find(
-            {requiresMovement: true, valid: true},
-            {_id: 1, directoryPath: 1}
-        );
+        let group = {
+            _id: "$directoryPath",
+            totalCount: {$sum: 1},
+            movableCount: {
+                $sum: {
+                    $cond: [{$eq: ["$requiresMovement", true]}, 1, 0]
+                }
+            }
+        };
 
-        let paths = {};
-        for (let result of results) {
-            let ids = paths[result.directoryPath] = paths[result.directoryPath] || [];
-            ids.push(result._id);
-        }
-
-        return paths;
+        return await this._photoImages.aggregate([
+            {$group: group},
+            {$match: {movableCount: {$gt: 0}}},
+            {$sort: {"_id": 1}},
+            {$project: {_id: 0, directoryPath: "$_id", totalCount: 1, movableCount: 1}}
+        ]);
     }
 
     async findImagesRequiringMovement(directoryPath) {
