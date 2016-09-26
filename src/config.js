@@ -24,6 +24,7 @@ import {PhotoExifDataServices} from "./services/photo-exif-data-services";
 import {PhotoImageServices} from "./services/photo-image-services";
 import {PhotoMovementServices} from "./services/photo-movement-services";
 import {PhotoUploadServices} from "./services/photo-upload-services";
+import {PhotoFrameServices} from "./services/photo-frame-services";
 
 // API Resources
 import {PermissionResource} from "./resources/permission-resource";
@@ -34,6 +35,7 @@ import {PhotoExifDataResource} from "./resources/photo-exif-data-resource";
 import {PhotoImageResource} from "./resources/photo-image-resource";
 import {PhotoMovementResource} from "./resources/photo-movement-resource";
 import {PhotoUploadResource} from "./resources/photo-upload-resource";
+import {PhotoFrameResource} from "./resources/photo-frame-resource";
 import {FileResource} from "./resources/file-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
 
@@ -63,6 +65,8 @@ function getDefaultSettings () {
             dev: {
                 ipAddress: "192.168.1.200",
                 macAddress: "bc:5f:f4:36:5c:a0"
+            }, flash: {
+                ipAddress: "192.168.1.100"
             }
         },
         stagingPhotoPath: process.env.STAGING_PHOTO_PATH,
@@ -123,6 +127,9 @@ export function getDefaultComponents () {
     components.photoUploadServices = new PhotoUploadServices(
         components.photoUploadDataAccess,
         settings.stagingPhotoPath);
+    components.photoFrameServices = new PhotoFrameServices(
+        components.photoImageDataAccess,
+        settings.machineLookup.flash.ipAddress);
 
     components.permissionResource = new PermissionResource(components.permissionDataAccess);
     components.userResource = new UserResource(components.userDataAccess);
@@ -132,6 +139,7 @@ export function getDefaultComponents () {
     components.photoImageResource = new PhotoImageResource(components.photoImageServices);
     components.photoMovementResource = new PhotoMovementResource(components.photoMovementServices);
     components.photoUploadResource = new PhotoUploadResource(components.photoUploadServices);
+    components.photoFrameResource = new PhotoFrameResource(components.photoFrameServices);
     components.fileResource = new FileResource(components.fileServices);
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
 
@@ -160,6 +168,7 @@ export function getDefaultComponents () {
             routing.getPhotoImageRouteGenerator(components.permissionDataAccess, components.photoImageResource),
             routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
             routing.getPhotoUploadRouteGenerator(components.permissionDataAccess, components.photoUploadResource),
+            routing.getPhotoFrameRouteGenerator(components.permissionDataAccess, components.photoFrameResource),
             routing.getFileRouteGenerator(components.permissionDataAccess, components.fileResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
         ]

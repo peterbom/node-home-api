@@ -87,6 +87,16 @@ export function getPhotoUploadRouteGenerator (permissionDataAccess, photoUploadR
         .put("/photo-upload/:uploadId/:filename", ctx => photoUploadResource.addFile(ctx), "manage");
 }
 
+export function getPhotoFrameRouteGenerator (permissionDataAccess, photoFrameResource) {
+    if (photoFrameResource === undefined) {
+        throw new Error("photoFrameResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/photo-frame", ctx => photoFrameResource.list(ctx), "manage")
+        .post("/photo-frame", ctx => photoFrameResource.setImages(ctx), "manage");
+}
+
 export function getFileRouteGenerator (permissionDataAccess, fileResource) {
     if (fileResource === undefined) {
         throw new Error("fileResource not defined");
