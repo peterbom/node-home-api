@@ -28,6 +28,28 @@ export class PhotoImageServices {
         let images = await this._photoImageDataAccess.findByCriteria(criteria);
         return toReturn(images);
     }
+
+    async getSummaryCounts() {
+        let [
+            totalCount,
+            readableCount,
+            requiringMovementCount
+        ] = await Promise.all([
+            this._photoImageDataAccess.getTotalCount(),
+            this._photoImageDataAccess.getReadableCount(),
+            this._photoImageDataAccess.getRequiringMovementCount()
+        ]);
+
+        return {
+            totalCount: totalCount,
+            readableCount: readableCount,
+            requiringMovementCount: requiringMovementCount
+        };
+    }
+
+    async getYearlyTotals() {
+        return await this._photoImageDataAccess.getYearlySummary();
+    }
 }
 
 function toReturn(images) {

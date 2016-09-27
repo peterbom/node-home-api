@@ -100,6 +100,32 @@ export class PhotoImageDataAccess {
         return await this._photoImages.find(queryCriteria);
     }
 
+    async getTotalCount() {
+        return await this._photoImages.count();
+    }
+
+    async getRequiringMovementCount() {
+        return await this._photoImages.count({requiresMovement: true});
+    }
+
+    async getReadableCount() {
+        return await this._photoImages.count({hash: {$ne: null}});
+    }
+
+    async getYearlySummary() {
+        let group = {
+            _id: { $year: "$properties.takenDateTime" },
+            count: { $sum: 1 }
+        };
+
+        return await this._photoImages.aggregate([
+            {$match: {"properties.takenDateTime": {$ne: null}}},
+            {$group : group},
+            {$sort: {_id: 1}},
+            {$project: {_id: 0, year: "$_id", count: 1}}
+        ]);
+    }
+
     async findPathsRequiringMovement() {
         let group = {
             _id: "$directoryPath",
