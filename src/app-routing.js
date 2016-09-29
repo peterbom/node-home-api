@@ -94,7 +94,8 @@ export function getPhotoFrameRouteGenerator (permissionDataAccess, photoFrameRes
 
     return RouteGenerator.create(permissionDataAccess, "home")
         .get("/photo-frame", ctx => photoFrameResource.list(ctx), "manage")
-        .post("/photo-frame", ctx => photoFrameResource.setImages(ctx), "manage");
+        .post("/photo-frame", ctx => photoFrameResource.addImages(ctx), "manage")
+        .delete("/photo-frame", ctx => photoFrameResource.clearImages(ctx), "manage");
 }
 
 export function getFileRouteGenerator (permissionDataAccess, fileResource) {

@@ -9,11 +9,15 @@ export class PhotoFrameResource {
         ctx.body = await this._photoFrameServices.list();
     }
 
-    async setImages (ctx) {
+    async addImages (ctx) {
         let ids = ctx.request.body.ids;
 
-        await this._photoFrameServices.setImages(ids);
+        await this._photoFrameServices.addImages(ids);
+        ctx.status = 200;
+    }
 
+    async clearImages (ctx) {
+        await this._photoFrameServices.clearImages();
         ctx.status = 200;
     }
 }

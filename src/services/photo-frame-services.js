@@ -21,7 +21,7 @@ export class PhotoFrameServices {
         return images.map(i => i._id);
     }
 
-    async setImages(ids) {
+    async addImages(ids) {
         // set the upload directory to the card root
         await this.setUploadDirectory("/");
 
@@ -34,18 +34,19 @@ export class PhotoFrameServices {
             targetFilename: this.getTargetFilename(i)
         }));
 
-        let targetFilenameSet = new Set(imageFilenames.map(i => i.targetFilename));
-
-        let filesToDelete = files.filter(f => !targetFilenameSet.has(f));
         let imageFilesToAdd = imageFilenames.filter(i => !existingFilenameSet.has(i.targetFilename));
-
-        await Promise.all(filesToDelete.map(f => this.deleteFile(f)));
 
         // Upload files serially. Attempting to do it in parallel seems to cause
         // the server to hang.
         for (let imageFile of imageFilesToAdd) {
             await this.uploadFile(imageFile.image, imageFile.targetFilename)
         }
+    }
+
+    async clearImages() {
+        let files = await this.getAllFiles();
+
+        await Promise.all(files.map(f => this.deleteFile(f)));
     }
 
     async setUploadDirectory(dir) {
