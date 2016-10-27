@@ -11,7 +11,7 @@ export class PhotoUploadDataAccess {
             directoryPath: directoryPath
         };
 
-        return await this._photoUploads.insert(upload)
+        return await this._photoUploads.insert(upload);
     }
 
     async getById(id) {

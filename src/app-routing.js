@@ -117,3 +117,38 @@ export function getMachineStatusRouteGenerator (permissionDataAccess, machineSta
         .get("/machine-status/:id", ctx => machineStatusResource.query(ctx), "manage")
         .put("/machine-status/:id", ctx => machineStatusResource.request(ctx), "manage");
 }
+
+export function getPlantRouteGenerator (permissionDataAccess, plantResource) {
+    if (plantResource === undefined) {
+        throw new Error("plantResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/plant", ctx => plantResource.listPlants(ctx), "manage")
+        .get("/plant-link", ctx => plantResource.listLinks(ctx), "manage")
+        .put("/plant/:tsn", ctx => plantResource.set(ctx), "manage");
+}
+
+export function getPlantCompanionRouteGenerator (permissionDataAccess, plantCompanionResource) {
+    if (plantCompanionResource === undefined) {
+        throw new Error("plantCompanionResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/plant-companion", ctx => plantCompanionResource.list(ctx), "manage")
+        .put("/plant-companion/:tsn", ctx => plantCompanionResource.set(ctx), "manage")
+        .delete("/plant-companion/:tsn", ctx => plantCompanionResource.delete(ctx), "manage");
+}
+
+export function getPlantReferenceRouteGenerator (permissionDataAccess, plantReferenceResource) {
+    if (plantReferenceResource === undefined) {
+        throw new Error("plantReferenceResource not defined");
+    }
+
+    return RouteGenerator.create(permissionDataAccess, "home")
+        .get("/plant-reference/companion-help", ctx => plantReferenceResource.listCompanionHelp(ctx), "manage")
+        .get("/plant-reference/companion-hinder", ctx => plantReferenceResource.listCompanionHinder(ctx), "manage")
+        .put("/plant-reference/companion-help/:tsn1/:tsn2", ctx => plantReferenceResource.addCompanionHelpReference(ctx), "manage")
+        .put("/plant-reference/companion-hinder/:tsn1/:tsn2", ctx => plantReferenceResource.addCompanionHinderReference(ctx), "manage")
+        .delete("/plant-reference/:id", ctx => plantReferenceResource.deleteReference(ctx), "manage");
+}

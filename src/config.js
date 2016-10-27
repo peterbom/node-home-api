@@ -17,6 +17,9 @@ import {UserDataAccess} from "./services/user-data-access";
 import {PermissionDataAccess} from "./services/permission-data-access";
 import {PhotoImageDataAccess} from "./services/photo-image-data-access";
 import {PhotoUploadDataAccess} from "./services/photo-upload-data-access";
+import {PlantDataAccess} from "./services/plant-data-access";
+import {PlantCompanionDataAccess} from "./services/plant-companion-data-access";
+import {PlantReferenceDataAccess} from "./services/plant-reference-data-access";
 
 import {PhotoIndexServices} from "./services/photo-index-services";
 import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
@@ -38,6 +41,9 @@ import {PhotoUploadResource} from "./resources/photo-upload-resource";
 import {PhotoFrameResource} from "./resources/photo-frame-resource";
 import {FileResource} from "./resources/file-resource";
 import {MachineStatusResource} from "./resources/machine-status-resource";
+import {PlantResource} from "./resources/plant-resource";
+import {PlantCompanionResource} from "./resources/plant-companion-resource";
+import {PlantReferenceResource} from "./resources/plant-reference-resource";
 
 // Middleware
 import {noop} from "./middleware/null-middleware";
@@ -95,6 +101,10 @@ export function getDefaultComponents () {
     components.logger = winston;
 
     components.dbManager = new DbManager(settings.connectionString);
+    components.dbManager.options = { 
+        safe    : true,
+        castIds : false
+    };
 
     components.imageUtils = new ImageUtils(settings.targetPhotoPath)
     components.jsonService = new JsonService();
@@ -107,6 +117,9 @@ export function getDefaultComponents () {
     components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
     components.photoImageDataAccess = new PhotoImageDataAccess(components.dbManager, components.imageUtils);
     components.photoUploadDataAccess = new PhotoUploadDataAccess(components.dbManager);
+    components.plantDataAccess = new PlantDataAccess(components.dbManager);
+    components.plantCompanionDataAccess = new PlantCompanionDataAccess(components.dbManager);
+    components.plantReferenceDataAccess = new PlantReferenceDataAccess(components.dbManager);
 
     components.photoIndexServices = new PhotoIndexServices(
         components.exifTool,
@@ -142,6 +155,9 @@ export function getDefaultComponents () {
     components.photoFrameResource = new PhotoFrameResource(components.photoFrameServices);
     components.fileResource = new FileResource(components.fileServices);
     components.machineStatusResource = new MachineStatusResource(settings.machineLookup);
+    components.plantResource = new PlantResource(components.plantDataAccess);
+    components.plantCompanionResource = new PlantCompanionResource(components.plantCompanionDataAccess);
+    components.plantReferenceResource = new PlantReferenceResource(components.plantReferenceDataAccess);
 
     components.middleware = {
         errorHandler: errorHandler,
@@ -170,7 +186,10 @@ export function getDefaultComponents () {
             routing.getPhotoUploadRouteGenerator(components.permissionDataAccess, components.photoUploadResource),
             routing.getPhotoFrameRouteGenerator(components.permissionDataAccess, components.photoFrameResource),
             routing.getFileRouteGenerator(components.permissionDataAccess, components.fileResource),
-            routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource)
+            routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource),
+            routing.getPlantRouteGenerator(components.permissionDataAccess, components.plantResource),
+            routing.getPlantCompanionRouteGenerator(components.permissionDataAccess, components.plantCompanionResource),
+            routing.getPlantReferenceRouteGenerator(components.permissionDataAccess, components.plantReferenceResource)
         ]
     };
 
