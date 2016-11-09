@@ -171,7 +171,11 @@ export function getDefaultComponents () {
             settings.authServer),
 
         unsecuredRouteGenerators: [
-            routing.getPermissionRouteGenerator(components.permissionResource)
+            routing.getPermissionRouteGenerator(components.permissionResource),
+            routing.getPlantViewRouteGenerator(
+                components.plantResource,
+                components.plantCompanionResource,
+                components.plantReferenceResource)
         ],
 
         authorizationChecker: authorizationChecker,
@@ -187,9 +191,11 @@ export function getDefaultComponents () {
             routing.getPhotoFrameRouteGenerator(components.permissionDataAccess, components.photoFrameResource),
             routing.getFileRouteGenerator(components.permissionDataAccess, components.fileResource),
             routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource),
-            routing.getPlantRouteGenerator(components.permissionDataAccess, components.plantResource),
-            routing.getPlantCompanionRouteGenerator(components.permissionDataAccess, components.plantCompanionResource),
-            routing.getPlantReferenceRouteGenerator(components.permissionDataAccess, components.plantReferenceResource)
+            routing.getPlantMaintainRouteGenerator(
+                components.permissionDataAccess,
+                components.plantResource,
+                components.plantCompanionResource,
+                components.plantReferenceResource)
         ]
     };
 
