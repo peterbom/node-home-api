@@ -15,6 +15,6 @@ export class PhotoUploadDataAccess {
     }
 
     async getById(id) {
-        return await this._photoUploads.findOne({_id: id});
+        return await this._photoUploads.findOne({_id: id}, {castIds: true});
     }
 }

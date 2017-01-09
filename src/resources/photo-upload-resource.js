@@ -19,8 +19,8 @@ export class PhotoUploadResource {
 
         let upload = await this._photoUploadServices.getUpload(uploadId);
         if (!upload) {
-            ctx.body = `Upload id ${uploadId} not found`;
             ctx.status = 404;
+            ctx.body = `Upload id ${uploadId} not found`;
             return;
         }
 
