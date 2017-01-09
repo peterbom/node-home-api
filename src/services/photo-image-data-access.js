@@ -4,6 +4,7 @@ import moment from "moment";
 
 export class PhotoImageDataAccess {
     constructor(dbManager, imageUtils) {
+        this._dbManager = dbManager;
         this._imageUtils = imageUtils;
 
         this._photoImages = dbManager.get("photoImages");
@@ -35,11 +36,13 @@ export class PhotoImageDataAccess {
     }
 
     async getById(id) {
-        return await this._photoImages.findOne({_id: id});
+        let objectId = this._dbManager.id(id);
+        return await this._photoImages.findOne({_id: objectId});
     }
 
     async getByIds(ids, includeInvalid = false) {
-        let criteria = {_id: {$in: ids}};
+        let objectIds = ids.map(id => this._dbManager.id(id));
+        let criteria = {_id: {$in: objectIds}};
         if (!includeInvalid) {
             criteria.valid = true;
         }
@@ -198,12 +201,14 @@ export class PhotoImageDataAccess {
     }
 
     async cleanIds(ids) {
-        await this._photoImages.remove({_id: {$in: ids}});
+        let objectIds = ids.map(id => this._dbManager.id(id));
+        await this._photoImages.remove({_id: {$in: objectIds}});
     }
 
     async invalidateImageIds(ids) {
+        let objectIds = ids.map(id => this._dbManager.id(id));
         await this._photoImages.update(
-            {_id: {$in: ids}},
+            {_id: {$in: objectIds}},
             {$set: {valid: false}},
             {multi: true});
     }
@@ -247,7 +252,8 @@ export class PhotoImageDataAccess {
     }
 
     async updateLocation(id, directoryPath, filename) {
-        let image = await this._photoImages.findOne({_id: id});
+        let objectId = this._dbManager.id(id);
+        let image = await this._photoImages.findOne({_id: objectId});
         if (!image) {
             return;
         }
@@ -260,7 +266,7 @@ export class PhotoImageDataAccess {
         });
         image.requiresMovement = this._imageUtils.requiresMovement(directoryPath, filename, image.properties);
 
-        await this._photoImages.update({_id: id}, image);
+        await this._photoImages.update({_id: objectId}, image);
     }
 
     async listDuplicateHashes() {
@@ -275,7 +281,8 @@ export class PhotoImageDataAccess {
     }
 
     async combineDuplicateHistories(ids) {
-        let duplicates = await this._photoImages.find({_id: {$in: ids}});
+        let objectIds = ids.map(id => this._dbManager.id(id));
+        let duplicates = await this._photoImages.find({_id: {$in: objectIds}});
 
         if (duplicates.length < 2) {
             // No duplicates

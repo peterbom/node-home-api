@@ -101,6 +101,12 @@ export function getDefaultComponents () {
     components.logger = winston;
 
     components.dbManager = new DbManager(settings.connectionString);
+
+    // The Monk API deprecates the static call to .id on monk instances
+    // (which are really DbManagers). But to avoid passing another db-related
+    // class around, we replace the instance method with the static method,
+    // which isn't deprecated.
+    components.dbManager.id = DbManager.id;
     components.dbManager.options = { 
         safe    : true,
         castIds : false
