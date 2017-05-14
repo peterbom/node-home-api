@@ -2,8 +2,9 @@ import {Log} from "../shared/log";
 import path from "path";
 
 export class PhotoMovementServices {
-    constructor (photoImageDataAccess, fileServices, imageUtils) {
+    constructor (photoImageDataAccess, fileServices, sshServices, imageUtils) {
         this._photoImageDataAccess = photoImageDataAccess;
+        this._sshServices = sshServices;
         this._fileServices = fileServices;
         this._imageUtils = imageUtils;
     }
@@ -66,7 +67,7 @@ export class PhotoMovementServices {
         let currentPath = path.join(image.directoryPath, image.filename);
         let targetPath = path.join(destinationDirectoryPath, destinationFilename);
 
-        await this._fileServices.move(currentPath, targetPath);
+        await this._sshServices.moveServerFiles(currentPath, targetPath);
         await this._photoImageDataAccess.updateLocation(id, destinationDirectoryPath, destinationFilename);
     }
 }

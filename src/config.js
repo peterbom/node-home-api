@@ -8,9 +8,11 @@ import {Log} from "./shared/log";
 import {ImageUtils} from "./shared/image-utils";
 import {JsonService} from "./shared/json-service";
 import {JwtUtils} from "./shared/jwt-utils";
+const envVars = require("./shared/env-utils");
 
 // Services
 import {FileServices} from "./services/file-services";
+const SshServices = require("./services/ssh-services");
 import {ExifTool} from "./services/exif-tool";
 
 import {UserDataAccess} from "./services/user-data-access";
@@ -59,14 +61,14 @@ import * as routing from "./app-routing";
 
 function getDefaultSettings () {
     return {
-        isUnitTest: process.env.NODE_ENV === "test",
-        port: process.env.PORT,
-        logglySubdomain: process.env.LOGGLY_SUBDOMAIN,
-        logglyToken: process.env.LOGGLY_TOKEN,
-        authServer: process.env.AUTH_SERVER,
-        authProviderSecret: process.env.AUTH_PROVIDER_SECRET,
-        connectionString: process.env.NODE_ENV === "test" ? "localhost:27017/unitTest" : process.env.CONNECTION_STRING,
-        suppressAuthorization: process.env.SUPPRESS_AUTHORIZATION === "1" && process.env.NODE_ENV === "development",
+        isUnitTest: envVars.nodeEnv === "test",
+        port: envVars.port,
+        logglySubdomain: envVars.logglySubdomain,
+        logglyToken: envVars.logglyToken,
+        authServer: envVars.authServer,
+        authProviderSecret: envVars.authProviderSecret,
+        connectionString: envVars.nodeEnv === "test" ? "localhost:27017/unitTest" : envVars.connectionString,
+        suppressAuthorization: envVars.suppressAuthorization === "1" && envVars.nodeEnv === "development",
         machineLookup: {
             dev: {
                 ipAddress: "192.168.1.200",
@@ -75,8 +77,14 @@ function getDefaultSettings () {
                 ipAddress: "192.168.1.100"
             }
         },
-        stagingPhotoPath: process.env.STAGING_PHOTO_PATH,
-        targetPhotoPath: process.env.TARGET_PHOTO_PATH
+        stagingPhotoPath: envVars.stagingPhotoPath,
+        targetPhotoPath: envVars.targetPhotoPath,
+        sshHost: "192.168.1.225",
+        sshPort: 60022,
+        sshUsername: "pete",
+        sshPrivateKeyPath: "C:\\Users\\Pete\\.ssh\\id_rsa",
+        localRoot: envVars.localRoot,
+        serverRoot: envVars.serverRoot
     };
 }
 
@@ -93,7 +101,7 @@ export function getDefaultComponents () {
         winston.add(winston.transports.Loggly, {
             token: settings.logglyToken,
             subdomain: settings.logglySubdomain,
-            tags: ["home-api", process.env.NODE_ENV],
+            tags: ["home-api", envVars.nodeEnv],
             json: true
         });
     }
@@ -112,11 +120,18 @@ export function getDefaultComponents () {
         castIds : false
     };
 
-    components.imageUtils = new ImageUtils(settings.targetPhotoPath)
+    components.imageUtils = new ImageUtils(settings.targetPhotoPath);
     components.jsonService = new JsonService();
     components.jwtUtils = new JwtUtils(settings.authProviderSecret);
 
     components.fileServices = new FileServices();
+    components.sshServices = new SshServices(
+        settings.sshHost,
+        settings.sshPort,
+        settings.sshUsername,
+        settings.sshPrivateKeyPath,
+        settings.localRoot,
+        settings.serverRoot);
     components.exifTool = new ExifTool();
 
     components.userDataAccess = new UserDataAccess(components.dbManager);
@@ -142,6 +157,7 @@ export function getDefaultComponents () {
     components.photoMovementServices = new PhotoMovementServices(
         components.photoImageDataAccess,
         components.fileServices,
+        components.sshServices,
         components.imageUtils);
     components.photoUploadServices = new PhotoUploadServices(
         components.photoUploadDataAccess,
