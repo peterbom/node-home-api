@@ -17,11 +17,13 @@ export class ImageUtils {
             return null;
         }
 
+        // Only include identifiers that affect the resulting
+        // filename, because we want to ensure that filename
+        // conflicts can be reliably detected by hash conflicts.
         let identifiers = {
             type: imageProperties.fileType,
             date: imageProperties.takenDateTime,
             camera: imageProperties.camera,
-            pixels: imageProperties.pixelCount,
             number: imageProperties.imageNumber
         };
 
