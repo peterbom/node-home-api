@@ -79,10 +79,10 @@ function getDefaultSettings () {
         },
         stagingPhotoPath: envVars.stagingPhotoPath,
         targetPhotoPath: envVars.targetPhotoPath,
-        sshHost: "192.168.1.225",
-        sshPort: 60022,
-        sshUsername: "pete",
-        sshPrivateKeyPath: "C:\\Users\\Pete\\.ssh\\id_rsa",
+        sshHost: envVars.sshHost,
+        sshPort: envVars.sshPort,
+        sshUsername: envVars.sshUsername,
+        sshPrivateKeyPath: envVars.sshPrivateKeyPath,
         localRoot: envVars.localRoot,
         serverRoot: envVars.serverRoot
     };
