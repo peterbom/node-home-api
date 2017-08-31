@@ -8,7 +8,7 @@
   },
   "scripts": {
     "init-env": "shx cp -n .env.template .env",
-    "test": "zoo IS_UNIT_TEST=1 SUPPRESS_AUTHORIZATION=0 mocha --recursive ./test -u bdd -R spec",
+    "test": "zoo IS_UNIT_TEST=1 SUPPRESS_AUTHORIZATION=0 mocha --no-timeouts --recursive ./test -u bdd -R spec",
     "test-debug": "concurrently \"npm run test -- --debug-brk\" \"node-inspector\"",
     "watch:src": "watch \"npm run test\" ./src",
     "watch:test": "watch \"npm run test\" ./test",
@@ -48,7 +48,7 @@
     "md5": "^2.1.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.14.1",
-    "monk": "^3.1.1",
+    "monk": "^6.0.3",
     "mv": "^2.1.1",
     "node-ssh": "^4.2.2",
     "ping": "^0.2.0",

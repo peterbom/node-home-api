@@ -4,7 +4,7 @@ class PlantDataAccess {
     // dbManager: https://automattic.github.io/monk/docs/manager/index.html
     constructor (dbManager) {
         this._plants = dbManager.get("plants");
-        this._plants.ensureIndex({"scientificName":1});
+        this._plants.createIndex({"scientificName":1});
 
         this._plantHierarchy = dbManager.get("plantHierarchy");
     }

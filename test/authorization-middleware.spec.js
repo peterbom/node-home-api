@@ -61,7 +61,7 @@ describe("Authorization middleware", function () {
 
         let token = createIdToken(components.jwtUtils, "user_1", new Date(2016, 1, 1), 1); // Valid for one minute
 
-        let time = new Date(2016, 1, 1, 0, 0, 2); // 2 minutes later
+        let time = new Date(2016, 1, 1, 0, 2, 0); // 2 minutes later
         timekeeper.freeze(time);
 
         request

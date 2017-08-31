@@ -8,10 +8,10 @@ class PhotoImageDataAccess {
         this._imageUtils = imageUtils;
 
         this._photoImages = dbManager.get("photoImages");
-        this._photoImages.ensureIndex({"directoryPath":1,"filename":1});
-        this._photoImages.ensureIndex({"hash":1});
-        this._photoImages.ensureIndex({"requiresMovement":1});
-        this._photoImages.ensureIndex({"properties.takenDateTime":1});
+        this._photoImages.createIndex({"directoryPath":1,"filename":1});
+        this._photoImages.createIndex({"hash":1});
+        this._photoImages.createIndex({"requiresMovement":1});
+        this._photoImages.createIndex({"properties.takenDateTime":1});
     }
 
     async getIds(includeInvalid = false, includeUnreadable = false, includeUndated = false) {

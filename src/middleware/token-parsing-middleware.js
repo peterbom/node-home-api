@@ -10,18 +10,22 @@ exports.getBearerTokenParser = jwtUtils => {
 
         let jwt = await bearerToken(ctx.request);
         if (jwt) {
+            // JWT was supplied, but we still need to check whether it's valid.
             ctx.request.bearerTokenJwt = jwt;
 
             let idToken = await jwtUtils.verifyJwt(jwt);
             if (!idToken) {
                 // No need to log here - it'll already have been logged by the verifyJwt method
-                ctx.status = 400; // bad request
+                // The token could not be verified, for example it might be expired. In these
+                // circumstances we should return 401 ( https://tools.ietf.org/html/rfc7235#section-3.1 )
+                ctx.status = 401; // Unauthorized
                 return;
             }
 
             if (!idToken.sub) {
                 Log.warn("Invalid id_token (no sub specified)");
-                ctx.status = 400;
+                // This is another kind of invalid token.
+                ctx.status = 401;
                 return;
             }
 

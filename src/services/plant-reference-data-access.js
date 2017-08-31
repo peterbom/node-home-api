@@ -4,7 +4,7 @@ class PlantReferenceDataAccess {
     // dbManager: https://automattic.github.io/monk/docs/manager/index.html
     constructor (dbManager) {
         this._plantReferences = dbManager.get("plantReferences");
-        this._plantReferences.ensureIndex({"type": 1, "key": 1});
+        this._plantReferences.createIndex({"type": 1, "key": 1});
     }
 
     async findReferences(type, key) {
