@@ -1,7 +1,7 @@
-import {Log} from "./shared/log";
-import {RouteGenerator} from "./shared/route-generator";
+const Log = require("./shared/log").Log;
+const RouteGenerator = require("./shared/route-generator").RouteGenerator;
 
-export function getPermissionRouteGenerator(permissionResource) {
+exports.getPermissionRouteGenerator = permissionResource => {
     if (permissionResource === undefined) {
         throw new Error("permissionResource not defined");
     }
@@ -10,7 +10,7 @@ export function getPermissionRouteGenerator(permissionResource) {
         .get("/permission", ctx => permissionResource.getPermissions(ctx));
 }
 
-export function getUserRouteGenerator (permissionDataAccess, userResource) {
+exports.getUserRouteGenerator = (permissionDataAccess, userResource) => {
     if (userResource === undefined) {
         throw new Error("userResource not defined");
     }
@@ -23,7 +23,7 @@ export function getUserRouteGenerator (permissionDataAccess, userResource) {
         .delete('/user/:id', ctx => userResource.remove(ctx), "maintain");
 }
 
-export function getPhotoIndexRouteGenerator (permissionDataAccess, photoIndexResource) {
+exports.getPhotoIndexRouteGenerator = (permissionDataAccess, photoIndexResource) => {
     if (photoIndexResource === undefined) {
         throw new Error("photoIndexResource not defined");
     }
@@ -34,7 +34,7 @@ export function getPhotoIndexRouteGenerator (permissionDataAccess, photoIndexRes
         .post("/photo-index", ctx => photoIndexResource.apply(ctx), "manage");
 }
 
-export function getPhotoDuplicateRouteGenerator (permissionDataAccess, photoDuplicateResource) {
+exports.getPhotoDuplicateRouteGenerator = (permissionDataAccess, photoDuplicateResource) => {
     if (photoDuplicateResource === undefined) {
         throw new Error("photoDuplicateResource not defined");
     }
@@ -45,7 +45,7 @@ export function getPhotoDuplicateRouteGenerator (permissionDataAccess, photoDupl
         .post("/photo-duplicate", ctx => photoDuplicateResource.resolve(ctx), "manage");
 }
 
-export function getPhotoExifDataRouteGenerator(permissionDataAccess, photoExifDataResource) {
+exports.getPhotoExifDataRouteGenerator = (permissionDataAccess, photoExifDataResource) => {
     if (photoExifDataResource === undefined) {
         throw new Error("photoExifDataResource not defined");
     }
@@ -56,7 +56,7 @@ export function getPhotoExifDataRouteGenerator(permissionDataAccess, photoExifDa
         .post("/photo-exif-data", ctx => photoExifDataResource.updateMany(ctx), "manage");
 }
 
-export function getPhotoImageRouteGenerator(permissionDataAccess, photoImageResource) {
+exports.getPhotoImageRouteGenerator = (permissionDataAccess, photoImageResource) => {
     if (photoImageResource === undefined) {
         throw new Error("photoImageResource not defined");
     }
@@ -66,7 +66,7 @@ export function getPhotoImageRouteGenerator(permissionDataAccess, photoImageReso
         .get("/photo-image", ctx => photoImageResource.query(ctx), "manage");
 }
 
-export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovementResource) {
+exports.getPhotoMovementRouteGenerator = (permissionDataAccess, photoMovementResource) => {
     if (photoMovementResource === undefined) {
         throw new Error("photoMovementResource not defined");
     }
@@ -77,7 +77,7 @@ export function getPhotoMovementRouteGenerator (permissionDataAccess, photoMovem
         .put("/photo-movement/:id", ctx => photoMovementResource.move(ctx), "manage");
 }
 
-export function getPhotoUploadRouteGenerator (permissionDataAccess, photoUploadResource) {
+exports.getPhotoUploadRouteGenerator = (permissionDataAccess, photoUploadResource) => {
     if (photoUploadResource === undefined) {
         throw new Error("photoUploadResource not defined");
     }
@@ -87,7 +87,7 @@ export function getPhotoUploadRouteGenerator (permissionDataAccess, photoUploadR
         .put("/photo-upload/:uploadId/:filename", ctx => photoUploadResource.addFile(ctx), "manage");
 }
 
-export function getPhotoFrameRouteGenerator (permissionDataAccess, photoFrameResource) {
+exports.getPhotoFrameRouteGenerator = (permissionDataAccess, photoFrameResource) => {
     if (photoFrameResource === undefined) {
         throw new Error("photoFrameResource not defined");
     }
@@ -98,7 +98,7 @@ export function getPhotoFrameRouteGenerator (permissionDataAccess, photoFrameRes
         .delete("/photo-frame", ctx => photoFrameResource.clearImages(ctx), "manage");
 }
 
-export function getFileRouteGenerator (permissionDataAccess, fileResource) {
+exports.getFileRouteGenerator = (permissionDataAccess, fileResource) => {
     if (fileResource === undefined) {
         throw new Error("fileResource not defined");
     }
@@ -108,7 +108,7 @@ export function getFileRouteGenerator (permissionDataAccess, fileResource) {
         .delete("/file/:filePath", ctx => fileResource.deleteFilePath(ctx), "manage");
 }
 
-export function getMachineStatusRouteGenerator (permissionDataAccess, machineStatusResource) {
+exports.getMachineStatusRouteGenerator = (permissionDataAccess, machineStatusResource) => {
     if (machineStatusResource === undefined) {
         throw new Error("machineStatusResource not defined");
     }
@@ -118,10 +118,10 @@ export function getMachineStatusRouteGenerator (permissionDataAccess, machineSta
         .put("/machine-status/:id", ctx => machineStatusResource.request(ctx), "manage");
 }
 
-export function getPlantViewRouteGenerator(
+exports.getPlantViewRouteGenerator = (
     plantResource,
     plantCompanionResource,
-    plantReferenceResource) {
+    plantReferenceResource) => {
 
     if (plantResource === undefined) throw new Error("plantResource not defined");
     if (plantCompanionResource === undefined) throw new Error("plantCompanionResource not defined");
@@ -135,11 +135,11 @@ export function getPlantViewRouteGenerator(
         .get("/plant-reference/companion-hinder", ctx => plantReferenceResource.listCompanionHinder(ctx));
 }
 
-export function getPlantMaintainRouteGenerator(
+exports.getPlantMaintainRouteGenerator = (
     permissionDataAccess,
     plantResource,
     plantCompanionResource,
-    plantReferenceResource) {
+    plantReferenceResource) => {
 
     if (plantResource === undefined) throw new Error("plantResource not defined");
     if (plantCompanionResource === undefined) throw new Error("plantCompanionResource not defined");

@@ -1,11 +1,11 @@
-import {Log} from "../shared/log";
-import path from "path";
-import promisify from "promisify-node";
+const Log = require("../shared/log").Log;
+const path = require("path");
+const promisify = require("promisify-node");
 
 let mv = promisify("mv");
 let fs = promisify("fs");
 
-export class FileServices {
+class FileServices {
     constructor () {
     }
 
@@ -86,3 +86,5 @@ export class FileServices {
         await mv(fromFilePath, toFilePath, {mkdirp: true, clobber: false});
     }
 }
+
+exports.FileServices = FileServices;

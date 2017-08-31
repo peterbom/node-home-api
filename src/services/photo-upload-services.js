@@ -1,12 +1,12 @@
-import {Log} from "../shared/log";
-import path from "path";
-import moment from "moment";
-import promisify from "promisify-node";
+const Log = require("../shared/log").Log;
+const path = require("path");
+const moment = require("moment");
+const promisify = require("promisify-node");
 
 let mkdirp = promisify("mkdirp");
 let fs = promisify("fs");
 
-export class PhotoUploadServices {
+class PhotoUploadServices {
     constructor (photoUploadDataAccess, stagingPhotoPath) {
         this._photoUploadDataAccess = photoUploadDataAccess;
         this._stagingPhotoPath = stagingPhotoPath;
@@ -40,3 +40,5 @@ export class PhotoUploadServices {
         });
     }
 }
+
+exports.PhotoUploadServices = PhotoUploadServices;

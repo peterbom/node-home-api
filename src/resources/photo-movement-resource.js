@@ -1,4 +1,4 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
 /*
 // Old:
@@ -8,7 +8,7 @@ import {Log} from "../shared/log";
 // Create a file movement given a file path and takenDateTime+camera (PUT /photo-movement/:id)
 */
 
-export class PhotoMovementResource {
+class PhotoMovementResource {
     constructor(photoMovementServices) {
         this._photoMovementServices = photoMovementServices;
     }
@@ -28,3 +28,5 @@ export class PhotoMovementResource {
         ctx.status = 200;
     }
 }
+
+exports.PhotoMovementResource = PhotoMovementResource;

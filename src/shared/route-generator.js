@@ -1,5 +1,5 @@
-import {Log} from "./log";
-import router from "koa-simple-router";
+const Log = require("./log").Log;
+const router = require("koa-simple-router");
 
 function getSecureRouteHandler(permissionDataAccess, routeHandler, securityResourceName, securityActionName) {
 
@@ -42,9 +42,7 @@ function getSecureRouteHandler(permissionDataAccess, routeHandler, securityResou
     }
 }
 
-export class RouteGenerator {
-
-    securityResourceName;
+class RouteGenerator {
 
     constructor(permissionDataAccess, securityResourceName) {
         this.securityResourceName = securityResourceName;
@@ -79,3 +77,5 @@ export class RouteGenerator {
         });
     }
 }
+
+exports.RouteGenerator = RouteGenerator;

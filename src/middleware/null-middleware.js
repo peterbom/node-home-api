@@ -1,5 +1,5 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export function noop (ctx, next) {
+exports.noop = (ctx, next) => {
 	return next();
 }

@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PhotoImageServices {
+class PhotoImageServices {
     constructor (photoImageDataAccess) {
         this._photoImageDataAccess = photoImageDataAccess;
     }
@@ -70,3 +70,5 @@ function toReturn(images) {
         pathHistory: image.pathHistory
     }));
 }
+
+exports.PhotoImageServices = PhotoImageServices;

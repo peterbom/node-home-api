@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PhotoExifDataResource {
+class PhotoExifDataResource {
     constructor (photoExifDataServices) {
         this._photoExifDataServices = photoExifDataServices;
     }
@@ -51,3 +51,5 @@ export class PhotoExifDataResource {
         ctx.status = 200;
     }
 }
+
+exports.PhotoExifDataResource = PhotoExifDataResource;

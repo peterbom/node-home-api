@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class UserResource {
+class UserResource {
     constructor (userDataAccess) {
         if (userDataAccess === undefined) {
             throw new Error("userDataAccess not defined");
@@ -57,3 +57,5 @@ export class UserResource {
         ctx.status = 200;
     }
 }
+
+exports.UserResource = UserResource;

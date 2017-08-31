@@ -3,37 +3,40 @@ const zoo = require("zoo");
 
 exports = module.exports = getEnvVars();
 
-
-
 function getEnvVars() {
     let launchDir = process.cwd();
     let envFilePath = path.join(launchDir, ".env");
-    let envVars;
+    let envFileVars;
     try {
-        envVars = zoo.get(envFilePath);
+        envFileVars = zoo.get(envFilePath);
     } catch (err) {
         // E.g. no .env file exists
-        envVars = process.env;
+        envFileVars = process.env;
     }
 
+    // Let environment variables take precedence over those defined in a file (so that we can
+    // override file variables using launch arguments).
+    let resolveVar = varName => process.env[varName] !== undefined ? process.env[varName] : envFileVars[varName];
+
     let vars = {
-        nodeEnv: envVars["NODE_ENV"],
-        port: envVars["PORT"],
-        logglySubdomain: envVars["LOGGLY_SUBDOMAIN"],
-        logglyToken: envVars["LOGGLY_TOKEN"],
-        authServer: envVars["AUTH_SERVER"],
-        authProviderSecret: envVars["AUTH_PROVIDER_SECRET"],
-        suppressAuthorization: envVars["SUPPRESS_AUTHORIZATION"],
-        logLevel: envVars["LOG_LEVEL"],
-        connectionString: envVars["CONNECTION_STRING"],
-        stagingPhotoPath: envVars["STAGING_PHOTO_PATH"],
-        targetPhotoPath: envVars["TARGET_PHOTO_PATH"],
-        sshHost: envVars["SSH_HOST"],
-        sshPort: envVars["SSH_PORT"],
-        sshUsername: envVars["SSH_USERNAME"],
-        sshPrivateKeyPath: envVars["SSH_PRIVATE_KEY_PATH"],
-        localRoot: envVars["LOCAL_ROOT"],
-        serverRoot: envVars["SERVER_ROOT"]
+        isUnitTest: !!resolveVar("IS_UNIT_TEST"),
+        nodeEnv: resolveVar("NODE_ENV"),
+        port: resolveVar("PORT"),
+        logglySubdomain: resolveVar("LOGGLY_SUBDOMAIN"),
+        logglyToken: resolveVar("LOGGLY_TOKEN"),
+        authServer: resolveVar("AUTH_SERVER"),
+        authProviderSecret: resolveVar("AUTH_PROVIDER_SECRET"),
+        suppressAuthorization: resolveVar("SUPPRESS_AUTHORIZATION"),
+        logLevel: resolveVar("LOG_LEVEL"),
+        connectionString: resolveVar("CONNECTION_STRING"),
+        stagingPhotoPath: resolveVar("STAGING_PHOTO_PATH"),
+        targetPhotoPath: resolveVar("TARGET_PHOTO_PATH"),
+        sshHost: resolveVar("SSH_HOST"),
+        sshPort: resolveVar("SSH_PORT"),
+        sshUsername: resolveVar("SSH_USERNAME"),
+        sshPrivateKeyPath: resolveVar("SSH_PRIVATE_KEY_PATH"),
+        localRoot: resolveVar("LOCAL_ROOT"),
+        serverRoot: resolveVar("SERVER_ROOT")
     }
 
     return vars;

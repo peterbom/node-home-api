@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PlantReferenceDataAccess {
+class PlantReferenceDataAccess {
     // dbManager: https://automattic.github.io/monk/docs/manager/index.html
     constructor (dbManager) {
         this._plantReferences = dbManager.get("plantReferences");
@@ -40,3 +40,5 @@ export class PlantReferenceDataAccess {
         return await this._plantReferences.find({type: type});
     }
 }
+
+exports.PlantReferenceDataAccess = PlantReferenceDataAccess;

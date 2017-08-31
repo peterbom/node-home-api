@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export function getUserUpdater(userDataAccess, jsonService, authServer) {
+exports.getUserUpdater = (userDataAccess, jsonService, authServer) => {
     if (!userDataAccess) {
         throw new Error("userDataAccess not supplied");
     }

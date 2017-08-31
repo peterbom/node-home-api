@@ -1,7 +1,7 @@
-import {Log} from "./log";
-import rp from "request-promise";
+const Log = require("./log").Log;
+const rp = require("request-promise");
 
-export class JsonService {
+class JsonService {
     async getJson(url, token) {
         let options = {
             uri: url,
@@ -38,3 +38,5 @@ export class JsonService {
         return await rp(options);
     }
 }
+
+exports.JsonService = JsonService;

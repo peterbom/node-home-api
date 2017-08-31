@@ -1,10 +1,10 @@
-import {Log} from "../shared/log";
-import promisify from "promisify-node";
+const Log = require("../shared/log").Log;
+const promisify = require("promisify-node");
 
 let bearerToken = promisify("bearer-token");
 
 // https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
-export function getBearerTokenParser(jwtUtils) {
+exports.getBearerTokenParser = jwtUtils => {
 
     return async function (ctx, next) {
 

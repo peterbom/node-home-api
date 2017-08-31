@@ -1,10 +1,10 @@
-import {Log} from "../shared/log";
-import ping from "ping";
-import promisify from "promisify-node";
+const Log = require("../shared/log").Log;
+const ping = require("ping");
+const promisify = require("promisify-node");
 
 let wol = promisify("wake_on_lan");
 
-export class MachineStatusResource {
+class MachineStatusResource {
     constructor(machineLookup) {
         this._machineLookup = machineLookup;
     }
@@ -55,3 +55,5 @@ async function requestOnline(macAddress) {
 async function requestOffline(ipAddress) {
 
 }
+
+exports.MachineStatusResource = MachineStatusResource;

@@ -1,7 +1,7 @@
-import {Log} from "../shared/log";
-import path from "path";
+const Log = require("../shared/log").Log;
+const path = require("path");
 
-export class PhotoDuplicateServices {
+class PhotoDuplicateServices {
     constructor (exifTool, photoImageDataAccess) {
         this._exifTool = exifTool;
         this._photoImageDataAccess = photoImageDataAccess;
@@ -51,3 +51,5 @@ export class PhotoDuplicateServices {
         await this._photoImageDataAccess.invalidateImageIds(differentIds);
     }
 }
+
+exports.PhotoDuplicateServices = PhotoDuplicateServices;

@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PhotoDuplicateResource {
+class PhotoDuplicateResource {
     constructor (photoDuplicateServices) {
         this._photoDuplicateServices = photoDuplicateServices;
     }
@@ -28,3 +28,5 @@ export class PhotoDuplicateResource {
         ctx.status = 200;
     }
 }
+
+exports.PhotoDuplicateResource = PhotoDuplicateResource;

@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export async function errorHandler (ctx, next) {
+exports.errorHandler = async (ctx, next) => {
     // https://github.com/koajs/koa/wiki/Error-Handling
     try {
         await next();

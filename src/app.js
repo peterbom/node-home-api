@@ -1,9 +1,7 @@
-import "babel-polyfill";
+const Log = require("./shared/log").Log;
+const config = require("./config");
+const AppLauncher = require("./app-launcher").AppLauncher;
 
-import {Log} from "./shared/log";
-import {getDefaultComponents} from "./config";
-import {AppLauncher} from "./app-launcher";
-
-let components = getDefaultComponents();
+let components = config.getDefaultComponents();
 
 AppLauncher.launch(components);

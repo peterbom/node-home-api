@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PermissionDataAccess {
+class PermissionDataAccess {
     constructor (dbManager) {
         this._users = dbManager.get("users");
     }
@@ -26,3 +26,5 @@ export class PermissionDataAccess {
         }
     }
 }
+
+exports.PermissionDataAccess = PermissionDataAccess;

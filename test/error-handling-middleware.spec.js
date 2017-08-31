@@ -1,11 +1,9 @@
-import "babel-polyfill";
+const Log = require("../src/shared/log").Log;
+const supertest = require("supertest");
 
-import {Log} from "../lib/shared/log";
-import supertest from "supertest";
-
-import {getDefaultComponents} from "../lib/config";
-import {AppLauncher} from "../lib/app-launcher";
-import {RouteGenerator} from "../lib/shared/route-generator";
+const getDefaultComponents = require("../src/config").getDefaultComponents;
+const AppLauncher = require("../src/app-launcher").AppLauncher;
+const RouteGenerator = require("../src/shared/route-generator").RouteGenerator;
 
 let delay = function () {
     return new Promise(function (fulfill) {

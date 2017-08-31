@@ -5,10 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Start",
             "type": "node",
             "request": "launch",
-            "name": "Start",
-            "program": "${workspaceRoot}/lib/app.js"
-        }
+            "program": "${workspaceRoot}/src/app.js"
+        },
+		{
+			"name": "Test",
+			"type": "node",
+            "request": "launch",
+			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+			//"stopOnEntry": false,
+            "args": ["--recursive", "--no-timeouts", "./test", "-u", "bdd", "-R", "spec"],
+            // "zoo IS_UNIT_TEST=1 SUPPRESS_AUTHORIZATION=0 mocha --recursive ./test -u bdd -R spec"
+			//"cwd": ".",
+			//"runtimeExecutable": null,
+			// Environment variables passed to the program.
+			"env": { "IS_UNIT_TEST": "1", "NODE_ENV": "production"}
+		}
     ]
 }

@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PhotoUploadDataAccess {
+class PhotoUploadDataAccess {
     constructor (dbManager) {
         this._dbManager = dbManager;
         this._photoUploads = dbManager.get("photoUploads");
@@ -20,3 +20,5 @@ export class PhotoUploadDataAccess {
         return await this._photoUploads.findOne({_id: objectId});
     }
 }
+
+exports.PhotoUploadDataAccess = PhotoUploadDataAccess;

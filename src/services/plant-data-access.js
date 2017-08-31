@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PlantDataAccess {
+class PlantDataAccess {
     // dbManager: https://automattic.github.io/monk/docs/manager/index.html
     constructor (dbManager) {
         this._plants = dbManager.get("plants");
@@ -51,3 +51,5 @@ export class PlantDataAccess {
         return await this._plantHierarchy.find({}, {fields: {parentId: 1}});
     }
 }
+
+exports.PlantDataAccess = PlantDataAccess;

@@ -1,7 +1,7 @@
-import {Log} from "../shared/log";
-import path from "path";
+const Log = require("../shared/log").Log;
+const path = require("path");
 
-export class PhotoMovementServices {
+class PhotoMovementServices {
     constructor (photoImageDataAccess, fileServices, sshServices, imageUtils) {
         this._photoImageDataAccess = photoImageDataAccess;
         this._sshServices = sshServices;
@@ -71,3 +71,5 @@ export class PhotoMovementServices {
         await this._photoImageDataAccess.updateLocation(id, destinationDirectoryPath, destinationFilename);
     }
 }
+
+exports.PhotoMovementServices = PhotoMovementServices;

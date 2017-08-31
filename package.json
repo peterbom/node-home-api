@@ -2,49 +2,29 @@
   "name": "node-home-api",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "src/app.js",
+  "engines": {
+    "node": ">=8.4.0"
+  },
   "scripts": {
     "init-env": "shx cp -n .env.template .env",
-    "clean": "rimraf lib/*",
-    "build": "npm run clean && babel src -d lib",
-    "test": "zoo NODE_ENV=test SUPPRESS_AUTHORIZATION=0 mocha --recursive --compilers js:babel-register ./test -u bdd -R spec",
+    "test": "zoo IS_UNIT_TEST=1 SUPPRESS_AUTHORIZATION=0 mocha --recursive ./test -u bdd -R spec",
     "test-debug": "concurrently \"npm run test -- --debug-brk\" \"node-inspector\"",
-    "watch:src": "watch \"npm run build && npm run test\" ./src",
+    "watch:src": "watch \"npm run test\" ./src",
     "watch:test": "watch \"npm run test\" ./test",
     "watch": "concurrently \"npm run watch:test\" \"npm run watch:src\"",
-    "start": "zoo node lib/app.js",
-    "build-start": "npm run build && npm start",
-    "debug": "concurrently \"zoo node --debug-brk lib/app.js\" \"node-inspector\"",
+    "start": "zoo node src/app.js",
     "update-release": "git pull && npm prune --production && npm install --production"
   },
   "repository": {
     "type": "git",
     "url": "ssh://gituser@192.168.1.225:60022/volume1/code/git/node-home-api.git"
   },
-  "babel": {
-    "sourceMaps": false,
-    "comments": true,
-    "minified": false,
-    "presets": [
-      "es2015-loose"
-    ],
-    "plugins": [
-      "transform-async-to-generator",
-      "transform-class-properties"
-    ]
-  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "babel-cli": "^6.11.4",
-    "babel-plugin-transform-async-to-generator": "^6.8.0",
-    "babel-plugin-transform-class-properties": "^6.11.5",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-es2015-loose": "^7.0.0",
-    "babel-register": "^6.11.6",
     "concurrently": "^2.2.0",
     "mocha": "^2.5.3",
-    "node-inspector": "^0.12.8",
     "nodemon": "^1.10.0",
     "rifraf": "^2.0.2",
     "rimraf": "^2.5.3",

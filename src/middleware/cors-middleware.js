@@ -1,9 +1,9 @@
-import {Log} from "../shared/log";
-import convert from "koa-convert";
-import cors from "koa-cors";
+const Log = require("../shared/log").Log;
+const convert = require("koa-convert");
+const cors = require("koa-cors");
 
 // https://www.npmjs.com/package/koa-cors
-export let corsConfig = convert(cors({
+exports.corsConfig = convert(cors({
     origin: true,
     credentials: true
 }));

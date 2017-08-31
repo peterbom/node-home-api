@@ -1,11 +1,11 @@
-import {Log} from "../shared/log";
-import path from "path";
-import moment from "moment";
+const Log = require("../shared/log").Log;
+const path = require("path");
+const moment = require("moment");
 
 var exec = require("child-process-promise").exec;
 const timeout = 60000; // 1 minute
 
-export class ExifTool {
+class ExifTool {
     constructor () {
         this._toolPath = path.join(__dirname, "../../exiftool/exiftool.pl");
     }
@@ -186,3 +186,5 @@ function tryGetDate (stringValue) {
 
     return null;
 }
+
+exports.ExifTool = ExifTool;

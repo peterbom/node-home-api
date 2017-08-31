@@ -15,7 +15,7 @@ const INFO = 3;
 let logger;
 let level;
 
-export class Log {
+class Log {
     static get NONE() {return NONE};
     static get ERROR() {return ERROR};
     static get WARN() {return WARN};
@@ -68,3 +68,5 @@ export class Log {
 }
 
 Log.reset();
+
+exports.Log = Log;

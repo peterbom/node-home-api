@@ -1,6 +1,6 @@
-import {Log} from "../../lib/shared/log";
+const Log = require("../../src/shared/log").Log;
 
-export class MockJsonService {
+class MockJsonService {
     constructor(jsonResponseLookup) {
         this.jsonResponseLookup = jsonResponseLookup;
     }
@@ -15,3 +15,5 @@ export class MockJsonService {
         return this.jsonResponseLookup[url];
     }
 }
+
+exports.MockJsonService = MockJsonService;

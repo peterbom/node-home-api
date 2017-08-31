@@ -1,11 +1,9 @@
-import "babel-polyfill";
+const Log = require("../src/shared/log").Log;
+const supertest = require("supertest");
 
-import {Log} from "../lib/shared/log";
-import supertest from "supertest";
-
-import {getDefaultComponents} from "../lib/config";
-import * as routing from "../lib/app-routing";
-import {AppLauncher} from "../lib/app-launcher";
+const getDefaultComponents = require("../src/config").getDefaultComponents;
+const routing = require("../src/app-routing");
+const AppLauncher = require("../src/app-launcher").AppLauncher;
 
 
 let components = getDefaultComponents();

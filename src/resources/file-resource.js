@@ -1,7 +1,7 @@
-import {Log} from "../shared/log";
-import path from "path";
+const Log = require("../shared/log").Log;
+const path = require("path");
 
-export class FileResource {
+class FileResource {
     constructor (fileServices) {
         this._fileServices = fileServices;
     }
@@ -37,3 +37,5 @@ export class FileResource {
         ctx.status = 200;
     }
 }
+
+exports.FileResource = FileResource;

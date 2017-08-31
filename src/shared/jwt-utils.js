@@ -1,10 +1,10 @@
-import {Log} from "./log";
-import {sign as signJwt, verify as verifyJwtLegacy} from "jsonwebtoken";
-import promisify from "promisify-node";
+const Log = require("./log").Log;
+const {sign: signJwt, verify: verifyJwtLegacy} = require("jsonwebtoken");
+const promisify = require("promisify-node");
 
 let verifyJwt = promisify(verifyJwtLegacy);
 
-export class JwtUtils {
+class JwtUtils {
     constructor (secret) {
         this._secretBuffer = new Buffer(secret, "base64");
     }
@@ -25,3 +25,5 @@ export class JwtUtils {
         });
     }
 }
+
+exports.JwtUtils = JwtUtils;

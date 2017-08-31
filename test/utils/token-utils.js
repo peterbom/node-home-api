@@ -1,7 +1,7 @@
-import {Log} from "../../lib/shared/log";
-import timekeeper from "timekeeper";
+const Log = require("../../src/shared/log").Log;
+const timekeeper = require("timekeeper");
 
-export function createIdToken(jwtUtils, sub, time, lifetimeInMinutes) {
+exports.createIdToken = (jwtUtils, sub, time, lifetimeInMinutes) => {
 
     let user = {
         sub: sub,

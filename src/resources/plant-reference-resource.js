@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PlantReferenceResource {
+class PlantReferenceResource {
     constructor (plantReferenceDataAccess) {
         if (plantReferenceDataAccess === undefined) {
             throw new Error("plantReferenceDataAccess not defined");
@@ -46,3 +46,5 @@ export class PlantReferenceResource {
         ctx.status = 200;
     }
 }
+
+exports.PlantReferenceResource = PlantReferenceResource;

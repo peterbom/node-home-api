@@ -1,9 +1,9 @@
-import {Log} from "./log";
-import path from "path";
-import moment from "moment";
-import md5 from "md5";
+const Log = require("./log").Log;
+const path = require("path");
+const moment = require("moment");
+const md5 = require("md5");
 
-export class ImageUtils {
+class ImageUtils {
     constructor (targetPhotoPath) {
         this._targetPhotoPath = targetPhotoPath;
     }
@@ -67,3 +67,5 @@ export class ImageUtils {
         return currentPath !== destinationPath;
     }
 }
+
+exports.ImageUtils = ImageUtils;

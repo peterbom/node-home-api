@@ -1,8 +1,8 @@
-import {Log} from "../shared/log";
-import bodyParser from "koa-bodyparser";
+const Log = require("../shared/log").Log;
+const bodyParser = require("koa-bodyparser");
 
 // https://github.com/koajs/bodyparser
-export let jsonBodyParser = bodyParser({
+exports.jsonBodyParser = bodyParser({
     enableTypes: ["json"],
 
     // http://stackoverflow.com/questions/16133923/400-vs-422-response-to-post-of-data

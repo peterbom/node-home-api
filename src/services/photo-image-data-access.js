@@ -1,8 +1,8 @@
-import {Log} from "../shared/log";
-import path from "path";
-import moment from "moment";
+const Log = require("../shared/log").Log;
+const path = require("path");
+const moment = require("moment");
 
-export class PhotoImageDataAccess {
+class PhotoImageDataAccess {
     constructor(dbManager, imageUtils) {
         this._dbManager = dbManager;
         this._imageUtils = imageUtils;
@@ -327,3 +327,5 @@ export class PhotoImageDataAccess {
         await Promise.all(updatePromises);
     }
 }
+
+exports.PhotoImageDataAccess = PhotoImageDataAccess;

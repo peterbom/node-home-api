@@ -1,7 +1,7 @@
-import {Log} from "../shared/log";
-import path from "path";
+const Log = require("../shared/log").Log;
+const path = require("path");
 
-export class PhotoIndexServices {
+class PhotoIndexServices {
     constructor (exifTool, photoImageDataAccess, fileServices, photoBaseDirectories) {
         this._exifTool = exifTool;
         this._photoImageDataAccess = photoImageDataAccess;
@@ -133,3 +133,5 @@ async function setPropertiesForImageInfos(exifTool, imageInfos) {
         imageInfo.properties = properties;
     }
 }
+
+exports.PhotoIndexServices = PhotoIndexServices;

@@ -1,9 +1,7 @@
-import "babel-polyfill";
-
-import {Log} from "../lib/shared/log";
-import assert from "assert";
-import {default as DbManager} from "monk";
-import {getDefaultComponents} from "../lib/config";
+const Log = require("../src/shared/log").Log;
+const assert = require("assert");
+const DbManager = require("monk");
+const getDefaultComponents = require("../src/config").getDefaultComponents;
 
 describe("Monk", function () {
     it ("can read inserted document", async done => {

@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export let authorizationChecker = async function (ctx, next) {
+exports.authorizationChecker = async function (ctx, next) {
     if (!ctx.request.idToken) {
         // TODO: Logging
         Log.info("Missing ID token. Returning 401 (unauthorized).");

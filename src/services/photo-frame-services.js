@@ -1,12 +1,12 @@
-import {Log} from "../shared/log";
-import request from "request";
-import rp from "request-promise";
-import path from "path";
-import promisify from "promisify-node";
+const Log = require("../shared/log").Log;
+const request = require("request");
+const rp = require("request-promise");
+const path = require("path");
+const promisify = require("promisify-node");
 
 let fs = promisify("fs");
 
-export class PhotoFrameServices {
+class PhotoFrameServices {
     constructor (photoImageDataAccess, ipAddress) {
         this._photoImageDataAccess = photoImageDataAccess;
         this._ipAddress = ipAddress;
@@ -155,3 +155,5 @@ export class PhotoFrameServices {
         await promise;
     }
 }
+
+exports.PhotoFrameServices = PhotoFrameServices;

@@ -1,73 +1,73 @@
-import Application from "koa";
-import winston from "winston";
-import winstonLogglyBulk from "winston-loggly-bulk";
-import {default as DbManager} from "monk";
+const Application = require("koa");
+const winston = require("winston");
+const winstonLogglyBulk = require("winston-loggly-bulk");
+const DbManager = require("monk");
 
 // Shared components
-import {Log} from "./shared/log";
-import {ImageUtils} from "./shared/image-utils";
-import {JsonService} from "./shared/json-service";
-import {JwtUtils} from "./shared/jwt-utils";
+const Log = require("./shared/log").Log;
+const ImageUtils = require("./shared/image-utils").ImageUtils;
+const JsonService = require("./shared/json-service").JsonService;
+const JwtUtils = require("./shared/jwt-utils").JwtUtils;
 const envVars = require("./shared/env-utils");
 
 // Services
-import {FileServices} from "./services/file-services";
+const FileServices = require("./services/file-services").FileServices;
 const SshServices = require("./services/ssh-services");
-import {ExifTool} from "./services/exif-tool";
+const ExifTool = require("./services/exif-tool").ExifTool;
 
-import {UserDataAccess} from "./services/user-data-access";
-import {PermissionDataAccess} from "./services/permission-data-access";
-import {PhotoImageDataAccess} from "./services/photo-image-data-access";
-import {PhotoUploadDataAccess} from "./services/photo-upload-data-access";
-import {PlantDataAccess} from "./services/plant-data-access";
-import {PlantCompanionDataAccess} from "./services/plant-companion-data-access";
-import {PlantReferenceDataAccess} from "./services/plant-reference-data-access";
+const UserDataAccess = require("./services/user-data-access").UserDataAccess;
+const PermissionDataAccess = require("./services/permission-data-access").PermissionDataAccess;
+const PhotoImageDataAccess = require("./services/photo-image-data-access").PhotoImageDataAccess;
+const PhotoUploadDataAccess = require("./services/photo-upload-data-access").PhotoUploadDataAccess;
+const PlantDataAccess = require("./services/plant-data-access").PlantDataAccess;
+const PlantCompanionDataAccess = require("./services/plant-companion-data-access").PlantCompanionDataAccess;
+const PlantReferenceDataAccess = require("./services/plant-reference-data-access").PlantReferenceDataAccess;
 
-import {PhotoIndexServices} from "./services/photo-index-services";
-import {PhotoDuplicateServices} from "./services/photo-duplicate-services";
-import {PhotoExifDataServices} from "./services/photo-exif-data-services";
-import {PhotoImageServices} from "./services/photo-image-services";
-import {PhotoMovementServices} from "./services/photo-movement-services";
-import {PhotoUploadServices} from "./services/photo-upload-services";
-import {PhotoFrameServices} from "./services/photo-frame-services";
+const PhotoIndexServices = require("./services/photo-index-services").PhotoIndexServices;
+const PhotoDuplicateServices = require("./services/photo-duplicate-services").PhotoDuplicateServices;
+const PhotoExifDataServices = require("./services/photo-exif-data-services").PhotoExifDataServices;
+const PhotoImageServices = require("./services/photo-image-services").PhotoImageServices;
+const PhotoMovementServices = require("./services/photo-movement-services").PhotoMovementServices;
+const PhotoUploadServices = require("./services/photo-upload-services").PhotoUploadServices;
+const PhotoFrameServices = require("./services/photo-frame-services").PhotoFrameServices;
 
 // API Resources
-import {PermissionResource} from "./resources/permission-resource";
-import {UserResource} from "./resources/user-resource";
-import {PhotoIndexResource} from "./resources/photo-index-resource";
-import {PhotoDuplicateResource} from "./resources/photo-duplicate-resource";
-import {PhotoExifDataResource} from "./resources/photo-exif-data-resource";
-import {PhotoImageResource} from "./resources/photo-image-resource";
-import {PhotoMovementResource} from "./resources/photo-movement-resource";
-import {PhotoUploadResource} from "./resources/photo-upload-resource";
-import {PhotoFrameResource} from "./resources/photo-frame-resource";
-import {FileResource} from "./resources/file-resource";
-import {MachineStatusResource} from "./resources/machine-status-resource";
-import {PlantResource} from "./resources/plant-resource";
-import {PlantCompanionResource} from "./resources/plant-companion-resource";
-import {PlantReferenceResource} from "./resources/plant-reference-resource";
+const PermissionResource = require("./resources/permission-resource").PermissionResource;
+const UserResource = require("./resources/user-resource").UserResource;
+const PhotoIndexResource = require("./resources/photo-index-resource").PhotoIndexResource;
+const PhotoDuplicateResource = require("./resources/photo-duplicate-resource").PhotoDuplicateResource;
+const PhotoExifDataResource = require("./resources/photo-exif-data-resource").PhotoExifDataResource;
+const PhotoImageResource = require("./resources/photo-image-resource").PhotoImageResource;
+const PhotoMovementResource = require("./resources/photo-movement-resource").PhotoMovementResource;
+const PhotoUploadResource = require("./resources/photo-upload-resource").PhotoUploadResource;
+const PhotoFrameResource = require("./resources/photo-frame-resource").PhotoFrameResource;
+const FileResource = require("./resources/file-resource").FileResource;
+const MachineStatusResource = require("./resources/machine-status-resource").MachineStatusResource;
+const PlantResource = require("./resources/plant-resource").PlantResource;
+const PlantCompanionResource = require("./resources/plant-companion-resource").PlantCompanionResource;
+const PlantReferenceResource = require("./resources/plant-reference-resource").PlantReferenceResource;
 
 // Middleware
-import {noop} from "./middleware/null-middleware";
-import {errorHandler} from "./middleware/error-handling-middleware";
-import {corsConfig} from "./middleware/cors-middleware";
-import {jsonBodyParser} from "./middleware/body-parsing-middleware";
-import {getUserUpdater} from "./middleware/user-update-middleware";
-import {getBearerTokenParser} from "./middleware/token-parsing-middleware";
-import {authorizationChecker} from "./middleware/authorization-middleware";
+const noop = require("./middleware/null-middleware").noop;
+const errorHandler = require("./middleware/error-handling-middleware").errorHandler;
+const corsConfig = require("./middleware/cors-middleware").corsConfig;
+const jsonBodyParser = require("./middleware/body-parsing-middleware").jsonBodyParser;
+const getUserUpdater = require("./middleware/user-update-middleware").getUserUpdater;
+const getBearerTokenParser = require("./middleware/token-parsing-middleware").getBearerTokenParser;
+const authorizationChecker = require("./middleware/authorization-middleware").authorizationChecker;
 
 // Routing
-import * as routing from "./app-routing";
+const routing = require("./app-routing");
 
 function getDefaultSettings () {
     return {
-        isUnitTest: envVars.nodeEnv === "test",
+        isUnitTest: envVars.isUnitTest,
         port: envVars.port,
         logglySubdomain: envVars.logglySubdomain,
         logglyToken: envVars.logglyToken,
         authServer: envVars.authServer,
         authProviderSecret: envVars.authProviderSecret,
-        connectionString: envVars.nodeEnv === "test" ? "localhost:27017/unitTest" : envVars.connectionString,
+        connectionString: envVars.connectionString,
         suppressAuthorization: envVars.suppressAuthorization === "1" && envVars.nodeEnv === "development",
         machineLookup: {
             dev: {
@@ -88,7 +88,7 @@ function getDefaultSettings () {
     };
 }
 
-export function getDefaultComponents () {
+exports.getDefaultComponents = () => {
     let settings = getDefaultSettings();
     
     let components = {

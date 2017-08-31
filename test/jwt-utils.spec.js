@@ -1,8 +1,6 @@
-import "babel-polyfill";
-
-import {Log} from "../lib/shared/log";
-import {JwtUtils} from "../lib/shared/jwt-utils";
-import timekeeper from "timekeeper";
+const Log = require("../src/shared/log").Log;
+const JwtUtils = require("../src/shared/jwt-utils").JwtUtils;
+const timekeeper = require("timekeeper");
 
 describe("JwtUtils", function () {
     it ("can verify a real Auth0 id_token", async function (done) {

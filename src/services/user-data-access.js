@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class UserDataAccess {
+class UserDataAccess {
     // dbManager: https://automattic.github.io/monk/docs/manager/index.html
     constructor (dbManager) {
         this._users = dbManager.get("users");
@@ -36,3 +36,5 @@ export class UserDataAccess {
         return await this._users.find();
     }
 }
+
+exports.UserDataAccess = UserDataAccess;

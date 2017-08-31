@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PermissionResource {
+class PermissionResource {
     constructor (permissionDataAccess) {
         this._permissionDataAccess = permissionDataAccess;
     }
@@ -16,3 +16,5 @@ export class PermissionResource {
         ctx.body = await this._permissionDataAccess.getPermissions(idToken.sub);
     }
 }
+
+exports.PermissionResource = PermissionResource;

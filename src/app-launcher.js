@@ -1,7 +1,7 @@
-import {Log} from "./shared/log";
-import {noop} from "./middleware/null-middleware";
+const Log = require("./shared/log").Log;
+const noop = require("./middleware/null-middleware").noop;
 
-export class AppLauncher {
+class AppLauncher {
     static launch(components) {
         let app = components.app;
         let settings = components.appSettings;
@@ -39,3 +39,5 @@ export class AppLauncher {
         }
     }
 }
+
+exports.AppLauncher = AppLauncher;

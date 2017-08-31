@@ -1,6 +1,6 @@
-import {Log} from "../../lib/shared/log";
+const Log = require("../../src/shared/log").Log;
 
-export class MockPermissionDataAccess {
+class MockPermissionDataAccess {
     constructor (permissionLookup) {
         this._permissionLookup = permissionLookup;
     }
@@ -9,3 +9,5 @@ export class MockPermissionDataAccess {
         return this._permissionLookup[sub];
     }
 }
+
+exports.MockPermissionDataAccess = MockPermissionDataAccess;

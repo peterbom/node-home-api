@@ -1,15 +1,13 @@
-import "babel-polyfill";
+const Log = require("../src/shared/log").Log;
+const supertest = require("supertest");
+const timekeeper = require("timekeeper");
 
-import {Log} from "../lib/shared/log";
-import supertest from "supertest";
-import timekeeper from "timekeeper";
+const MockPermissionDataAccess = require("./mocks/mock-permission-data-access").MockPermissionDataAccess;
+const createIdToken = require("./utils/token-utils").createIdToken;
 
-import {MockPermissionDataAccess} from "./mocks/mock-permission-data-access";
-import {createIdToken} from "./utils/token-utils";
-
-import {getDefaultComponents} from "../lib/config";
-import {AppLauncher} from "../lib/app-launcher";
-import {RouteGenerator} from "../lib/shared/route-generator";
+const getDefaultComponents = require("../src/config").getDefaultComponents;
+const AppLauncher = require("../src/app-launcher").AppLauncher;
+const RouteGenerator = require("../src/shared/route-generator").RouteGenerator;
 
 
 describe("Authorization middleware", function () {

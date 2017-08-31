@@ -1,6 +1,6 @@
-import {Log} from "../shared/log";
+const Log = require("../shared/log").Log;
 
-export class PlantCompanionDataAccess {
+class PlantCompanionDataAccess {
     // dbManager: https://automattic.github.io/monk/docs/manager/index.html
     constructor (dbManager) {
         this._plantCompanions = dbManager.get("plantCompanions");
@@ -44,3 +44,5 @@ export class PlantCompanionDataAccess {
         await this._plantCompanions.remove({_id: tsn});
     }
 }
+
+exports.PlantCompanionDataAccess = PlantCompanionDataAccess;
