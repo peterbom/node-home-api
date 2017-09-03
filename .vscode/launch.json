@@ -8,20 +8,15 @@
             "name": "Start",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/src/app.js"
+            "program": "${workspaceRoot}/src/app.js",
+			"env": { "LOG_LEVEL": "3", "NODE_ENV": "development" }
         },
 		{
 			"name": "Test",
 			"type": "node",
             "request": "launch",
 			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-			//"stopOnEntry": false,
-            "args": ["--recursive", "--no-timeouts", "./test", "-u", "bdd", "-R", "spec"],
-            // "zoo IS_UNIT_TEST=1 SUPPRESS_AUTHORIZATION=0 mocha --recursive ./test -u bdd -R spec"
-			//"cwd": ".",
-			//"runtimeExecutable": null,
-			// Environment variables passed to the program.
-			"env": { "IS_UNIT_TEST": "1", "NODE_ENV": "production"}
+            "args": ["--recursive", "--timeout", "10000", "./test", "-u", "bdd", "-R", "spec"]
 		}
     ]
 }

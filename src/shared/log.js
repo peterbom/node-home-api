@@ -12,8 +12,13 @@ const ERROR = 1;
 const WARN = 2;
 const INFO = 3;
 
-let logger;
-let level;
+let _logger;
+let _level;
+
+function init() {
+    _logger = _logger || console;
+    _level = _level !== undefined ? _level : INFO;
+}
 
 class Log {
     static get NONE() {return NONE};
@@ -21,52 +26,55 @@ class Log {
     static get WARN() {return WARN};
     static get INFO() {return INFO};
     
-    static reset(){
-        level = process.env.LOG_LEVEL;
-        logger = console;
+    static get level() {
+        init();
+        return _level;
     }
-    
-    static get level(){
-        return level;
-    }
-    static set level(value){
+
+    static set level(value) {
+        init();
+        value = Number.parseInt(value);
         if (NONE <= value && value <= INFO){
-            level = value;
-        }
-        else {
+            _level = value;
+        } else {
             throw new Error("Invalid log level");
         }
     }
     
-    static get logger(){
-        return logger;
+    static get logger() {
+        init();
+        return _logger;
     }
+
     static set logger(value){
-        if (value.info && value.warn && value.error){
-            logger = value;
-        }
-        else {
+        init();
+        if (value.info && value.warn && value.error) {
+            _logger = value;
+        } else {
             throw new Error("Invalid logger");
         }
     }
     
-    static info(...args){
-        if (level >= INFO){
-            logger.info.apply(logger, Array.from(args));
+    static info(...args) {
+        init();
+        if (_level >= INFO){
+            _logger.info.apply(_logger, Array.from(args));
         }
     }
-    static warn(...args){
-        if (level >= WARN){
-            logger.warn.apply(logger, Array.from(args));
+
+    static warn(...args) {
+        init();
+        if (_level >= WARN){
+            _logger.warn.apply(_logger, Array.from(args));
         }
     }
-    static error(...args){
-        if (level >= ERROR){
-            logger.error.apply(logger, Array.from(args));
+
+    static error(...args) {
+        init();
+        if (_level >= ERROR){
+            _logger.error.apply(_logger, Array.from(args));
         }
     }
 }
-
-Log.reset();
 
 exports.Log = Log;

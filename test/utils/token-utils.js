@@ -5,11 +5,13 @@ exports.createIdToken = (jwtUtils, sub, time, lifetimeInMinutes) => {
 
     let user = {
         sub: sub,
-        "iss": "https://bomb.au.auth0.com/",
-        "aud": "IrfJgtk1rlqbHX7ywbVsofJ7MOsNz52s"
+        "iss": "https://authdomain.com",
+        "aud": "aaaaaaaaaaaaaaa"
     };
 
-    timekeeper.freeze(time || new Date(2016, 1, 1));
+    timekeeper.freeze(time || new Date());
 
     return jwtUtils.signJwt(user, lifetimeInMinutes || 1);
+
+    timekeeper.reset();
 }

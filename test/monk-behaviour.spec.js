@@ -2,11 +2,27 @@ const Log = require("../src/shared/log").Log;
 const assert = require("assert");
 const DbManager = require("monk");
 const getDefaultComponents = require("../src/config").getDefaultComponents;
+const {getTestEnvVars} = require("./utils/env-utils");
+
+let envVars = getTestEnvVars();
+let settings = {
+    connectionString: envVars["TEST_CONNECTION_STRING"],
+    authServer: "test.auth.com",
+    authProviderSecret: "secret",
+    machineLookup: {
+        test: {
+            macAddress: "11:11:11:11:11:11"
+        },
+        flash: {
+            ipAddress: "127.0.0.1"
+        }
+    },
+};
 
 describe("Monk", function () {
     it ("can read inserted document", async done => {
         try {
-            let components = getDefaultComponents();
+            let components = getDefaultComponents(settings);
             let dbManager = new DbManager(components.appSettings.connectionString);
 
             let things = dbManager.get("things");
@@ -26,7 +42,7 @@ describe("Monk", function () {
 
     it ("can use distinct", async done => {
         try {
-            let components = getDefaultComponents();
+            let components = getDefaultComponents(settings);
             let dbManager = new DbManager(components.appSettings.connectionString);
 
             let things = dbManager.get("things");
@@ -47,7 +63,7 @@ describe("Monk", function () {
 
     it ("can use group by", async done => {
         try {
-            let components = getDefaultComponents();
+            let components = getDefaultComponents(settings);
             let dbManager = new DbManager(components.appSettings.connectionString);
 
             let things = dbManager.get("things");
@@ -77,7 +93,7 @@ describe("Monk", function () {
 
     it ("can use group by, having count > 1", async done => {
         try {
-            let components = getDefaultComponents();
+            let components = getDefaultComponents(settings);
             let dbManager = new DbManager(components.appSettings.connectionString);
 
             let things = dbManager.get("things");
@@ -104,7 +120,7 @@ describe("Monk", function () {
 
     it ("can upsert using findOneAndUpdate", async function (done) {
         try {
-            let components = getDefaultComponents();
+            let components = getDefaultComponents(settings);
             let dbManager = new DbManager(components.appSettings.connectionString);
 
             let things = dbManager.get("things");
@@ -138,7 +154,7 @@ describe("Monk", function () {
 
     it ("can search using 'in'", async function (done) {
         try {
-            let components = getDefaultComponents();
+            let components = getDefaultComponents(settings);
             let dbManager = new DbManager(components.appSettings.connectionString);
 
             let things = dbManager.get("things");

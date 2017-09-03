@@ -34,11 +34,25 @@ let catchAllMiddleware = async function (ctx, next) {
     }
 }
 
+let settings = {
+    connectionString: "mongodb://fakeuser:fakepassword@fakedomain.com/fakedb",
+    authServer: "test.auth.com",
+    authProviderSecret: "secret",
+    machineLookup: {
+        test: {
+            macAddress: "11:11:11:11:11:11"
+        },
+        flash: {
+            ipAddress: "127.0.0.1"
+        }
+    },
+};
+
 describe("Error handling middleware", function () {
 
     it ("catches synchronous errors", done => {
 
-        let components = getDefaultComponents();
+        let components = getDefaultComponents(settings);
         components.middleware.corsConfig = null;
         components.middleware.bodyParser = null;
         components.middleware.requireBearerToken = null;
@@ -72,7 +86,7 @@ describe("Error handling middleware", function () {
 
     it ("catches asynchronous errors", done => {
 
-        let components = getDefaultComponents();
+        let components = getDefaultComponents(settings);
         components.middleware.corsConfig = null;
         components.middleware.bodyParser = null;
         components.middleware.requireBearerToken = null;

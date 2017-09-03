@@ -9,18 +9,32 @@ const getDefaultComponents = require("../src/config").getDefaultComponents;
 const AppLauncher = require("../src/app-launcher").AppLauncher;
 const RouteGenerator = require("../src/shared/route-generator").RouteGenerator;
 
+let settings = {
+    connectionString: "mongodb://fakeuser:fakepassword@fakedomain.com/fakedb",
+    authServer: "test.auth.com",
+    authProviderSecret: "secret",
+    machineLookup: {
+        test: {
+            macAddress: "11:11:11:11:11:11"
+        },
+        flash: {
+            ipAddress: "127.0.0.1"
+        }
+    },
+};
 
 describe("Authorization middleware", function () {
+    afterEach(() => timekeeper.reset());
 
     it ("returns unauthorized for secured resource when no access token is supplied", done => {
         let reachedSecureMiddleware = false;
 
-        let components = getDefaultComponents();
+        let components = getDefaultComponents(settings);
         components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_access"]});
         components.middleware.userUpdater = null;
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
-            RouteGenerator.create(components.permissionDataAccess, "resource")
+            RouteGenerator.create("resource")
                 .get("/secure-resource", ctx => {
                     reachedSecureMiddleware = true;
                     ctx.body = {success: true};
@@ -44,12 +58,12 @@ describe("Authorization middleware", function () {
     it ("returns unauthorized for secured resource when access token is expired", done => {
         let reachedSecureMiddleware = false;
 
-        let components = getDefaultComponents();
+        let components = getDefaultComponents(settings);
         components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_access"]});
         components.middleware.userUpdater = null;
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
-            RouteGenerator.create(components.permissionDataAccess, "resource")
+            RouteGenerator.create("resource")
                 .get("/secure-resource", ctx => {
                     reachedSecureMiddleware = true;
                     ctx.body = {success: true};
@@ -79,12 +93,12 @@ describe("Authorization middleware", function () {
     it ("returns forbidden for secured resource when access token lacks the required permissions", done => {
         let reachedSecureMiddleware = false;
 
-        let components = getDefaultComponents();
+        let components = getDefaultComponents(settings);
         components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_read"]});
         components.middleware.userUpdater = null;
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
-            RouteGenerator.create(components.permissionDataAccess, "resource")
+            RouteGenerator.create("resource")
                 .get("/secure-resource", ctx => {
                     reachedSecureMiddleware = true;
                     ctx.body = {success: true};
@@ -106,17 +120,17 @@ describe("Authorization middleware", function () {
                 }
             })
             .expect(403, done);
-    })
+    });
 
     it ("allows access to the route when access token has the required permissions", done => {
         let reachedSecureMiddleware = false;
 
-        let components = getDefaultComponents();
+        let components = getDefaultComponents(settings);
         components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_write"]});
         components.middleware.userUpdater = null;
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
-            RouteGenerator.create(components.permissionDataAccess, "resource")
+            RouteGenerator.create("resource")
                 .get("/secure-resource", ctx => {
                     reachedSecureMiddleware = true;
                     ctx.body = {success: true};
@@ -138,5 +152,5 @@ describe("Authorization middleware", function () {
                 }
             })
             .expect(200, done);
-    })
+    });
 });

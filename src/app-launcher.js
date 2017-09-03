@@ -7,6 +7,13 @@ class AppLauncher {
         let settings = components.appSettings;
         Log.logger = components.logger;
 
+        // Make all the components available to each request.
+        app.use(async (ctx, next) => {
+            ctx.components = components;
+            await next();
+        });
+
+        // General request-processing middleware
         app.use(components.middleware.errorHandler || noop);
         app.use(components.middleware.corsConfig || noop);
         app.use(components.middleware.bodyParser || noop);
@@ -33,7 +40,7 @@ class AppLauncher {
             app.use(routeGenerator.toMiddleware(settings.suppressAuthorization));
         }
 
-        if (!settings.isUnitTest) {
+        if (settings.listen) {
             app.listen(settings.port);
             Log.info("Application started. Listening on port: " + settings.port);
         }

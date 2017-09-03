@@ -1,7 +1,7 @@
 const Log = require("./log").Log;
 const router = require("koa-simple-router");
 
-function getSecureRouteHandler(permissionDataAccess, routeHandler, securityResourceName, securityActionName) {
+function getSecureRouteHandler(routeHandler, securityResourceName, securityActionName) {
 
     if (!securityResourceName && !securityActionName) {
         // No security checking needed.
@@ -27,7 +27,7 @@ function getSecureRouteHandler(permissionDataAccess, routeHandler, securityResou
             throw new Error("no \"sub\" claim on access token");
         }
 
-        let permissions = await permissionDataAccess.getPermissions(idToken.sub);
+        let permissions = await ctx.components.permissionDataAccess.getPermissions(idToken.sub);
 
         let requiredPermission = `${securityResourceName}_${securityActionName}`;
 
@@ -44,7 +44,7 @@ function getSecureRouteHandler(permissionDataAccess, routeHandler, securityResou
 
 class RouteGenerator {
 
-    constructor(permissionDataAccess, securityResourceName) {
+    constructor(securityResourceName) {
         this.securityResourceName = securityResourceName;
 
         this._routeDescriptors = [];
@@ -55,7 +55,7 @@ class RouteGenerator {
                     method: method,
                     route: route,
                     bareHandler: handler,
-                    secureHandler: getSecureRouteHandler(permissionDataAccess, handler, this.securityResourceName, securityActionName),
+                    secureHandler: getSecureRouteHandler(handler, this.securityResourceName, securityActionName),
                     securityActionName: securityActionName
                 };
 
@@ -65,8 +65,8 @@ class RouteGenerator {
         });
     }
 
-    static create(permissionDataAccess, securityResourceName) {
-        return new RouteGenerator(permissionDataAccess, securityResourceName);
+    static create(securityResourceName) {
+        return new RouteGenerator(securityResourceName);
     }
 
     toMiddleware(suppressAuthorization) {

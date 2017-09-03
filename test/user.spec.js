@@ -4,15 +4,32 @@ const supertest = require("supertest");
 const getDefaultComponents = require("../src/config").getDefaultComponents;
 const routing = require("../src/app-routing");
 const AppLauncher = require("../src/app-launcher").AppLauncher;
+const {MockUserDataAccess} = require("./mocks/mock-user-data-access");
+const {UserResource} = require("../src/resources/user-resource");
 
+let settings = {
+    connectionString: "mongodb://fakeuser:fakepassword@fakedomain.com/fakedb",
+    authServer: "test.auth.com",
+    authProviderSecret: "secret",
+    machineLookup: {
+        test: {
+            macAddress: "11:11:11:11:11:11"
+        },
+        flash: {
+            ipAddress: "127.0.0.1"
+        }
+    },
+};
 
-let components = getDefaultComponents();
+let components = getDefaultComponents(settings);
 components.appSettings.suppressAuthorization = true;
+components.userDataAccess = new MockUserDataAccess();
+components.userResource = new UserResource(components.userDataAccess);
 
 components.middleware.authorizationChecker = null;
 components.middleware.unsecuredRouteGenerators = [];
 components.middleware.securedRouteGenerators = [
-    routing.getUserRouteGenerator(null, components.userResource)
+    routing.getUserRouteGenerator(components.userResource)
 ];
 
 AppLauncher.launch(components);

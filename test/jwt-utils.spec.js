@@ -3,6 +3,8 @@ const JwtUtils = require("../src/shared/jwt-utils").JwtUtils;
 const timekeeper = require("timekeeper");
 
 describe("JwtUtils", function () {
+    afterEach(() => timekeeper.reset());
+
     it ("can verify a real Auth0 id_token", async function (done) {
         let time = new Date(1471848758000);
         timekeeper.freeze(time);

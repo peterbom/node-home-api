@@ -1,10 +1,6 @@
 const Log = require("../shared/log").Log;
 
 class PermissionResource {
-    constructor (permissionDataAccess) {
-        this._permissionDataAccess = permissionDataAccess;
-    }
-
     async getPermissions(ctx) {
 
         let idToken = ctx.request.idToken;
@@ -13,7 +9,7 @@ class PermissionResource {
         	return;
         }
 
-        ctx.body = await this._permissionDataAccess.getPermissions(idToken.sub);
+        ctx.body = await ctx.components.permissionDataAccess.getPermissions(idToken.sub);
     }
 }
 

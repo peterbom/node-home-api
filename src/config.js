@@ -8,7 +8,6 @@ const Log = require("./shared/log").Log;
 const ImageUtils = require("./shared/image-utils").ImageUtils;
 const JsonService = require("./shared/json-service").JsonService;
 const JwtUtils = require("./shared/jwt-utils").JwtUtils;
-const envVars = require("./shared/env-utils");
 
 // Services
 const FileServices = require("./services/file-services").FileServices;
@@ -34,6 +33,7 @@ const PhotoFrameServices = require("./services/photo-frame-services").PhotoFrame
 // API Resources
 const PermissionResource = require("./resources/permission-resource").PermissionResource;
 const UserResource = require("./resources/user-resource").UserResource;
+const AzureSasTokenResource = require("./resources/azure-sas-token-resource").AzureSasTokenResource;
 const PhotoIndexResource = require("./resources/photo-index-resource").PhotoIndexResource;
 const PhotoDuplicateResource = require("./resources/photo-duplicate-resource").PhotoDuplicateResource;
 const PhotoExifDataResource = require("./resources/photo-exif-data-resource").PhotoExifDataResource;
@@ -59,54 +59,23 @@ const authorizationChecker = require("./middleware/authorization-middleware").au
 // Routing
 const routing = require("./app-routing");
 
-function getDefaultSettings () {
-    return {
-        isUnitTest: envVars.isUnitTest,
-        port: envVars.port,
-        logglySubdomain: envVars.logglySubdomain,
-        logglyToken: envVars.logglyToken,
-        authServer: envVars.authServer,
-        authProviderSecret: envVars.authProviderSecret,
-        connectionString: envVars.connectionString,
-        suppressAuthorization: envVars.suppressAuthorization === "1" && envVars.nodeEnv === "development",
-        machineLookup: {
-            dev: {
-                ipAddress: "192.168.1.200",
-                macAddress: "bc:5f:f4:36:5c:a0"
-            }, flash: {
-                ipAddress: "192.168.1.100"
-            }
-        },
-        stagingPhotoPath: envVars.stagingPhotoPath,
-        targetPhotoPath: envVars.targetPhotoPath,
-        sshHost: envVars.sshHost,
-        sshPort: envVars.sshPort,
-        sshUsername: envVars.sshUsername,
-        sshPrivateKeyPath: envVars.sshPrivateKeyPath,
-        localRoot: envVars.localRoot,
-        serverRoot: envVars.serverRoot
-    };
-}
-
-exports.getDefaultComponents = () => {
-    let settings = getDefaultSettings();
-    
+exports.getDefaultComponents = (settings) => {
     let components = {
         appSettings: settings
     };
 
     components.app = new Application();
 
-    if (!settings.isUnitTest) {
+    if (settings.logExternal) {
         winston.add(winston.transports.Loggly, {
             token: settings.logglyToken,
             subdomain: settings.logglySubdomain,
-            tags: ["home-api", envVars.nodeEnv],
+            tags: ["home-api", settings.nodeEnv],
             json: true
         });
     }
 
-    components.logger = winston;
+    components.logger = settings.logExternal ? winston : console;
 
     components.dbManager = new DbManager(settings.connectionString);
 
@@ -166,8 +135,9 @@ exports.getDefaultComponents = () => {
         components.photoImageDataAccess,
         settings.machineLookup.flash.ipAddress);
 
-    components.permissionResource = new PermissionResource(components.permissionDataAccess);
+    components.permissionResource = new PermissionResource();
     components.userResource = new UserResource(components.userDataAccess);
+    components.azureSasTokenResource = new AzureSasTokenResource(settings.azureStorageConnectionString);
     components.photoIndexResource = new PhotoIndexResource(components.photoIndexServices);
     components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
@@ -203,18 +173,18 @@ exports.getDefaultComponents = () => {
         authorizationChecker: authorizationChecker,
 
         securedRouteGenerators: [
-            routing.getUserRouteGenerator(components.permissionDataAccess, components.userResource),
-            routing.getPhotoIndexRouteGenerator(components.permissionDataAccess, components.photoIndexResource),
-            routing.getPhotoDuplicateRouteGenerator(components.permissionDataAccess, components.photoDuplicateResource),
-            routing.getPhotoExifDataRouteGenerator(components.permissionDataAccess, components.photoExifDataResource),
-            routing.getPhotoImageRouteGenerator(components.permissionDataAccess, components.photoImageResource),
-            routing.getPhotoMovementRouteGenerator(components.permissionDataAccess, components.photoMovementResource),
-            routing.getPhotoUploadRouteGenerator(components.permissionDataAccess, components.photoUploadResource),
-            routing.getPhotoFrameRouteGenerator(components.permissionDataAccess, components.photoFrameResource),
-            routing.getFileRouteGenerator(components.permissionDataAccess, components.fileResource),
-            routing.getMachineStatusRouteGenerator(components.permissionDataAccess, components.machineStatusResource),
+            routing.getUserRouteGenerator(components.userResource),
+            routing.getAzureSasTokenRouteGenerator(components.azureSasTokenResource),
+            routing.getPhotoIndexRouteGenerator(components.photoIndexResource),
+            routing.getPhotoDuplicateRouteGenerator(components.photoDuplicateResource),
+            routing.getPhotoExifDataRouteGenerator(components.photoExifDataResource),
+            routing.getPhotoImageRouteGenerator(components.photoImageResource),
+            routing.getPhotoMovementRouteGenerator(components.photoMovementResource),
+            routing.getPhotoUploadRouteGenerator(components.photoUploadResource),
+            routing.getPhotoFrameRouteGenerator(components.photoFrameResource),
+            routing.getFileRouteGenerator(components.fileResource),
+            routing.getMachineStatusRouteGenerator(components.machineStatusResource),
             routing.getPlantMaintainRouteGenerator(
-                components.permissionDataAccess,
                 components.plantResource,
                 components.plantCompanionResource,
                 components.plantReferenceResource)
