@@ -49,7 +49,7 @@ class AzureSasTokenResource {
 
         ctx.body = {
             token: sasToken,
-            uri: blobService.getUrl(ContainerName, sasToken)
+            host: blobService.host
         };
     }
 }
