@@ -23,6 +23,12 @@
 			"type": "node",
             "request": "launch",
 			"program": "${workspaceRoot}/tasks/create-token.js"
-		}
+		},
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Init Storage Emulator",
+            "program": "${workspaceRoot}/tasks/init-storage-emulator.js"
+        }
     ]
 }
