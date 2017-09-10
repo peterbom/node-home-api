@@ -12,7 +12,8 @@ const getTestEnvVars = require("./utils/env-utils").getTestEnvVars;
 let envVars = getTestEnvVars();
 let settings = {
     connectionString: "mongodb://fakeuser:fakepassword@fakedomain.com/fakedb",
-    azureStorageConnectionString: envVars["TEST_AZURE_STORAGE_CONNECTION_STRING"],
+    blobStorageConnectionString: envVars["TEST_BLOB_STORAGE_CONNECTION_STRING"],
+    jobStorageConnectionString: envVars["TEST_JOB_STORAGE_CONNECTION_STRING"],
     authServer: "test.auth.com",
     authProviderSecret: "secret",
     machineLookup: {

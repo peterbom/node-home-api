@@ -1,55 +1,85 @@
 const {Log} = require("../shared/log");
 const AzureStorage = require("azure-storage");
 
-const ContainerName = "images";
+const BlobContainerName = "images";
+const QueueName = "client-requests";
 
-async function ensureContainerExists(blobService) {
+function getSharedAccessPolicy(expireInMinutes) {
+    // Set start time to five minutes ago to avoid clock skew.
+    let startMinutes = -5;
+    let expireMinutes = expireInMinutes;
+    let startDate = new Date();
+    let expiryDate = new Date(startDate);
+
+    startDate.setMinutes(startDate.getMinutes() + startMinutes);
+    expiryDate.setMinutes(startDate.getMinutes() + expireMinutes);
+
+    //   SharedAccessPermissions: {
+    //     READ: 'r',
+    //     ADD: 'a',
+    //     CREATE: 'c',
+    //     WRITE: 'w',
+    //     DELETE: 'd',
+    //     LIST: 'l'
+    //   },
+    return {
+        AccessPolicy: {
+            Permissions: "racwl",
+            Start: startDate,
+            Expiry: expiryDate
+        }
+    };
+}
+
+async function getBlobContainerSasToken(blobStorageConnectionString, sharedAccessPolicy) {
+    let blobService = AzureStorage.createBlobService(blobStorageConnectionString);
+
+    // Bit of a side-effect here. We need to ensure the container exists before we can create
+    // a token which gives access to it.
     await new Promise((resolve, reject) => {
-        blobService.createContainerIfNotExists(ContainerName, error => error ? reject(error) : resolve());
+        blobService.createContainerIfNotExists(BlobContainerName, error => error ? reject(error) : resolve());
     });
+
+    let token = blobService.generateSharedAccessSignature(BlobContainerName, null /* blob */, sharedAccessPolicy);
+    return {
+        token: token,
+        host: blobService.host,
+        container: BlobContainerName
+    }
+}
+
+async function getQueueSasToken(jobStorageConnectionString, sharedAccessPolicy) {
+    let queueService = AzureStorage.createQueueService(jobStorageConnectionString);
+
+    // Ensure the container exists before we can create a token which gives access to it.
+    await new Promise((resolve, reject) => {
+        queueService.createQueueIfNotExists(QueueName, error => error ? reject(error) : resolve());
+    });
+
+    let token = queueService.generateSharedAccessSignature(QueueName, sharedAccessPolicy);
+    return {
+        token: token,
+        host: queueService.host,
+        queue: QueueName
+    };
 }
 
 class AzureSasTokenResource {
-    constructor (azureStorageConnectionString) {
-        this._azureStorageConnectionString = azureStorageConnectionString;
+    constructor (blobStorageConnectionString, jobStorageConnectionString) {
+        this._blobStorageConnectionString = blobStorageConnectionString;
+        this._jobStorageConnectionString = jobStorageConnectionString;
     }
 
     async getToken (ctx) {
-        let blobService = AzureStorage.createBlobService(this._azureStorageConnectionString);
-
-        await ensureContainerExists(blobService, ContainerName);
-
         // Create a SAS token that expires in 12 hours
-        // Set start time to five minutes ago to avoid clock skew.
-        let startMinutes = -5;
-        let expireMinutes = 12 * 60;
-        let startDate = new Date();
-        let expiryDate = new Date(startDate);
+        let sharedAccessPolicy = getSharedAccessPolicy(12 * 60);
 
-        startDate.setMinutes(startDate.getMinutes() + startMinutes);
-        expiryDate.setMinutes(startDate.getMinutes() + expireMinutes);
-
-        //   SharedAccessPermissions: {
-        //     READ: 'r',
-        //     ADD: 'a',
-        //     CREATE: 'c',
-        //     WRITE: 'w',
-        //     DELETE: 'd',
-        //     LIST: 'l'
-        //   },
-        let sharedAccessPolicy = {
-            AccessPolicy: {
-                Permissions: "acw",
-                Start: startDate,
-                Expiry: expiryDate
-            }
-        };
-
-        let sasToken = blobService.generateSharedAccessSignature(ContainerName, null /* blob */, sharedAccessPolicy);
-
+        let blobTokenInfo = await getBlobContainerSasToken(this._blobStorageConnectionString, sharedAccessPolicy);
+        let queueTokenInfo = await getQueueSasToken(this._jobStorageConnectionString, sharedAccessPolicy);
+    
         ctx.body = {
-            token: sasToken,
-            host: blobService.host
+            blob: blobTokenInfo,
+            queue: queueTokenInfo
         };
     }
 }

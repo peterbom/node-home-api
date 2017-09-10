@@ -137,7 +137,7 @@ exports.getDefaultComponents = (settings) => {
 
     components.permissionResource = new PermissionResource();
     components.userResource = new UserResource(components.userDataAccess);
-    components.azureSasTokenResource = new AzureSasTokenResource(settings.azureStorageConnectionString);
+    components.azureSasTokenResource = new AzureSasTokenResource(settings.blobStorageConnectionString, settings.jobStorageConnectionString);
     components.photoIndexResource = new PhotoIndexResource(components.photoIndexServices);
     components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
