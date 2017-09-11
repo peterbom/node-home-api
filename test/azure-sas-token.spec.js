@@ -41,9 +41,17 @@ describe("Azure SAS token resource", function () {
             .get("/azure-sas-token")
             .set("Accept", "application/json")
             .set("Authorization", `Bearer ${token}`)
-            .expect(res =>
-                typeof res.body.token === "string" &&
-                typeof res.body.uri === "string")
+            .expect(res => {
+                if (!res.body.blob) throw new Error("blob object not returned");
+                if (!res.body.blob.token) throw new Error("blob.token value not returned");
+                if (!res.body.blob.host) throw new Error("blob.host value not returned");
+                if (!res.body.blob.container) throw new Error("blob.container value not returned");
+                
+                if (!res.body.queue) throw new Error("queue object not returned");
+                if (!res.body.queue.token) throw new Error("queue.token value not returned");
+                if (!res.body.queue.host) throw new Error("queue.host value not returned");
+                if (!res.body.queue.queue) throw new Error("queue.queue value not returned");
+            })
             .expect(200, done);
     });
 });

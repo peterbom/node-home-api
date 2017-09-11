@@ -16,7 +16,7 @@ function getSharedAccessPolicy(expireInMinutes, permissions) {
 
     return {
         AccessPolicy: {
-            Permissions: "racwl",
+            Permissions: permissions,
             Start: startDate,
             Expiry: expiryDate
         }
@@ -79,7 +79,7 @@ class AzureSasTokenResource {
         //     UPDATE: 'u',
         //     PROCESS: 'p'
         // }
-        let queuePermissions = 'raup';
+        let queuePermissions = 'rau';
 
         // Create a SAS token that expires in 12 hours
         let blobSharedAccessPolicy = getSharedAccessPolicy(12 * 60, blobPermissions);
