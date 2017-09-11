@@ -4,7 +4,7 @@ const AzureStorage = require("azure-storage");
 const BlobContainerName = "images";
 const QueueName = "client-requests";
 
-function getSharedAccessPolicy(expireInMinutes) {
+function getSharedAccessPolicy(expireInMinutes, permissions) {
     // Set start time to five minutes ago to avoid clock skew.
     let startMinutes = -5;
     let expireMinutes = expireInMinutes;
@@ -14,14 +14,6 @@ function getSharedAccessPolicy(expireInMinutes) {
     startDate.setMinutes(startDate.getMinutes() + startMinutes);
     expiryDate.setMinutes(startDate.getMinutes() + expireMinutes);
 
-    //   SharedAccessPermissions: {
-    //     READ: 'r',
-    //     ADD: 'a',
-    //     CREATE: 'c',
-    //     WRITE: 'w',
-    //     DELETE: 'd',
-    //     LIST: 'l'
-    //   },
     return {
         AccessPolicy: {
             Permissions: "racwl",
@@ -71,11 +63,30 @@ class AzureSasTokenResource {
     }
 
     async getToken (ctx) {
-        // Create a SAS token that expires in 12 hours
-        let sharedAccessPolicy = getSharedAccessPolicy(12 * 60);
+        // Blob permissions: {
+        //     READ: 'r',
+        //     ADD: 'a',
+        //     CREATE: 'c',
+        //     WRITE: 'w',
+        //     DELETE: 'd',
+        //     LIST: 'l'
+        // }
+        let blobPermissions = 'racwl';
 
-        let blobTokenInfo = await getBlobContainerSasToken(this._blobStorageConnectionString, sharedAccessPolicy);
-        let queueTokenInfo = await getQueueSasToken(this._jobStorageConnectionString, sharedAccessPolicy);
+        // Queue permissions: {
+        //     READ: 'r',
+        //     ADD: 'a',
+        //     UPDATE: 'u',
+        //     PROCESS: 'p'
+        // }
+        let queuePermissions = 'raup';
+
+        // Create a SAS token that expires in 12 hours
+        let blobSharedAccessPolicy = getSharedAccessPolicy(12 * 60, blobPermissions);
+        let queueSharedAccessPolicy = getSharedAccessPolicy(12 * 60, queuePermissions);
+
+        let blobTokenInfo = await getBlobContainerSasToken(this._blobStorageConnectionString, blobSharedAccessPolicy);
+        let queueTokenInfo = await getQueueSasToken(this._jobStorageConnectionString, queueSharedAccessPolicy);
     
         ctx.body = {
             blob: blobTokenInfo,
