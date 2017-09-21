@@ -8,7 +8,8 @@ class PermissionResource {
         	return;
         }
 
-        ctx.body = ctx.request.user.permissions;
+        let permissionLookup = ctx.request.user.permissions || {};
+        ctx.body = Object.keys(permissionLookup).filter(k => k);
     }
 }
 
