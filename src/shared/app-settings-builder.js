@@ -17,7 +17,9 @@ class AppSettingsBuilder {
             logglySubdomain: getEnvVar("LOGGLY_SUBDOMAIN"),
             logglyToken: getEnvVar("LOGGLY_TOKEN"),
             authServer: getEnvVar("AUTH_SERVER"),
-            authProviderSecret: getEnvVar("AUTH_PROVIDER_SECRET"),
+            authJwksUrl: getEnvVar("AUTH_JWKS_URL"),
+            authAudience: getEnvVar("AUTH_AUDIENCE"),
+            authIssuer: getEnvVar("AUTH_ISSUER"),
             suppressAuthorization: getEnvVar("SUPPRESS_AUTHORIZATION") && getEnvVar("NODE_ENV") === "development",
             machineLookup: {
                 dev: {

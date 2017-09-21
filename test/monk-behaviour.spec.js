@@ -8,7 +8,9 @@ let envVars = getTestEnvVars();
 let settings = {
     connectionString: envVars["TEST_CONNECTION_STRING"],
     authServer: "test.auth.com",
-    authProviderSecret: "secret",
+    authJwksUrl: "https://test.auth.com/.well-known/jwks.json",
+    authAudience: "aAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaA",
+    authIssuer: "https://test.auth.com/",
     machineLookup: {
         test: {
             macAddress: "11:11:11:11:11:11"
@@ -23,7 +25,7 @@ describe("Monk", function () {
     it ("can read inserted document", async done => {
         try {
             let components = getDefaultComponents(settings);
-            let dbManager = new DbManager(components.appSettings.connectionString);
+            let dbManager = new DbManager(settings.connectionString);
 
             let things = dbManager.get("things");
             await things.remove();
@@ -43,7 +45,7 @@ describe("Monk", function () {
     it ("can use distinct", async done => {
         try {
             let components = getDefaultComponents(settings);
-            let dbManager = new DbManager(components.appSettings.connectionString);
+            let dbManager = new DbManager(settings.connectionString);
 
             let things = dbManager.get("things");
             await things.remove();
@@ -64,7 +66,7 @@ describe("Monk", function () {
     it ("can use group by", async done => {
         try {
             let components = getDefaultComponents(settings);
-            let dbManager = new DbManager(components.appSettings.connectionString);
+            let dbManager = new DbManager(settings.connectionString);
 
             let things = dbManager.get("things");
             await things.remove();
@@ -94,7 +96,7 @@ describe("Monk", function () {
     it ("can use group by, having count > 1", async done => {
         try {
             let components = getDefaultComponents(settings);
-            let dbManager = new DbManager(components.appSettings.connectionString);
+            let dbManager = new DbManager(settings.connectionString);
 
             let things = dbManager.get("things");
             await things.remove();
@@ -121,7 +123,7 @@ describe("Monk", function () {
     it ("can upsert using findOneAndUpdate", async function (done) {
         try {
             let components = getDefaultComponents(settings);
-            let dbManager = new DbManager(components.appSettings.connectionString);
+            let dbManager = new DbManager(settings.connectionString);
 
             let things = dbManager.get("things");
             await things.remove();
@@ -155,7 +157,7 @@ describe("Monk", function () {
     it ("can search using 'in'", async function (done) {
         try {
             let components = getDefaultComponents(settings);
-            let dbManager = new DbManager(components.appSettings.connectionString);
+            let dbManager = new DbManager(settings.connectionString);
 
             let things = dbManager.get("things");
             await things.remove();

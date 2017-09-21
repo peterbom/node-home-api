@@ -23,7 +23,7 @@ async function main() {
     let settings = await settingsBuilder.buildSettings(envVars, secretRetriever);
 
     let components = config.getDefaultComponents(settings);
-    AppLauncher.launch(components);
+    AppLauncher.launch(settings, components);
 }
 
 main().catch(Log.error);

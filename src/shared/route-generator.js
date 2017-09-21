@@ -27,11 +27,11 @@ function getSecureRouteHandler(routeHandler, securityResourceName, securityActio
             throw new Error("no \"sub\" claim on access token");
         }
 
-        let permissions = await ctx.components.permissionDataAccess.getPermissions(idToken.sub);
+        let permissions = ctx.request.user.permissions;
 
         let requiredPermission = `${securityResourceName}_${securityActionName}`;
 
-        if (permissions.indexOf(requiredPermission) < 0) {
+        if (!permissions[requiredPermission]) {
             // Forbidden
             ctx.status = 403;
             return;

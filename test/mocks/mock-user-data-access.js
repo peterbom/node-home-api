@@ -1,8 +1,8 @@
 const Log = require("../../src/shared/log").Log;
 
 class MockUserDataAccess {
-    constructor (permissionLookup) {
-        this._users = [];
+    constructor (users) {
+        this._users = users || [];
     }
 
     async clearUsers() {

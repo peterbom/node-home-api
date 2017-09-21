@@ -15,7 +15,6 @@ const SshServices = require("./services/ssh-services");
 const ExifTool = require("./services/exif-tool").ExifTool;
 
 const UserDataAccess = require("./services/user-data-access").UserDataAccess;
-const PermissionDataAccess = require("./services/permission-data-access").PermissionDataAccess;
 const PhotoImageDataAccess = require("./services/photo-image-data-access").PhotoImageDataAccess;
 const PhotoUploadDataAccess = require("./services/photo-upload-data-access").PhotoUploadDataAccess;
 const PlantDataAccess = require("./services/plant-data-access").PlantDataAccess;
@@ -33,7 +32,6 @@ const PhotoFrameServices = require("./services/photo-frame-services").PhotoFrame
 // API Resources
 const PermissionResource = require("./resources/permission-resource").PermissionResource;
 const UserResource = require("./resources/user-resource").UserResource;
-const AzureSasTokenResource = require("./resources/azure-sas-token-resource").AzureSasTokenResource;
 const PhotoIndexResource = require("./resources/photo-index-resource").PhotoIndexResource;
 const PhotoDuplicateResource = require("./resources/photo-duplicate-resource").PhotoDuplicateResource;
 const PhotoExifDataResource = require("./resources/photo-exif-data-resource").PhotoExifDataResource;
@@ -52,17 +50,15 @@ const noop = require("./middleware/null-middleware").noop;
 const errorHandler = require("./middleware/error-handling-middleware").errorHandler;
 const corsConfig = require("./middleware/cors-middleware").corsConfig;
 const jsonBodyParser = require("./middleware/body-parsing-middleware").jsonBodyParser;
-const getUserUpdater = require("./middleware/user-update-middleware").getUserUpdater;
-const getBearerTokenParser = require("./middleware/token-parsing-middleware").getBearerTokenParser;
+const userUpdater = require("./middleware/user-update-middleware").userUpdater;
+const bearerTokenParser = require("./middleware/token-parsing-middleware").bearerTokenParser;
 const authorizationChecker = require("./middleware/authorization-middleware").authorizationChecker;
 
 // Routing
 const routing = require("./app-routing");
 
 exports.getDefaultComponents = (settings) => {
-    let components = {
-        appSettings: settings
-    };
+    let components = {};
 
     components.app = new Application();
 
@@ -91,7 +87,7 @@ exports.getDefaultComponents = (settings) => {
 
     components.imageUtils = new ImageUtils(settings.targetPhotoPath);
     components.jsonService = new JsonService();
-    components.jwtUtils = new JwtUtils(settings.authProviderSecret);
+    components.jwtUtils = new JwtUtils(settings.authJwksUrl, settings.authAudience, settings.authIssuer, null);
 
     components.fileServices = new FileServices();
     components.sshServices = new SshServices(
@@ -104,7 +100,6 @@ exports.getDefaultComponents = (settings) => {
     components.exifTool = new ExifTool();
 
     components.userDataAccess = new UserDataAccess(components.dbManager);
-    components.permissionDataAccess = new PermissionDataAccess(components.dbManager);
     components.photoImageDataAccess = new PhotoImageDataAccess(components.dbManager, components.imageUtils);
     components.photoUploadDataAccess = new PhotoUploadDataAccess(components.dbManager);
     components.plantDataAccess = new PlantDataAccess(components.dbManager);
@@ -137,7 +132,6 @@ exports.getDefaultComponents = (settings) => {
 
     components.permissionResource = new PermissionResource();
     components.userResource = new UserResource(components.userDataAccess);
-    components.azureSasTokenResource = new AzureSasTokenResource(settings.blobStorageConnectionString, settings.jobStorageConnectionString);
     components.photoIndexResource = new PhotoIndexResource(components.photoIndexServices);
     components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
     components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
@@ -156,38 +150,28 @@ exports.getDefaultComponents = (settings) => {
         corsConfig: corsConfig,
 
         bodyParser: jsonBodyParser,
-        tokenParser: getBearerTokenParser(components.jwtUtils),
-        userUpdater: getUserUpdater(
-            components.userDataAccess,
-            components.jsonService,
-            settings.authServer),
+        tokenParser: bearerTokenParser,
+        userUpdater: userUpdater,
 
         unsecuredRouteGenerators: [
-            routing.getPermissionRouteGenerator(components.permissionResource),
-            routing.getPlantViewRouteGenerator(
-                components.plantResource,
-                components.plantCompanionResource,
-                components.plantReferenceResource)
+            routing.permissionRouteGenerator,
+            routing.plantViewRouteGenerator
         ],
 
         authorizationChecker: authorizationChecker,
 
         securedRouteGenerators: [
-            routing.getUserRouteGenerator(components.userResource),
-            routing.getAzureSasTokenRouteGenerator(components.azureSasTokenResource),
-            routing.getPhotoIndexRouteGenerator(components.photoIndexResource),
-            routing.getPhotoDuplicateRouteGenerator(components.photoDuplicateResource),
-            routing.getPhotoExifDataRouteGenerator(components.photoExifDataResource),
-            routing.getPhotoImageRouteGenerator(components.photoImageResource),
-            routing.getPhotoMovementRouteGenerator(components.photoMovementResource),
-            routing.getPhotoUploadRouteGenerator(components.photoUploadResource),
-            routing.getPhotoFrameRouteGenerator(components.photoFrameResource),
-            routing.getFileRouteGenerator(components.fileResource),
-            routing.getMachineStatusRouteGenerator(components.machineStatusResource),
-            routing.getPlantMaintainRouteGenerator(
-                components.plantResource,
-                components.plantCompanionResource,
-                components.plantReferenceResource)
+            routing.userRouteGenerator,
+            routing.photoIndexRouteGenerator,
+            routing.photoDuplicateRouteGenerator,
+            routing.photoExifDataRouteGenerator,
+            routing.photoImageRouteGenerator,
+            routing.photoMovementRouteGenerator,
+            routing.photoUploadRouteGenerator,
+            routing.photoFrameRouteGenerator,
+            routing.fileRouteGenerator,
+            routing.machineStatusRouteGenerator,
+            routing.plantMaintainRouteGenerator
         ]
     };
 

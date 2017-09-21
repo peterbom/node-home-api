@@ -37,7 +37,9 @@ let catchAllMiddleware = async function (ctx, next) {
 let settings = {
     connectionString: "mongodb://fakeuser:fakepassword@fakedomain.com/fakedb",
     authServer: "test.auth.com",
-    authProviderSecret: "secret",
+    authJwksUrl: "https://test.auth.com/.well-known/jwks.json",
+    authAudience: "aAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaA",
+    authIssuer: "https://test.auth.com/",
     machineLookup: {
         test: {
             macAddress: "11:11:11:11:11:11"
@@ -64,7 +66,7 @@ describe("Router middleware", function () {
 
         // Add the catch-all middleware before anything else
         components.app.use(catchAllMiddleware);
-        AppLauncher.launch(components);
+        AppLauncher.launch(settings, components);
 
         let request = supertest.agent(components.app.listen());
 
@@ -99,7 +101,7 @@ describe("Router middleware", function () {
 
         // Add the catch-all middleware before anything else
         components.app.use(catchAllMiddleware);
-        AppLauncher.launch(components);
+        AppLauncher.launch(settings, components);
 
         let request = supertest.agent(components.app.listen());
 

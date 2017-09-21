@@ -2,7 +2,7 @@ const Log = require("../../src/shared/log").Log;
 
 class MockJsonService {
     constructor(jsonResponseLookup) {
-        this.jsonResponseLookup = jsonResponseLookup;
+        this.jsonResponseLookup = jsonResponseLookup || {};
     }
 
     getJson(url, token) {

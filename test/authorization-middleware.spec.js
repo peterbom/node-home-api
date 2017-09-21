@@ -2,17 +2,21 @@ const Log = require("../src/shared/log").Log;
 const supertest = require("supertest");
 const timekeeper = require("timekeeper");
 
-const MockPermissionDataAccess = require("./mocks/mock-permission-data-access").MockPermissionDataAccess;
-const createIdToken = require("./utils/token-utils").createIdToken;
+const MockUserDataAccess = require("./mocks/mock-user-data-access").MockUserDataAccess;
+const MockJsonService = require("./mocks/mock-json-service").MockJsonService;
+const {configureMockJsonService, createIdToken} = require("./utils/token-utils");
 
 const getDefaultComponents = require("../src/config").getDefaultComponents;
 const AppLauncher = require("../src/app-launcher").AppLauncher;
 const RouteGenerator = require("../src/shared/route-generator").RouteGenerator;
+const UserResource = require("../src/resources/user-resource").UserResource;
 
 let settings = {
     connectionString: "mongodb://fakeuser:fakepassword@fakedomain.com/fakedb",
     authServer: "test.auth.com",
-    authProviderSecret: "secret",
+    authJwksUrl: "https://test.auth.com/.well-known/jwks.json",
+    authAudience: "aAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaA",
+    authIssuer: "https://test.auth.com/",
     machineLookup: {
         test: {
             macAddress: "11:11:11:11:11:11"
@@ -23,6 +27,9 @@ let settings = {
     },
 };
 
+let mockJwksJsonService = new MockJsonService();
+configureMockJsonService(mockJwksJsonService, settings.authJwksUrl);
+
 describe("Authorization middleware", function () {
     afterEach(() => timekeeper.reset());
 
@@ -30,8 +37,12 @@ describe("Authorization middleware", function () {
         let reachedSecureMiddleware = false;
 
         let components = getDefaultComponents(settings);
-        components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_access"]});
-        components.middleware.userUpdater = null;
+        components.jsonService = mockJwksJsonService;
+        components.userDataAccess = new MockUserDataAccess([{
+            "sub": "user_1",
+            "permissions": {"resource_access": true}
+        }]);
+        components.userResource = new UserResource(components.userDataAccess);
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
             RouteGenerator.create("resource")
@@ -41,7 +52,7 @@ describe("Authorization middleware", function () {
                 }, "access")
         ];
 
-        AppLauncher.launch(components);
+        AppLauncher.launch(settings, components);
         let request = supertest.agent(components.app.listen());
 
         request
@@ -59,8 +70,12 @@ describe("Authorization middleware", function () {
         let reachedSecureMiddleware = false;
 
         let components = getDefaultComponents(settings);
-        components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_access"]});
-        components.middleware.userUpdater = null;
+        components.jsonService = mockJwksJsonService;
+        components.userDataAccess = new MockUserDataAccess([{
+            "sub": "user_1",
+            "permissions": {"resource_access": true}
+        }]);
+        components.userResource = new UserResource(components.userDataAccess);
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
             RouteGenerator.create("resource")
@@ -70,7 +85,7 @@ describe("Authorization middleware", function () {
                 }, "access")
         ];
 
-        AppLauncher.launch(components);
+        AppLauncher.launch(settings, components);
         let request = supertest.agent(components.app.listen());
 
         let token = createIdToken(components.jwtUtils, "user_1", new Date(2016, 1, 1), 1); // Valid for one minute
@@ -94,8 +109,12 @@ describe("Authorization middleware", function () {
         let reachedSecureMiddleware = false;
 
         let components = getDefaultComponents(settings);
-        components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_read"]});
-        components.middleware.userUpdater = null;
+        components.jsonService = mockJwksJsonService;
+        components.userDataAccess = new MockUserDataAccess([{
+            "sub": "user_1",
+            "permissions": {"resource_read": true}
+        }]);
+        components.userResource = new UserResource(components.userDataAccess);
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
             RouteGenerator.create("resource")
@@ -105,7 +124,7 @@ describe("Authorization middleware", function () {
                 }, "write")
         ];
 
-        AppLauncher.launch(components);
+        AppLauncher.launch(settings, components);
         let request = supertest.agent(components.app.listen());
 
         let token = createIdToken(components.jwtUtils, "user_1");
@@ -126,8 +145,12 @@ describe("Authorization middleware", function () {
         let reachedSecureMiddleware = false;
 
         let components = getDefaultComponents(settings);
-        components.permissionDataAccess = new MockPermissionDataAccess({"user_1": ["resource_write"]});
-        components.middleware.userUpdater = null;
+        components.jsonService = mockJwksJsonService;
+        components.userDataAccess = new MockUserDataAccess([{
+            "sub": "user_1",
+            "permissions": {"resource_write": true}
+        }]);
+        components.userResource = new UserResource(components.userDataAccess);
         components.middleware.unsecuredRouteGenerators = [];
         components.middleware.securedRouteGenerators = [
             RouteGenerator.create("resource")
@@ -137,7 +160,7 @@ describe("Authorization middleware", function () {
                 }, "write")
         ];
 
-        AppLauncher.launch(components);
+        AppLauncher.launch(settings, components);
         let request = supertest.agent(components.app.listen());
 
         let token = createIdToken(components.jwtUtils, "user_1");

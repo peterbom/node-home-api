@@ -10,7 +10,9 @@ const {UserResource} = require("../src/resources/user-resource");
 let settings = {
     connectionString: "mongodb://fakeuser:fakepassword@fakedomain.com/fakedb",
     authServer: "test.auth.com",
-    authProviderSecret: "secret",
+    authJwksUrl: "https://test.auth.com/.well-known/jwks.json",
+    authAudience: "aAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaA",
+    authIssuer: "https://test.auth.com/",
     machineLookup: {
         test: {
             macAddress: "11:11:11:11:11:11"
@@ -19,20 +21,18 @@ let settings = {
             ipAddress: "127.0.0.1"
         }
     },
+    suppressAuthorization: true
 };
 
 let components = getDefaultComponents(settings);
-components.appSettings.suppressAuthorization = true;
 components.userDataAccess = new MockUserDataAccess();
 components.userResource = new UserResource(components.userDataAccess);
 
 components.middleware.authorizationChecker = null;
 components.middleware.unsecuredRouteGenerators = [];
-components.middleware.securedRouteGenerators = [
-    routing.getUserRouteGenerator(components.userResource)
-];
+components.middleware.securedRouteGenerators = [routing.userRouteGenerator];
 
-AppLauncher.launch(components);
+AppLauncher.launch(settings, components);
 
 let request = supertest.agent(components.app.listen());
 

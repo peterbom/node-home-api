@@ -2,14 +2,14 @@ const Log = require("./shared/log").Log;
 const noop = require("./middleware/null-middleware").noop;
 
 class AppLauncher {
-    static launch(components) {
+    static launch(settings, components) {
         let app = components.app;
-        let settings = components.appSettings;
         Log.logger = components.logger;
 
-        // Make all the components available to each request.
+        // Make all the components and settings available to each request.
         app.use(async (ctx, next) => {
             ctx.components = components;
+            ctx.settings = settings;
             await next();
         });
 

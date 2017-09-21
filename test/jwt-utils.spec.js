@@ -1,18 +1,26 @@
 const Log = require("../src/shared/log").Log;
 const JwtUtils = require("../src/shared/jwt-utils").JwtUtils;
+const MockJsonService = require("./mocks/mock-json-service").MockJsonService;
+const {configureMockJsonService, createIdToken} = require("./utils/token-utils");
 const timekeeper = require("timekeeper");
+
+const JwksUrl = "https://test.auth.com/.well-known/jwks.json";
+const Audience = "aAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaA";
+const Issuer = "https://test.auth.com/";
+
+let mockJwksJsonService = new MockJsonService();
+configureMockJsonService(mockJwksJsonService, JwksUrl);
 
 describe("JwtUtils", function () {
     afterEach(() => timekeeper.reset());
 
-    it ("can verify a real Auth0 id_token", async function (done) {
-        let time = new Date(1471848758000);
-        timekeeper.freeze(time);
+    it ("can sign and verify an id_token", async function (done) {
+        let jwtUtils = new JwtUtils(JwksUrl, Audience, Issuer);
+        let jwt = createIdToken(jwtUtils, "user_1", 10);
+        
+        let decoded = await jwtUtils.verifyJwt(jwt, mockJwksJsonService);
 
-        let jwtUtils = new JwtUtils("xeC1jNSaC4XI1DIN3OPF_Eb9UGYUNrrJrpNtROHC9XMWeriOyDMJ1TmSntqmwPQY");
-        let token = await jwtUtils.verifyJwt("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2JvbWIuYXUuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA2MDYxNTYzNTczNDUyMzk1NDMwIiwiYXVkIjoiSXJmSmd0azFybHFiSFg3eXdiVnNvZko3TU9zTno1MnMiLCJleHAiOjE0NzE4ODQ3NTgsImlhdCI6MTQ3MTg0ODc1OH0.2X7SRKXhKQZyYy0r1T_84PlFRzCVyJyhNTSKASV_RXE");
-
-        if (!token) {
+        if (!decoded) {
             return "Not verified";
         }
 
