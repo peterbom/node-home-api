@@ -12,6 +12,8 @@ class PhotoImageDataAccess {
         this._photoImages.createIndex({"hash":1});
         this._photoImages.createIndex({"requiresMovement":1});
         this._photoImages.createIndex({"properties.takenDateTime":1});
+
+        this._cloudImages = dbManager.get("cloudImages");
     }
 
     async getIds(includeInvalid = false, includeUnreadable = false, includeUndated = false) {
@@ -267,6 +269,74 @@ class PhotoImageDataAccess {
         image.requiresMovement = this._imageUtils.requiresMovement(directoryPath, filename, image.properties);
 
         await this._photoImages.update({_id: objectId}, image);
+    }
+
+    async listDuplicates() {
+        return await this._cloudImages.aggregate([
+            { $match: { hash: { $ne: null } } },
+            {
+                $group: {
+                    _id: "$hash",
+                    count: { $sum: 1 },
+                    name: { $addToSet: "$_id" }
+                }
+            },
+            { $match: { count: { $gt: 1 } } },
+            { $unwind: "$name" },
+            {
+                $lookup: {
+                    from: "cloudImages",
+                    localField: "name",
+                    foreignField: "_id",
+                    as: "image"
+                }
+            },
+            { $unwind: "$image" },
+            {
+                $lookup: {
+                    from: "cloudImageProperties",
+                    localField: "name",
+                    foreignField: "_id",
+                    as: "properties"
+                }
+            },
+            { $unwind: "$properties" },
+            {
+                $project: {
+                    image: {
+                        name: "$name",
+                        owner: "$image.owner",
+                        takenDateTime: "$image.takenDateTime",
+                        imageNumber: "$image.imageNumber",
+                        tagLookup: "$image.tagLookup",
+                        widths: "$image.resizedWidths",
+                        cameraMake: "$properties.cameraMake",
+                        cameraModel: "$properties.cameraModel",
+                        pixelCount: "$properties.pixelCount",
+                        originalFilename: "$properties.originalFilename",
+                        originalDirectory: "$properties.originalDirectory",
+                        fileSizeBytes: "$properties.fileSizeBytes",
+                        fileMd5Hash: "$properties.fileMd5Hash"
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    count: { $sum: 1 },
+                    images: { $push: "$image" }
+                }
+            },
+            { 
+                $project: {
+                    _id: 0,
+                    hash: "$_id",
+                    count: 1,
+                    images: 1
+                }
+            },
+            { $sort: { count: -1 } }
+        ]);
     }
 
     async listDuplicateHashes() {

@@ -8,20 +8,7 @@ class PhotoDuplicateServices {
     }
 
     async listDuplicates() {
-        let hashes = await this._photoImageDataAccess.listDuplicateHashes();
-
-        let result = {};
-        let resultPromises = [];
-        for (let hash of hashes) {
-            let updateResult = async () => {
-                result[hash] = await this.getDuplicates(hash);
-            };
-
-            resultPromises.push(updateResult());
-        }
-
-        await Promise.all(resultPromises);
-        return result;
+        return await this._photoImageDataAccess.listDuplicates();
     }
 
     async getDuplicates(hash) {
