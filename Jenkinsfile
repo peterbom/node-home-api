@@ -5,20 +5,17 @@ node {
         checkout scm
     }
     
-	def docker_path = "${tool name: 'Docker', type: 'org.jenkinsci.plugins.docker.commons.tools.DockerTool'}/bin"
 	def environment = env.BRANCH_NAME == 'master' ? 'production' : 'staging'
 	def repo = "image-registry:5000/node-home-api:${environment}"
 
-    withEnv(["PATH+DOCKER=${docker_path}"]) {
-		docker.withServer(env.HOME_API_BUILDER_DOCKER_HOST) {
-			stage('build') {
-				sh "docker build -t ${repo} ."
-			}
+    docker.withServer(env.HOME_API_BUILDER_DOCKER_HOST) {
+        stage('build') {
+            sh "docker build -t ${repo} ."
+        }
 
-			stage('push') {
-				sh "docker push ${repo}"
-			}
-		}
+        stage('push') {
+            sh "docker push ${repo}"
+        }
     }
 	
 	stage('deploy') {
