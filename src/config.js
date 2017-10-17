@@ -12,7 +12,6 @@ const JwtUtils = require("./shared/jwt-utils").JwtUtils;
 // Services
 const FileServices = require("./services/file-services").FileServices;
 const SshServices = require("./services/ssh-services");
-const ExifTool = require("./services/exif-tool").ExifTool;
 
 const UserDataAccess = require("./services/user-data-access").UserDataAccess;
 const PhotoImageDataAccess = require("./services/photo-image-data-access").PhotoImageDataAccess;
@@ -21,9 +20,6 @@ const PlantDataAccess = require("./services/plant-data-access").PlantDataAccess;
 const PlantCompanionDataAccess = require("./services/plant-companion-data-access").PlantCompanionDataAccess;
 const PlantReferenceDataAccess = require("./services/plant-reference-data-access").PlantReferenceDataAccess;
 
-const PhotoIndexServices = require("./services/photo-index-services").PhotoIndexServices;
-const PhotoDuplicateServices = require("./services/photo-duplicate-services").PhotoDuplicateServices;
-const PhotoExifDataServices = require("./services/photo-exif-data-services").PhotoExifDataServices;
 const PhotoImageServices = require("./services/photo-image-services").PhotoImageServices;
 const PhotoMovementServices = require("./services/photo-movement-services").PhotoMovementServices;
 const PhotoUploadServices = require("./services/photo-upload-services").PhotoUploadServices;
@@ -32,9 +28,6 @@ const PhotoFrameServices = require("./services/photo-frame-services").PhotoFrame
 // API Resources
 const PermissionResource = require("./resources/permission-resource").PermissionResource;
 const UserResource = require("./resources/user-resource").UserResource;
-const PhotoIndexResource = require("./resources/photo-index-resource").PhotoIndexResource;
-const PhotoDuplicateResource = require("./resources/photo-duplicate-resource").PhotoDuplicateResource;
-const PhotoExifDataResource = require("./resources/photo-exif-data-resource").PhotoExifDataResource;
 const PhotoImageResource = require("./resources/photo-image-resource").PhotoImageResource;
 const PhotoMovementResource = require("./resources/photo-movement-resource").PhotoMovementResource;
 const PhotoUploadResource = require("./resources/photo-upload-resource").PhotoUploadResource;
@@ -97,7 +90,6 @@ exports.getDefaultComponents = (settings) => {
         settings.sshPrivateKeyPath,
         settings.localRoot,
         settings.serverRoot);
-    components.exifTool = new ExifTool();
 
     components.userDataAccess = new UserDataAccess(components.dbManager);
     components.photoImageDataAccess = new PhotoImageDataAccess(components.dbManager, components.imageUtils);
@@ -106,17 +98,6 @@ exports.getDefaultComponents = (settings) => {
     components.plantCompanionDataAccess = new PlantCompanionDataAccess(components.dbManager);
     components.plantReferenceDataAccess = new PlantReferenceDataAccess(components.dbManager);
 
-    components.photoIndexServices = new PhotoIndexServices(
-        components.exifTool,
-        components.photoImageDataAccess,
-        components.fileServices,
-        [settings.stagingPhotoPath, settings.targetPhotoPath]);
-    components.photoDuplicateServices = new PhotoDuplicateServices(
-        components.exifTool,
-        components.photoImageDataAccess);
-    components.photoExifDataServices = new PhotoExifDataServices(
-        components.exifTool,
-        components.photoImageDataAccess);
     components.photoImageServices = new PhotoImageServices(components.photoImageDataAccess);
     components.photoMovementServices = new PhotoMovementServices(
         components.photoImageDataAccess,
@@ -132,9 +113,6 @@ exports.getDefaultComponents = (settings) => {
 
     components.permissionResource = new PermissionResource();
     components.userResource = new UserResource(components.userDataAccess);
-    components.photoIndexResource = new PhotoIndexResource(components.photoIndexServices);
-    components.photoDuplicateResource = new PhotoDuplicateResource(components.photoDuplicateServices);
-    components.photoExifDataResource = new PhotoExifDataResource(components.photoExifDataServices);
     components.photoImageResource = new PhotoImageResource(components.photoImageServices);
     components.photoMovementResource = new PhotoMovementResource(components.photoMovementServices);
     components.photoUploadResource = new PhotoUploadResource(components.photoUploadServices);
@@ -162,9 +140,6 @@ exports.getDefaultComponents = (settings) => {
 
         securedRouteGenerators: [
             routing.userRouteGenerator,
-            routing.photoIndexRouteGenerator,
-            routing.photoDuplicateRouteGenerator,
-            routing.photoExifDataRouteGenerator,
             routing.photoImageRouteGenerator,
             routing.photoMovementRouteGenerator,
             routing.photoUploadRouteGenerator,

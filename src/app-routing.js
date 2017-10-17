@@ -13,24 +13,6 @@ exports.userRouteGenerator = RouteGenerator
     .put('/user/:id', ctx => ctx.components.userResource.update(ctx), "maintain")
     .delete('/user/:id', ctx => ctx.components.userResource.remove(ctx), "maintain");
 
-exports.photoIndexRouteGenerator = RouteGenerator
-    .create("home")
-    .get("/photo-index", ctx => ctx.components.photoIndexResource.listDirectories(ctx), "manage")
-    .get("/photo-index/:path", ctx => ctx.components.photoIndexResource.compare(ctx), "manage")
-    .post("/photo-index", ctx => ctx.components.photoIndexResource.apply(ctx), "manage");
-
-exports.photoDuplicateRouteGenerator = RouteGenerator
-    .create("home")
-    .get("/photo-duplicate", ctx => ctx.components.photoDuplicateResource.list(ctx), "manage")
-    .get("/photo-duplicate/:id", ctx => ctx.components.photoDuplicateResource.get(ctx), "manage")
-    .post("/photo-duplicate", ctx => ctx.components.photoDuplicateResource.resolve(ctx), "manage");
-
-exports.photoExifDataRouteGenerator = RouteGenerator
-    .create("home")
-    .get("/photo-exif-data", ctx => ctx.components.photoExifDataResource.query(ctx), "manage")
-    .get("/photo-exif-data/:id", ctx => ctx.components.photoExifDataResource.get(ctx), "manage")
-    .post("/photo-exif-data", ctx => ctx.components.photoExifDataResource.updateMany(ctx), "manage");
-
 exports.photoImageRouteGenerator = RouteGenerator
     .create("home")
     .get("/photo-image/:id", ctx => ctx.components.photoImageResource.getById(ctx), "manage")
