@@ -8,7 +8,7 @@ node {
 	def environment = env.BRANCH_NAME == 'master' ? 'production' : 'staging'
 	def repo = "image-registry:5000/node-home-api:${environment}"
 
-    docker.withServer(env.HOME_API_BUILDER_DOCKER_HOST) {
+    docker.withServer(env.ARM32_DOCKER_HOST) {
         stage('build') {
             sh "docker build -t ${repo} ."
         }
