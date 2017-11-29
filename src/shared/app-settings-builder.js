@@ -40,9 +40,7 @@ class AppSettingsBuilder {
         };
 
         let secretNames = {
-            connectionString: "mongo-db-connection-string",
-            blobStorageConnectionString: "blob-storage-connection-string",
-            jobStorageConnectionString: "job-storage-connection-string"
+            connectionString: "mongo-db-connection-string"
         };
 
         let secretValues = {};
